@@ -41,4 +41,13 @@ module.exports = {
       'error', { args: 'none' },
     ],
   },
+  settings: {
+    'import/resolver': {
+      alias: {
+        map: [
+          ['@src', './src'],
+        ]
+      }
+    }
+  }
 };
