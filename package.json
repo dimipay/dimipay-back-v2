@@ -1,0 +1,44 @@
+{
+  "name": "express-restapi-boilerplate",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "npx prisma db pull && npx prisma generate && cross-env NODE_ENV=develop nodemon --watch 'src/**/*.ts' --exec 'ts-node' -r tsconfig-paths/register --files src/index.ts",
+    "prod": "npx prisma db pull && npx prisma generate && cross-env NODE_ENV=prod nodemon src/index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/express": "^4.17.13",
+    "@types/joi": "^17.2.3",
+    "@types/jsonwebtoken": "^8.5.5",
+    "@types/morgan": "^1.9.3",
+    "@types/multer": "^1.4.7",
+    "@typescript-eslint/eslint-plugin": "^4.29.0",
+    "@typescript-eslint/parser": "^4.29.0",
+    "eslint": "^7.32.0",
+    "nodemon": "^2.0.12",
+    "ts-node": "^10.5.0",
+    "tsc-watch": "^4.4.0",
+    "tsconfig-paths": "^3.12.0"
+  },
+  "dependencies": {
+    "@notionhq/client": "^0.4.11",
+    "@prisma/client": "3.9.1",
+    "cross-env": "^7.0.3",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "express-bearer-token": "^2.4.0",
+    "helmet": "^5.0.1",
+    "joi": "^17.4.2",
+    "jsonwebtoken": "^8.5.1",
+    "morgan": "^1.10.0",
+    "multer": "^1.4.3",
+    "prisma": "^3.9.1",
+    "typescript": "^4.5.5",
+    "winston": "^3.3.3",
+    "winston-daily-rotate-file": "^4.5.5"
+  }
+}
