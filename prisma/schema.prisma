@@ -21,9 +21,9 @@ model User {
   systemUid       String?         @unique
   issuedCoupons   Coupon[]        @relation("issue")
   receivedCoupons Coupon[]        @relation("receive")
-  notice          Notice[]
+  uploadedNotices Notice[]
   paymentMethods  PaymentMethod[]
-  transaction     Transaction[]
+  transactions    Transaction[]
 }
 
 model PaymentMethod {
@@ -34,8 +34,8 @@ model PaymentMethod {
   generalCardId String?           @unique
   prepaidCardId String?           @unique
   ownerId       String
-  color         String            @default("#2EA4AB")
-  name          String
+  color         String?
+  name          String?
   owner         User              @relation(fields: [ownerId], references: [id])
   generalCard   GeneralCard?      @relation("generalCard")
   prepaidCard   PrepaidCard?      @relation("prepaidCard")
@@ -155,7 +155,7 @@ model DiscountPolicy {
   fixedPrice      Int?
   percentRate     Int?
   eventId         String?
-  event           Event?     @relation(fields: [eventId], references: [id])
+  relatedEvent    Event?     @relation(fields: [eventId], references: [id])
   taretCategory   Category[]
   excludedProduct Product[]  @relation("discountExcludedProduct")
   targetProduct   Product[]  @relation("discountTargetProduct")
@@ -171,6 +171,15 @@ model PosDevice {
   transaction        Transaction[]
 }
 
+model Event {
+  id               String           @id
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime
+  content          String
+  url              String
+  discountPolicies DiscountPolicy[]
+}
+
 model Notice {
   id          String    @id
   createdAt   DateTime  @default(now())
@@ -182,15 +191,6 @@ model Notice {
   url         String
   authorId    String
   author      User      @relation(fields: [authorId], references: [id])
-}
-
-model Event {
-  id             String           @id
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime
-  content        String
-  url            String
-  discountPolicy DiscountPolicy[]
 }
 
 enum Role {
