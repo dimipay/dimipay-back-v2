@@ -17,5 +17,12 @@ export default createService({
         amount: Joi.number(),
       },
     },
+    {
+      handler: controllers.getMonthlyTransaction,
+      method: "get",
+      path: "/monthly/year/:year/month/:month",
+      needAuth: true,
+      needPermission: false,
+    },
   ],
 });
