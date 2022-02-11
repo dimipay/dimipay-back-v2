@@ -19,10 +19,10 @@ model User {
   profileImage    String
   studentNumber   String?
   systemUid       String?         @unique
-  paymentMethods  PaymentMethod[]
   issuedCoupons   Coupon[]        @relation("issue")
   receivedCoupons Coupon[]        @relation("receive")
   notice          Notice[]
+  paymentMethods  PaymentMethod[]
   transaction     Transaction[]
 }
 
@@ -34,6 +34,8 @@ model PaymentMethod {
   generalCardId String?           @unique
   prepaidCardId String?           @unique
   ownerId       String
+  color         String            @default("#2EA4AB")
+  name          String
   owner         User              @relation(fields: [ownerId], references: [id])
   generalCard   GeneralCard?      @relation("generalCard")
   prepaidCard   PrepaidCard?      @relation("prepaidCard")
@@ -100,12 +102,12 @@ model Transaction {
   authMethod    AuthMethod
   usedCardId    String
   posDeviceId   String
+  userId        String
   posDevice     PosDevice         @relation(fields: [posDeviceId], references: [id])
   paymentMethod PaymentMethod     @relation(fields: [usedCardId], references: [id])
+  user          User              @relation(fields: [userId], references: [id])
   coupon        Coupon[]
   products      Product[]
-  user          User              @relation(fields: [userId], references: [id])
-  userId        String
 }
 
 model Category {
@@ -152,11 +154,11 @@ model DiscountPolicy {
   endsAt          DateTime?
   fixedPrice      Int?
   percentRate     Int?
-  taretCategory   Category[]
-  targetProduct   Product[]  @relation("discountTargetProduct")
-  excludedProduct Product[]  @relation("discountExcludedProduct")
-  event           Event?     @relation(fields: [eventId], references: [id])
   eventId         String?
+  event           Event?     @relation(fields: [eventId], references: [id])
+  taretCategory   Category[]
+  excludedProduct Product[]  @relation("discountExcludedProduct")
+  targetProduct   Product[]  @relation("discountTargetProduct")
 }
 
 model PosDevice {
@@ -170,23 +172,24 @@ model PosDevice {
 }
 
 model Notice {
-  id        String   @id
-  createdAt DateTime @default(now())
-  updatedAt DateTime
-
+  id          String    @id
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime
+  startsAt    DateTime  @default(now())
+  endsAt      DateTime?
   title       String
   description String
   url         String
-  author      User   @relation(fields: [authorId], references: [id])
   authorId    String
+  author      User      @relation(fields: [authorId], references: [id])
 }
 
 model Event {
-  id        String   @id
-  createdAt DateTime @default(now())
-  updatedAt DateTime
-
+  id             String           @id
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime
   content        String
+  url            String
   discountPolicy DiscountPolicy[]
 }
 

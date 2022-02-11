@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import { User } from "../interfaces";
+import { User } from "@prisma/client";
 import config from "../config";
 import { HttpException } from "../exceptions";
 
