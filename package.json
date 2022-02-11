@@ -4,9 +4,8 @@
   "description": "",
   "main": "src/index.js",
   "scripts": {
-    "build": "tsc",
     "dev": "npx prisma db pull && npx prisma generate && cross-env NODE_ENV=develop nodemon --watch 'src/**/*.ts' --exec 'ts-node' -r tsconfig-paths/register --files src/index.ts",
-    "prod": "npx prisma db pull && npx prisma generate && cross-env NODE_ENV=prod nodemon --watch 'src/**/*.ts' --exec 'ts-node' -r tsconfig-paths/register --files src/index.ts"
+    "start": "npx prisma db pull && npx prisma generate && cross-env NODE_ENV=prod ts-node -r tsconfig-paths/register ./src/index.ts"
   },
   "author": "",
   "license": "ISC",
