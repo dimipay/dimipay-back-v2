@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { HttpException } from "../../exceptions";
+import { HttpException } from "@src/exceptions";
 import { issueToken, prisma } from "@src/resources";
 
 export const identifyUser = async (req: Request, res: Response) => {

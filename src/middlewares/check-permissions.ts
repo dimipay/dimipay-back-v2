@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { HttpException } from "../exceptions";
+import { HttpException } from "@src/exceptions";
 import { Route, services } from "../services";
 
 type ServiceName = typeof services[number];

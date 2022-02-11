@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import { User } from "@prisma/client";
 import config from "../config";
-import { HttpException } from "../exceptions";
+import { HttpException } from "@src/exceptions";
 
 export const issueToken = async (identity: User) => {
   const token = await jwt.sign(
