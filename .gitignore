@@ -3,3 +3,4 @@ yarn.lock
 logs
 .DS_Store
 .env
+dist
