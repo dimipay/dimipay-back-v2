@@ -1,11 +1,214 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["dataProxy"]
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String          @id @default(uuid())
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  isDisabled      Boolean         @default(false)
+  accountName     String          @unique
+  name            String
+  roles           Role[]
+  profileImage    String
+  studentNumber   String?
+  systemUid       String?         @unique
+  paymentMethods  PaymentMethod[]
+  issuedCoupons   Coupon[]        @relation("issue")
+  receivedCoupons Coupon[]        @relation("receive")
+  notice          Notice[]
+  transaction     Transaction[]
+}
+
+model PaymentMethod {
+  id            String            @id @default(uuid())
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  type          PaymentMethodType
+  generalCardId String?           @unique
+  prepaidCardId String?           @unique
+  ownerId       String
+  owner         User              @relation(fields: [ownerId], references: [id])
+  generalCard   GeneralCard?      @relation("generalCard")
+  prepaidCard   PrepaidCard?      @relation("prepaidCard")
+  transaction   Transaction[]
+}
+
+model PrepaidCard {
+  id                       String                     @id @default(uuid())
+  createdAt                DateTime                   @default(now())
+  updatedAt                DateTime                   @updatedAt
+  balance                  Int
+  paymentMethodId          String                     @unique
+  paymentMethod            PaymentMethod              @relation("prepaidCard", fields: [paymentMethodId], references: [id])
+  prepaidCardChargeHistory PrepaidCardChargeHistory[]
+}
+
+model PrepaidCardChargeHistory {
+  id                  String            @id @default(uuid())
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  delta               Int
+  status              TransactionStatus
+  method              String
+  detailInfo          String
+  targetPrepaidCardId String
+  prepaidCard         PrepaidCard       @relation(fields: [targetPrepaidCardId], references: [id])
+}
+
+model GeneralCard {
+  id              String        @id @default(uuid())
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  cardNumber      String
+  validMonth      Int
+  validYear       Int
+  billingKey      String
+  paymentMethodId String        @unique
+  paymentMethod   PaymentMethod @relation("generalCard", fields: [paymentMethodId], references: [id])
+}
+
+model Coupon {
+  id                String       @id @default(uuid())
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  name              String
+  expiresAt         DateTime?
+  amount            Int
+  usedTransactionId String?
+  issuerId          String
+  receiverId        String
+  issuer            User         @relation("issue", fields: [issuerId], references: [id])
+  receiver          User         @relation("receive", fields: [receiverId], references: [id])
+  transaction       Transaction? @relation(fields: [usedTransactionId], references: [id])
+}
+
+model Transaction {
+  id            String            @id @default(uuid())
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  billingId     String
+  totalPrice    Int
+  status        TransactionStatus
+  statusText    String?
+  authMethod    AuthMethod
+  usedCardId    String
+  posDeviceId   String
+  posDevice     PosDevice         @relation(fields: [posDeviceId], references: [id])
+  paymentMethod PaymentMethod     @relation(fields: [usedCardId], references: [id])
+  coupon        Coupon[]
+  products      Product[]
+  user          User              @relation(fields: [userId], references: [id])
+  userId        String
+}
+
+model Category {
+  id               String           @id @default(uuid())
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  name             String
+  color            String
+  discountPolicyId String?
+  products         Product[]
+  discountPolicy   DiscountPolicy[]
+}
+
+model Product {
+  id                      String            @id @default(uuid())
+  createdAt               DateTime          @default(now())
+  updatedAt               DateTime          @updatedAt
+  name                    String
+  barcode                 String?
+  price                   Int
+  sellingStopped          Boolean           @default(false)
+  categoryId              String
+  category                Category          @relation(fields: [categoryId], references: [id])
+  productInOutLog         ProductInOutLog[]
+  transaction             Transaction[]
+  excludedDiscountPolicy  DiscountPolicy[]  @relation("discountExcludedProduct")
+  targettedDiscountPolicy DiscountPolicy[]  @relation("discountTargetProduct")
+}
+
+model ProductInOutLog {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  delta     Int
+  message   String?
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+}
+
+model DiscountPolicy {
+  id              String     @id
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime
+  endsAt          DateTime?
+  fixedPrice      Int?
+  percentRate     Int?
+  taretCategory   Category[]
+  targetProduct   Product[]  @relation("discountTargetProduct")
+  excludedProduct Product[]  @relation("discountExcludedProduct")
+  event           Event?     @relation(fields: [eventId], references: [id])
+  eventId         String?
+}
+
+model PosDevice {
+  id                 String        @id
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime
+  name               String
+  disabled           Boolean       @default(false)
+  enabledAuthMethods AuthMethod
+  transaction        Transaction[]
+}
+
+model Notice {
+  id        String   @id
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+
+  title       String
+  description String
+  url         String
+  author      User   @relation(fields: [authorId], references: [id])
+  authorId    String
+}
+
+model Event {
+  id        String   @id
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+
+  content        String
+  discountPolicy DiscountPolicy[]
+}
+
+enum Role {
+  USER
+  TEACHER
+  ADMIN
+}
+
+enum PaymentMethodType {
+  PREPAID
+  GENERAL
+}
+
+enum TransactionStatus {
+  CONFIRMED
+  CANCELED
+  ERROR
+}
+
+enum AuthMethod {
+  SMS
+  APP_QR
+  FACESIGN
 }
