@@ -12,4 +12,10 @@ export default {
 
   notionToken: process.env.NOTION_TOKEN!,
   notionPageId: process.env.NOTION_PAGE_ID!,
+
+  dimi: {
+    baseUrl: process.env.DIMIAPI_BASEURL!,
+    apiId: process.env.DIMIAPI_ID!,
+    apiPw: process.env.DIMIAPI_PW!,
+  },
 };
