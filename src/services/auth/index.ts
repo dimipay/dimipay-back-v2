@@ -1,3 +1,4 @@
+import Joi from "joi";
 import * as controllers from "./controllers";
 import { createService } from "../index";
 
@@ -7,17 +8,14 @@ export default createService({
   routes: [
     {
       method: "post",
-      path: "/register",
-      handler: controllers.registerUser,
-      needAuth: false,
-      needPermission: false,
-    },
-    {
-      method: "post",
-      path: "/:id",
+      path: "/login",
       handler: controllers.identifyUser,
       needAuth: false,
       needPermission: false,
+      validateSchema: {
+        username: Joi.string().required(),
+        password: Joi.string().required(),
+      },
     },
     {
       method: "post",
