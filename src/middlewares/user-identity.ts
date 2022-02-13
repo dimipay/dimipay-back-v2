@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { veriToken } from "@src/resources";
+import { verify as veriToken } from "@src/resources";
 
 const attachIdentity = async (
   req: Request,
