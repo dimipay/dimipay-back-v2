@@ -18,7 +18,7 @@ export default createService({
       },
     },
     {
-      method: "get",
+      method: "post",
       path: "/refresh",
       handler: controllers.refreshAccessToken,
       needAuth: false,
