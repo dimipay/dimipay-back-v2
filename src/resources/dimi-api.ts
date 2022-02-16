@@ -8,11 +8,12 @@ const apiRouter = {
 };
 
 const api = axios.create({
-  auth: {
-    username: config.dimi.apiId,
-    password: config.dimi.apiPw,
-  },
   baseURL: config.dimi.baseUrl,
+  headers: {
+    Authorization: `Basic ${Buffer.from(
+      `${config.dimi.apiId}:${config.dimi.apiPw}`
+    ).toString("base64")}`,
+  },
 });
 
 export const getIdentity = async (
