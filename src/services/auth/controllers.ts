@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { User } from "@prisma/client";
+import { User, PaymentMethod, Prisma } from "@prisma/client";
 import { HttpException } from "@src/exceptions";
 import {
   issue as issueToken,
@@ -8,60 +8,72 @@ import {
   prisma,
   getIdentity,
 } from "@src/resources";
-import { Account } from "@src/interfaces";
+import { LoginInfo } from "@src/interfaces";
+
+const createTokensFromUser = async (user: User) => {
+  return {
+    accessToken: issueToken(user, false),
+    refreshToken: issueToken(user, true),
+  };
+};
 
 export const identifyUser = async (req: Request, res: Response) => {
-  const body: Account = req.body;
-  let isUnregistered = false;
+  const body: LoginInfo = req.body;
   try {
     if (body.username == body.password) {
-      throw {
-        status: 400,
-        message: "아이디와 비밀번호가 동일합니다.",
-      };
+      throw new HttpException(400, "아이디와 비밀번호가 동일합니다.");
     }
+
+    const queriedUser = await prisma.user.findUnique({
+      where: {
+        accountName: body.username,
+      },
+    });
+
+    if (queriedUser) {
+      if (queriedUser.roles.includes("ADMIN")) {
+        // 관리자 스푸핑 방지를 위한 가짜 오류메시지
+        throw new HttpException(
+          403,
+          "아이디 혹은 비밀번호가 올바르지 않습니다."
+        );
+      }
+
+      return res.json(await createTokensFromUser(queriedUser));
+    }
+
     const { apiData, status } = await getIdentity(body);
-    if (status === 404) {
+
+    if (status !== 200 || !apiData) {
       throw new HttpException(403, "아이디 혹은 비밀번호가 올바르지 않습니다.");
     }
 
-    if (status === 200) {
-      const identify =
-        (await (async () => {
-          const a = await prisma.user.findUnique({
-            where: { accountName: apiData.username },
-          });
-          if (a.studentNumber !== apiData.studentNumber) {
-            return await prisma.user.update({
-              where: { accountName: apiData.username },
-              data: {
-                studentNumber: apiData.studentNumber,
-              },
-            });
-          } else {
-            return a;
-          }
-        })()) ||
-        (await (async () => {
-          isUnregistered = true;
-          return await prisma.user.create({
-            data: {
-              accountName: apiData.username,
-              name: apiData.name,
-              profileImage: apiData.photofile2,
-              roles: apiData.user_type === "T" ? ["USER", "TEACHER"] : ["USER"],
-              studentNumber: apiData.studentNumber,
-              systemUid: apiData.id.toString(),
-            },
-          });
-        })());
+    const mappedUser: Prisma.UserCreateInput = {
+      accountName: apiData.username,
+      name: apiData.name,
+      profileImage: apiData.photofile2,
+      roles: ["D", "T"].includes(apiData.user_type)
+        ? ["USER", "TEACHER"]
+        : ["USER"],
+      studentNumber: apiData.studentNumber,
+      systemUid: apiData.id.toString(),
+    };
 
-      return res.status(200).json({
-        accessToken: await issueToken(identify, false),
-        refreshToken: await issueToken(identify, true),
-        isUnregistered,
-      });
-    }
+    // update if exist else create (update / insert)
+    const user = await prisma.user.upsert({
+      where: { systemUid: mappedUser.systemUid },
+      include: { paymentMethods: true },
+      update: mappedUser,
+      create: mappedUser,
+    });
+
+    if (user.paymentMethods.length)
+      return res.json(await createTokensFromUser(user));
+
+    return res.status(201).json({
+      ...(await createTokensFromUser(user)),
+      isFirstVisit: true,
+    });
   } catch (e) {
     if (e.status) {
       throw new HttpException(e.status, e.message);
@@ -83,8 +95,5 @@ export const refreshAccessToken = async (req: Request, res: Response) => {
 
   const payload = await verify(refreshToken);
   const identity = await prisma.user.findUnique({ where: { id: payload.id } });
-  res.json({
-    accessToken: await issueToken(identity, false),
-    refreshToken: await issueToken(identity, true),
-  });
+  res.json(await createTokensFromUser(identity));
 };
