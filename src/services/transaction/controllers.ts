@@ -2,9 +2,9 @@ import { prisma } from "@src/resources";
 import { Request, Response } from "express";
 
 export const getTransactionHistories = async (req: Request) => {
-  const user = await prisma.transaction.findFirst({
+  const transactions = await prisma.transaction.findFirst({
     where: {
-      id: req.user.id,
+      userId: req.user.systemId,
     },
     take: 10,
     orderBy: {
@@ -21,7 +21,7 @@ export const getTransactionHistories = async (req: Request) => {
     },
   });
 
-  return user;
+  return transactions;
 };
 
 export const getMonthlyTransaction = async (req: Request) => {
