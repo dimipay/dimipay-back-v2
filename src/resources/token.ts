@@ -33,7 +33,7 @@ export const verify = async (token: string) => {
   }
 };
 
-export const issue = async (identity: User, refresh: boolean) => {
+export const issue = async (identity: Partial<User>, refresh: boolean) => {
   if (refresh) {
     const token = await jwt.sign(
       {
