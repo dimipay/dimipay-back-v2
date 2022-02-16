@@ -4,7 +4,7 @@ import { Request } from "express";
 export const getMyInfo = async (req: Request) => {
   const user = await prisma.user.findFirst({
     where: {
-      id: req.user.id,
+      systemId: req.user.systemId,
     },
     select: {
       transactions: false,
