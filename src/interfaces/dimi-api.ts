@@ -1,6 +1,6 @@
 import { DimiUserType, Gender } from "@src/types";
 
-export interface Account {
+export interface LoginInfo {
   username: string;
   password: string;
 }

@@ -1,44 +1,79 @@
 import { Request, Response } from "express";
-import { User } from "@prisma/client";
+import { User, PaymentMethod, Prisma } from "@prisma/client";
 import { HttpException } from "@src/exceptions";
-import { issue as issueToken, prisma, getIdentity } from "@src/resources";
-import { Account } from "@src/interfaces";
+import {
+  issue as issueToken,
+  getTokenType,
+  verify,
+  prisma,
+  getIdentity,
+} from "@src/resources";
+import { LoginInfo } from "@src/interfaces";
+
+const createTokensFromUser = async (user: User) => {
+  return {
+    accessToken: issueToken(user, false),
+    refreshToken: issueToken(user, true),
+  };
+};
 
 export const identifyUser = async (req: Request, res: Response) => {
-  const body: Account = req.body;
+  const body: LoginInfo = req.body;
   try {
     if (body.username == body.password) {
-      throw {
-        status: 400,
-        message: "아이디와 비밀번호가 동일합니다.",
-      };
+      throw new HttpException(400, "아이디와 비밀번호가 동일합니다.");
     }
+
+    const queriedUser = await prisma.user.findUnique({
+      where: {
+        accountName: body.username,
+      },
+    });
+
+    if (queriedUser) {
+      if (queriedUser.roles.includes("ADMIN")) {
+        // 관리자 스푸핑 방지를 위한 가짜 오류메시지
+        throw new HttpException(
+          403,
+          "아이디 혹은 비밀번호가 올바르지 않습니다."
+        );
+      }
+
+      return res.json(await createTokensFromUser(queriedUser));
+    }
+
     const { apiData, status } = await getIdentity(body);
-    if (status === 404) {
+
+    if (status !== 200 || !apiData) {
       throw new HttpException(403, "아이디 혹은 비밀번호가 올바르지 않습니다.");
     }
 
-    if (status === 200) {
-      const identify =
-        (await prisma.user.findUnique({
-          where: { accountName: apiData.username },
-        })) ||
-        (await prisma.user.create({
-          data: {
-            accountName: apiData.username,
-            name: apiData.name,
-            profileImage: apiData.photofile2,
-            roles: apiData.user_type === "T" ? ["USER", "TEACHER"] : ["USER"],
-            studentNumber: apiData.studentNumber,
-            systemUid: apiData.id.toString(),
-          },
-        }));
+    const mappedUser: Prisma.UserCreateInput = {
+      accountName: apiData.username,
+      name: apiData.name,
+      profileImage: apiData.photofile2,
+      roles: ["D", "T"].includes(apiData.user_type)
+        ? ["USER", "TEACHER"]
+        : ["USER"],
+      studentNumber: apiData.studentNumber,
+      systemUid: apiData.id.toString(),
+    };
 
-      return res.status(200).json({
-        accessToken: await issueToken(identify, false),
-        refreshToken: await issueToken(identify, true),
-      });
-    }
+    // update if exist else create (update / insert)
+    const user = await prisma.user.upsert({
+      where: { systemUid: mappedUser.systemUid },
+      include: { paymentMethods: true },
+      update: mappedUser,
+      create: mappedUser,
+    });
+
+    if (user.paymentMethods.length)
+      return res.json(await createTokensFromUser(user));
+
+    return res.status(201).json({
+      ...(await createTokensFromUser(user)),
+      isFirstVisit: true,
+    });
   } catch (e) {
     if (e.status) {
       throw new HttpException(e.status, e.message);
@@ -50,5 +85,15 @@ export const identifyUser = async (req: Request, res: Response) => {
 };
 
 export const refreshAccessToken = async (req: Request, res: Response) => {
-  //토큰 재발급 로직
+  const { token: refreshToken } = req;
+  if (!refreshToken)
+    throw new HttpException(400, "리프레시 토큰이 전달되지 않았습니다.");
+
+  const tokenType = await getTokenType(refreshToken);
+  if (tokenType !== "REFRESH")
+    throw new HttpException(400, "리프레시 토큰이 아닙니다.");
+
+  const payload = await verify(refreshToken);
+  const identity = await prisma.user.findUnique({ where: { id: payload.id } });
+  res.json(await createTokensFromUser(identity));
 };

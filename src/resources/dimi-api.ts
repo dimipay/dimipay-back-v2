@@ -1,6 +1,6 @@
 import axios from "axios";
 import config from "@src/config";
-import { Account, UserIdentity } from "@src/interfaces";
+import { LoginInfo, UserIdentity } from "@src/interfaces";
 
 const apiRouter = {
   getIdentity: "/users/identify",
@@ -16,7 +16,7 @@ const api = axios.create({
 });
 
 export const getIdentity = async (
-  account: Account
+  account: LoginInfo
 ): Promise<{ apiData: UserIdentity; status: number }> => {
   const { data: apiData, status } = await api.get(apiRouter.getIdentity, {
     params: account,
