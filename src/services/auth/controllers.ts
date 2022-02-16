@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import { User, PaymentMethod, Prisma } from "@prisma/client";
 import { HttpException } from "@src/exceptions";
 import {
   issue as issueToken,
@@ -9,11 +8,12 @@ import {
   getIdentity,
 } from "@src/resources";
 import { LoginInfo } from "@src/interfaces";
+import { Prisma, User } from "@prisma/client";
 
-const createTokensFromUser = async (user: User) => {
+const createTokensFromUser = async (user: Partial<User>) => {
   return {
-    accessToken: issueToken(user, false),
-    refreshToken: issueToken(user, true),
+    accessToken: await issueToken(user, false),
+    refreshToken: await issueToken(user, true),
   };
 };
 
@@ -33,22 +33,36 @@ export const identifyUser = async (req: Request, res: Response) => {
     const mappedUser: Prisma.UserCreateInput = {
       accountName: apiData.username,
       name: apiData.name,
-      profileImage: apiData.photofile2,
+      profileImage: apiData.photofile2 || apiData.photofile1,
       studentNumber: apiData.studentNumber,
       systemId: apiData.id.toString(),
       isTeacher: ["D", "T"].includes(apiData.user_type),
     };
 
-    // update if exist else create (update / insert)
-    const user = await prisma.user.upsert({
+    const queriedUser = await prisma.user.findFirst({
       where: { systemId: mappedUser.systemId },
-      include: { paymentMethods: true },
-      update: mappedUser,
-      create: mappedUser,
+      select: {
+        accountName: true,
+        isDisabled: true,
+        isTeacher: true,
+        name: true,
+        paymentMethods: true,
+        profileImage: true,
+      },
     });
+    if (queriedUser) {
+      if (queriedUser.paymentMethods.length)
+        return res.json(await createTokensFromUser(queriedUser));
 
-    if (user.paymentMethods.length)
-      return res.json(await createTokensFromUser(user));
+      return res.status(201).json({
+        ...(await createTokensFromUser(queriedUser)),
+        isFirstVisit: true,
+      });
+    }
+
+    const user = await prisma.user.create({
+      data: mappedUser,
+    });
 
     return res.status(201).json({
       ...(await createTokensFromUser(user)),
@@ -59,6 +73,7 @@ export const identifyUser = async (req: Request, res: Response) => {
       if (e instanceof HttpException) throw e;
       throw new HttpException(e.status, e.message);
     }
+    console.log(e);
     throw new HttpException(400, "로그인할 수 없습니다.");
   }
 };
