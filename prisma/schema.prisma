@@ -1,45 +1,44 @@
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["dataProxy"]
+  previewFeatures = ["referentialIntegrity"]
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider             = "mysql"
+  url                  = env("DATABASE_URL")
+  referentialIntegrity = "prisma"
 }
 
 model User {
-  id              String          @id @default(uuid())
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
-  isDisabled      Boolean         @default(false)
-  accountName     String          @unique
-  name            String
-  roles           Role[]
-  profileImage    String
-  studentNumber   String?
-  systemUid       String?         @unique
-  issuedCoupons   Coupon[]        @relation("issue")
-  receivedCoupons Coupon[]        @relation("receive")
-  uploadedNotices Notice[]
-  paymentMethods  PaymentMethod[]
-  transactions    Transaction[]
+  id                  String          @id @default(uuid())
+  systemId            String          @unique
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+  isDisabled          Boolean         @default(false)
+  accountName         String          @unique
+  name                String
+  isTeacher           Boolean?        @default(false)
+  profileImage        String?
+  studentNumber       String?
+  relatedAdminAccount AdminAccount?
+  transactions        Transaction[]
+  issuedCoupons       Coupon[]        @relation("issue")
+  receivedCoupons     Coupon[]        @relation("receive")
+  paymentMethods      PaymentMethod[]
 }
 
 model PaymentMethod {
-  id            String            @id @default(uuid())
-  createdAt     DateTime          @default(now())
-  updatedAt     DateTime          @updatedAt
-  type          PaymentMethodType
-  generalCardId String?           @unique
-  prepaidCardId String?           @unique
-  ownerId       String
-  color         String?
-  name          String?
-  owner         User              @relation(fields: [ownerId], references: [id])
-  generalCard   GeneralCard?      @relation("generalCard")
-  prepaidCard   PrepaidCard?      @relation("prepaidCard")
-  transaction   Transaction[]
+  id          String            @id @default(uuid())
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  type        PaymentMethodType
+  color       String?
+  name        String?
+  generalCard GeneralCard?      @relation("generalCard")
+  prepaidCard PrepaidCard?      @relation("prepaidCard")
+  owner       User              @relation(fields: [ownerId], references: [systemId])
+  ownerId     String
+  transaction Transaction[]
 }
 
 model PrepaidCard {
@@ -85,27 +84,27 @@ model Coupon {
   amount            Int
   usedTransactionId String?
   issuerId          String
+  issuer            User         @relation("issue", fields: [issuerId], references: [systemId])
+  receiver          User         @relation("receive", fields: [receiverId], references: [systemId])
   receiverId        String
-  issuer            User         @relation("issue", fields: [issuerId], references: [id])
-  receiver          User         @relation("receive", fields: [receiverId], references: [id])
   transaction       Transaction? @relation(fields: [usedTransactionId], references: [id])
 }
 
 model Transaction {
-  id            String            @id @default(uuid())
-  createdAt     DateTime          @default(now())
-  updatedAt     DateTime          @updatedAt
+  id            String                 @id @default(uuid())
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
   billingId     String
   totalPrice    Int
-  status        TransactionStatus
+  status        Transaction_status
   statusText    String?
-  authMethod    AuthMethod
+  authMethod    Transaction_authMethod
   usedCardId    String
   posDeviceId   String
   userId        String
-  posDevice     PosDevice         @relation(fields: [posDeviceId], references: [id])
-  paymentMethod PaymentMethod     @relation(fields: [usedCardId], references: [id])
-  user          User              @relation(fields: [userId], references: [id])
+  user          User                   @relation(fields: [userId], references: [systemId])
+  posDevice     PosDevice              @relation(fields: [posDeviceId], references: [id])
+  paymentMethod PaymentMethod          @relation(fields: [usedCardId], references: [id])
   coupon        Coupon[]
   products      Product[]
 }
@@ -190,13 +189,53 @@ model Notice {
   description String
   url         String
   authorId    String
-  author      User      @relation(fields: [authorId], references: [id])
 }
 
-enum Role {
-  USER
-  TEACHER
-  ADMIN
+model AdminAccount {
+  id                   String   @id
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime
+  relatedUser          User?    @relation(fields: [relatedUserSystemUid], references: [systemId])
+  relatedUserSystemUid String?  @unique
+  username             String
+  hashedPassword       String
+  description          String?
+}
+
+model CategoryToDiscountPolicy {
+  A String
+  B String
+
+  @@unique([A, B], map: "_CategoryToDiscountPolicy_AB_unique")
+  @@index([B], map: "_CategoryToDiscountPolicy_B_index")
+  @@map("_CategoryToDiscountPolicy")
+}
+
+model ProductToTransaction {
+  A String
+  B String
+
+  @@unique([A, B], map: "_ProductToTransaction_AB_unique")
+  @@index([B], map: "_ProductToTransaction_B_index")
+  @@map("_ProductToTransaction")
+}
+
+model discountExcludedProduct {
+  A String
+  B String
+
+  @@unique([A, B], map: "_discountExcludedProduct_AB_unique")
+  @@index([B], map: "_discountExcludedProduct_B_index")
+  @@map("_discountExcludedProduct")
+}
+
+model discountTargetProduct {
+  A String
+  B String
+
+  @@unique([A, B], map: "_discountTargetProduct_AB_unique")
+  @@index([B], map: "_discountTargetProduct_B_index")
+  @@map("_discountTargetProduct")
 }
 
 enum PaymentMethodType {
@@ -211,6 +250,18 @@ enum TransactionStatus {
 }
 
 enum AuthMethod {
+  SMS
+  APP_QR
+  FACESIGN
+}
+
+enum Transaction_status {
+  CONFIRMED
+  CANCELED
+  ERROR
+}
+
+enum Transaction_authMethod {
   SMS
   APP_QR
   FACESIGN

@@ -24,24 +24,6 @@ export const identifyUser = async (req: Request, res: Response) => {
       throw new HttpException(400, "아이디와 비밀번호가 동일합니다.");
     }
 
-    const queriedUser = await prisma.user.findUnique({
-      where: {
-        accountName: body.username,
-      },
-    });
-
-    if (queriedUser) {
-      if (queriedUser.roles.includes("ADMIN")) {
-        // 관리자 스푸핑 방지를 위한 가짜 오류메시지
-        throw new HttpException(
-          403,
-          "아이디 혹은 비밀번호가 올바르지 않습니다."
-        );
-      }
-
-      return res.json(await createTokensFromUser(queriedUser));
-    }
-
     const { apiData, status } = await getIdentity(body);
 
     if (status !== 200 || !apiData) {
@@ -52,16 +34,14 @@ export const identifyUser = async (req: Request, res: Response) => {
       accountName: apiData.username,
       name: apiData.name,
       profileImage: apiData.photofile2,
-      roles: ["D", "T"].includes(apiData.user_type)
-        ? ["USER", "TEACHER"]
-        : ["USER"],
       studentNumber: apiData.studentNumber,
-      systemUid: apiData.id.toString(),
+      systemId: apiData.id.toString(),
+      isTeacher: ["D", "T"].includes(apiData.user_type),
     };
 
     // update if exist else create (update / insert)
     const user = await prisma.user.upsert({
-      where: { systemUid: mappedUser.systemUid },
+      where: { systemId: mappedUser.systemId },
       include: { paymentMethods: true },
       update: mappedUser,
       create: mappedUser,
@@ -76,12 +56,11 @@ export const identifyUser = async (req: Request, res: Response) => {
     });
   } catch (e) {
     if (e.status) {
+      if (e instanceof HttpException) throw e;
       throw new HttpException(e.status, e.message);
-    } else {
-      throw new HttpException(400, "로그인할 수 없습니다.");
     }
+    throw new HttpException(400, "로그인할 수 없습니다.");
   }
-  //로그인 로직
 };
 
 export const refreshAccessToken = async (req: Request, res: Response) => {
