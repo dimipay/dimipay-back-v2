@@ -25,6 +25,7 @@ model User {
   issuedCoupons       Coupon[]        @relation("issue")
   receivedCoupons     Coupon[]        @relation("receive")
   paymentMethods      PaymentMethod[]
+  paymentPin          String?
 }
 
 model PaymentMethod {
