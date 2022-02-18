@@ -4,6 +4,11 @@ RUN mkdir -p /app
 WORKDIR /app
 
 ARG GITHUB_TOKEN
+ARG DATABASE_URL
+ARG JWT_SECRET
+ARG NOTION_PAGE_ID
+ARG NOTION_TOKEN
+ARG PORT
 
 RUN git clone https://github.com/dimipay/dimipay-back-v2/ .
 
