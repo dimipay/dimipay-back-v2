@@ -48,6 +48,8 @@ export const identifyUser = async (req: Request, res: Response) => {
         name: true,
         paymentMethods: true,
         profileImage: true,
+        createdAt: true,
+        updatedAt: true,
       },
     });
     if (queriedUser) {
