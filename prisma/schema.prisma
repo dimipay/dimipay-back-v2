@@ -187,9 +187,10 @@ model Notice {
   startsAt    DateTime  @default(now())
   endsAt      DateTime?
   title       String
-  description String
+  description String?
   url         String
   authorId    String
+  content     String    @db.LongText
 }
 
 model AdminAccount {
