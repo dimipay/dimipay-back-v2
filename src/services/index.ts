@@ -91,7 +91,7 @@ const createDocsObject = (services: Service[]) => {
       path: (service.baseURL + r.path).replace(/\/$/, ""),
       validateSchema: r.validateSchema
         ? j2s(Joi.object().keys(r.validateSchema)).swagger
-        : {},
+        : null,
     }));
 
   const mappedServices = services.map((s: Service) => ({
@@ -133,17 +133,24 @@ const createSwaggerDocs = (services: Service[]) => {
       mappedPaths[service.baseURL + route.path] = {};
     });
     service.routes.forEach((route: any) => {
-      mappedPaths[service.baseURL + route.path][route.method] = {
-        tags: [service.code],
-        summary: route.summery,
-        requestBody: {
-          content: {
-            "application/json": {
-              schema: j2s(Joi.object().keys(route.validateSchema)).swagger,
+      if (route.validateSchema) {
+        mappedPaths[service.baseURL + route.path][route.method] = {
+          tags: [service.code],
+          summary: route.summery,
+          requestBody: {
+            content: {
+              "application/json": {
+                schema: j2s(Joi.object().keys(route.validateSchema)).swagger,
+              },
             },
           },
-        },
-      };
+        };
+      } else {
+        mappedPaths[service.baseURL + route.path][route.method] = {
+          tags: [service.code],
+          summary: route.summery,
+        };
+      }
     });
   });
   return { tags: mappedTags, paths: mappedPaths };
