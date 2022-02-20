@@ -2,6 +2,7 @@ import express from "express";
 import bearerToken from "express-bearer-token";
 import morgan from "morgan";
 import helmet from "helmet";
+import cors from "cors";
 
 import { httpLogStream, logger } from "@src/resources";
 import { serviceDocsRouter, serviceRouter } from "./services";
@@ -21,6 +22,7 @@ class App {
   }
   private initializeMiddlewares() {
     this.app.use(helmet());
+    this.app.use(cors());
     this.app.use(express.json()); // for parsing application/json
     this.app.use(
       bearerToken({
