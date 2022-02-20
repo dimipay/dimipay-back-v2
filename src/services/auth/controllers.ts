@@ -75,7 +75,7 @@ export const identifyUser = async (req: Request, res: Response) => {
       if (e instanceof HttpException) throw e;
       throw new HttpException(e.status, e.message);
     }
-    console.log(e);
+
     throw new HttpException(400, "로그인할 수 없습니다.");
   }
 };

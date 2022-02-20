@@ -2,6 +2,11 @@
   "openapi": "3.0.0",
   "servers": [
     {
+      "url": "https://dimipay.up.railway.app/",
+      "description": "Production",
+      "variables": {}
+    },
+    {
       "url": "http://localhost:4000",
       "description": "localhost",
       "variables": {}
