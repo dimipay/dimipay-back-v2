@@ -5,7 +5,7 @@ import helmet from "helmet";
 import cors from "cors";
 
 import { httpLogStream, logger } from "@src/resources";
-import { serviceDocsRouter, serviceRouter } from "./services";
+import { serviceDocsRouter, serviceRouter, serviceSwaggerUi } from "./services";
 import { attachIdentity } from "./middlewares";
 
 class App {
@@ -19,6 +19,7 @@ class App {
   private initializeRouter() {
     this.app.use("/", serviceRouter);
     this.app.use("/docs", serviceDocsRouter);
+    this.app.use("/api-docs", serviceSwaggerUi);
   }
   private initializeMiddlewares() {
     this.app.use(helmet());

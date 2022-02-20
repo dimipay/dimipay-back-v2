@@ -7,9 +7,12 @@ import {
   Response,
   NextFunction,
 } from "express";
+import j2s from "joi-to-swagger";
 import { join as pathJoin } from "path";
 import { HTTPMethod } from "../types";
 import { checkPermissions, validator } from "../middlewares";
+import swaggerUi from "swagger-ui-express";
+import defaultSwagger from "@src/resources/swagger/default-swagger.json";
 
 interface KeyValue<T> {
   [key: string]: T;
@@ -17,6 +20,7 @@ interface KeyValue<T> {
 
 export interface Route {
   method: HTTPMethod;
+  description?: string;
   path: string;
   middlewares?: RequestHandler[];
   handler: RequestHandler;
@@ -72,23 +76,22 @@ const createRouter = (services: Service[]) => {
   return router;
 };
 
-const createDocsRouter = (services: Service[]) => {
-  const router = Router();
-
-  const schemaMapper = (validateSchema: KeyValue<Joi.AnySchema>) => {
-    const keys = Object.keys(validateSchema);
-    const result: KeyValue<String | undefined> = {};
-    keys.forEach((key) => {
-      result[key] = validateSchema[key].type;
-    });
-    return result;
-  };
-
+const createDocsObject = (services: Service[]) => {
+  // const schemaMapper = (validateSchema: KeyValue<Joi.AnySchema>) => {
+  //   const keys = Object.keys(validateSchema);
+  //   const result: KeyValue<String | undefined> = {};
+  //   keys.forEach((key) => {
+  //     result[key] = validateSchema[key].type;
+  //   });
+  //   return result;
+  // };
   const routeMapper = (service: Service) =>
     service.routes.map((r) => ({
       ...r,
       path: (service.baseURL + r.path).replace(/\/$/, ""),
-      validateSchema: r.validateSchema ? schemaMapper(r.validateSchema) : {},
+      validateSchema: r.validateSchema
+        ? j2s(Joi.object().keys(r.validateSchema)).swagger
+        : {},
     }));
 
   const mappedServices = services.map((s: Service) => ({
@@ -96,8 +99,13 @@ const createDocsRouter = (services: Service[]) => {
     routes: routeMapper(s),
   }));
 
+  return mappedServices;
+};
+
+const createDocsRouter = (services: Service[]) => {
+  const router = Router();
   router.get("/", (req, res) => {
-    res.json({ services: mappedServices });
+    res.json(createDocsObject(services));
   });
 
   return router;
@@ -107,11 +115,66 @@ export const services = fs
   .readdirSync(__dirname)
   .filter((s) => !s.startsWith("index"));
 
-export const importedServices = services.map((s: string) => ({
+export const importedServices: Service[] = services.map((s: string) => ({
   code: s,
   // eslint-disable-next-line
   ...require(`${__dirname}/${s}`).default,
 }));
 
+const createSwaggerDocs = (services: Service[]) => {
+  const mappedTags = services.map((s: any) => ({
+    name: s.code,
+    description: s.name,
+  }));
+
+  const mappedPaths: KeyValue<any> = {};
+  services.forEach((service: Service) => {
+    service.routes.forEach((route: Route) => {
+      mappedPaths[service.baseURL + route.path] = {};
+    });
+    service.routes.forEach((route: any) => {
+      mappedPaths[service.baseURL + route.path][route.method] = {
+        tags: [service.code],
+        summary: route.summery,
+        requestBody: {
+          content: {
+            "application/json": {
+              schema: j2s(Joi.object().keys(route.validateSchema)).swagger,
+            },
+          },
+        },
+      };
+    });
+  });
+  return { tags: mappedTags, paths: mappedPaths };
+};
+
+export const createSwaggerUi = () => {
+  const router = Router();
+  router.get("/swagger.json", wrapper(getSwaggerJson));
+  const options = {
+    swaggerOptions: {
+      url: "/api-docs/swagger.json",
+    },
+  };
+  router.use(
+    "/",
+    swaggerUi.serveFiles(undefined, options),
+    swaggerUi.setup(undefined, options)
+  );
+
+  return router;
+};
+
+const getSwaggerJson = async (req: Request, res: Response) => {
+  const swagger = {
+    ...defaultSwagger,
+    ...createSwaggerDocs(importedServices),
+  };
+  // console.log(swagger);
+  return res.json(swagger);
+};
+
+export const serviceSwaggerUi = createSwaggerUi();
 export const serviceRouter = createRouter(importedServices);
 export const serviceDocsRouter = createDocsRouter(importedServices);
