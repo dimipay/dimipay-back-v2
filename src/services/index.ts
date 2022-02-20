@@ -7,6 +7,7 @@ import {
   Response,
   NextFunction,
 } from "express";
+import j2s from "joi-to-swagger";
 import { join as pathJoin } from "path";
 import { HTTPMethod } from "../types";
 import { checkPermissions, validator } from "../middlewares";
@@ -76,20 +77,21 @@ const createRouter = (services: Service[]) => {
 };
 
 const createDocsObject = (services: Service[]) => {
-  const schemaMapper = (validateSchema: KeyValue<Joi.AnySchema>) => {
-    const keys = Object.keys(validateSchema);
-    const result: KeyValue<String | undefined> = {};
-    keys.forEach((key) => {
-      result[key] = validateSchema[key].type;
-    });
-    return result;
-  };
-
+  // const schemaMapper = (validateSchema: KeyValue<Joi.AnySchema>) => {
+  //   const keys = Object.keys(validateSchema);
+  //   const result: KeyValue<String | undefined> = {};
+  //   keys.forEach((key) => {
+  //     result[key] = validateSchema[key].type;
+  //   });
+  //   return result;
+  // };
   const routeMapper = (service: Service) =>
     service.routes.map((r) => ({
       ...r,
       path: (service.baseURL + r.path).replace(/\/$/, ""),
-      validateSchema: r.validateSchema ? schemaMapper(r.validateSchema) : {},
+      validateSchema: r.validateSchema
+        ? j2s(Joi.object().keys(r.validateSchema)).swagger
+        : {},
     }));
 
   const mappedServices = services.map((s: Service) => ({
@@ -113,45 +115,31 @@ export const services = fs
   .readdirSync(__dirname)
   .filter((s) => !s.startsWith("index"));
 
-export const importedServices = services.map((s: string) => ({
+export const importedServices: Service[] = services.map((s: string) => ({
   code: s,
   // eslint-disable-next-line
   ...require(`${__dirname}/${s}`).default,
 }));
 
-const createSwaggerDocs = (services: any[]) => {
+const createSwaggerDocs = (services: Service[]) => {
   const mappedTags = services.map((s: any) => ({
     name: s.code,
     description: s.name,
   }));
 
-  const mappedValidators = (validator: KeyValue<string>) => {
-    const result: KeyValue<object> = {};
-    console.log(Object.keys(validator), validator);
-    Object.keys(validator).forEach((key) => {
-      result[key] = {
-        type: validator[key],
-      };
-    });
-
-    return result;
-  };
-
   const mappedPaths: KeyValue<any> = {};
   services.forEach((service: Service) => {
     service.routes.forEach((route: Route) => {
-      mappedPaths[route.path] = {};
+      mappedPaths[service.baseURL + route.path] = {};
     });
     service.routes.forEach((route: any) => {
-      mappedPaths[route.path][route.method] = {
+      mappedPaths[service.baseURL + route.path][route.method] = {
         tags: [service.code],
         summary: route.summery,
         requestBody: {
           content: {
             "application/json": {
-              schema: {
-                properties: mappedValidators(route.validateSchema),
-              },
+              schema: j2s(Joi.object().keys(route.validateSchema)).swagger,
             },
           },
         },
@@ -181,9 +169,9 @@ export const createSwaggerUi = () => {
 const getSwaggerJson = async (req: Request, res: Response) => {
   const swagger = {
     ...defaultSwagger,
-    ...createSwaggerDocs(createDocsObject(importedServices)),
+    ...createSwaggerDocs(importedServices),
   };
-  console.log(swagger);
+  // console.log(swagger);
   return res.json(swagger);
 };
 

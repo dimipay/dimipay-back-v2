@@ -13,8 +13,8 @@ export default createService({
       needAuth: false,
       needPermission: false,
       validateSchema: {
-        username: Joi.string().required(),
-        password: Joi.string().required(),
+        username: Joi.string().min(3).required(),
+        password: Joi.string(),
       },
     },
     {
