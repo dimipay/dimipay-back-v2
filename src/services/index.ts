@@ -10,6 +10,8 @@ import {
 import { join as pathJoin } from "path";
 import { HTTPMethod } from "../types";
 import { checkPermissions, validator } from "../middlewares";
+import swaggerUi from "swagger-ui-express";
+import defaultSwagger from "@src/resources/swagger/default-swagger.json";
 
 interface KeyValue<T> {
   [key: string]: T;
@@ -17,6 +19,7 @@ interface KeyValue<T> {
 
 export interface Route {
   method: HTTPMethod;
+  summery?: string;
   path: string;
   middlewares?: RequestHandler[];
   handler: RequestHandler;
@@ -72,9 +75,7 @@ const createRouter = (services: Service[]) => {
   return router;
 };
 
-const createDocsRouter = (services: Service[]) => {
-  const router = Router();
-
+const createDocsObject = (services: Service[]) => {
   const schemaMapper = (validateSchema: KeyValue<Joi.AnySchema>) => {
     const keys = Object.keys(validateSchema);
     const result: KeyValue<String | undefined> = {};
@@ -96,8 +97,13 @@ const createDocsRouter = (services: Service[]) => {
     routes: routeMapper(s),
   }));
 
+  return mappedServices;
+};
+
+const createDocsRouter = (services: Service[]) => {
+  const router = Router();
   router.get("/", (req, res) => {
-    res.json({ services: mappedServices });
+    res.json(createDocsObject(services));
   });
 
   return router;
@@ -113,5 +119,74 @@ export const importedServices = services.map((s: string) => ({
   ...require(`${__dirname}/${s}`).default,
 }));
 
+const createSwaggerDocs = (services: any[]) => {
+  const mappedTags = services.map((s: any) => ({
+    name: s.code,
+    description: s.name,
+  }));
+
+  const mappedValidators = (validator: KeyValue<string>) => {
+    const result: KeyValue<object> = {};
+    console.log(Object.keys(validator), validator);
+    Object.keys(validator).forEach((key) => {
+      result[key] = {
+        type: validator[key],
+      };
+    });
+
+    return result;
+  };
+
+  const mappedPaths: KeyValue<any> = {};
+  services.forEach((service: Service) => {
+    service.routes.forEach((route: Route) => {
+      mappedPaths[route.path] = {};
+    });
+    service.routes.forEach((route: any) => {
+      mappedPaths[route.path][route.method] = {
+        tags: [service.code],
+        summary: route.summery,
+        requestBody: {
+          content: {
+            "application/json": {
+              schema: {
+                properties: mappedValidators(route.validateSchema),
+              },
+            },
+          },
+        },
+      };
+    });
+  });
+  return { tags: mappedTags, paths: mappedPaths };
+};
+
+export const createSwaggerUi = () => {
+  const router = Router();
+  router.get("/swagger.json", wrapper(getSwaggerJson));
+  const options = {
+    swaggerOptions: {
+      url: "/api-docs/swagger.json",
+    },
+  };
+  router.use(
+    "/",
+    swaggerUi.serveFiles(undefined, options),
+    swaggerUi.setup(undefined, options)
+  );
+
+  return router;
+};
+
+const getSwaggerJson = async (req: Request, res: Response) => {
+  const swagger = {
+    ...defaultSwagger,
+    ...createSwaggerDocs(createDocsObject(importedServices)),
+  };
+  console.log(swagger);
+  return res.json(swagger);
+};
+
+export const serviceSwaggerUi = createSwaggerUi();
 export const serviceRouter = createRouter(importedServices);
 export const serviceDocsRouter = createDocsRouter(importedServices);
