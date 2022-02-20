@@ -20,7 +20,7 @@ interface KeyValue<T> {
 
 export interface Route {
   method: HTTPMethod;
-  summery?: string;
+  description?: string;
   path: string;
   middlewares?: RequestHandler[];
   handler: RequestHandler;
