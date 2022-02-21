@@ -91,7 +91,7 @@ const createDocsObject = (services: Service[]) => {
       path: (service.baseURL + r.path).replace(/\/$/, ""),
       validateSchema: r.validateSchema
         ? j2s(Joi.object().keys(r.validateSchema)).swagger
-        : {},
+        : null,
     }));
 
   const mappedServices = services.map((s: Service) => ({
@@ -127,23 +127,59 @@ const createSwaggerDocs = (services: Service[]) => {
     description: s.name,
   }));
 
+  const pathMapper = (path: string) => {
+    let mappedPath = "";
+    let params: string[] = [];
+    path
+      .substring(1)
+      .split("/")
+      .forEach((p) => {
+        if (p.startsWith(":")) {
+          mappedPath = mappedPath + `/{${p.substring(1)}}`;
+          params.push(p.substring(1));
+        } else {
+          mappedPath = mappedPath + `/${p}`;
+        }
+      });
+    return { mappedPath, params };
+  };
+
   const mappedPaths: KeyValue<any> = {};
   services.forEach((service: Service) => {
     service.routes.forEach((route: Route) => {
-      mappedPaths[service.baseURL + route.path] = {};
+      mappedPaths[service.baseURL + pathMapper(route.path).mappedPath] = {};
     });
     service.routes.forEach((route: any) => {
-      mappedPaths[service.baseURL + route.path][route.method] = {
+      mappedPaths[service.baseURL + pathMapper(route.path).mappedPath][
+        route.method
+      ] = {
         tags: [service.code],
         summary: route.summery,
-        requestBody: {
+      };
+      if (route.validateSchema) {
+        mappedPaths[service.baseURL + pathMapper(route.path).mappedPath][
+          route.method
+        ].requestBody = {
           content: {
             "application/json": {
               schema: j2s(Joi.object().keys(route.validateSchema)).swagger,
             },
           },
-        },
-      };
+        };
+      }
+      if (pathMapper(route.path).params.length) {
+        const params: object[] = [];
+        pathMapper(route.path).params.forEach((p) => {
+          params.push({
+            name: p,
+            in: "path",
+            required: true,
+          });
+        });
+        mappedPaths[service.baseURL + pathMapper(route.path).mappedPath][
+          route.method
+        ].parameters = params;
+      }
     });
   });
   return { tags: mappedTags, paths: mappedPaths };
