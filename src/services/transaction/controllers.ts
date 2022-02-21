@@ -1,7 +1,7 @@
 import { prisma } from "@src/resources";
 import { Request, Response } from "express";
 
-export const getTransactionHistories = async (req: Request) => {
+export const getTransactionHistories = async (req: Request, res: Response) => {
   const transactions = await prisma.transaction.findFirst({
     where: {
       userId: req.user.systemId,
@@ -21,10 +21,10 @@ export const getTransactionHistories = async (req: Request) => {
     },
   });
 
-  return transactions;
+  return res.json(transactions);
 };
 
-export const getMonthlyTransaction = async (req: Request) => {
+export const getMonthlyTransaction = async (req: Request, res: Response) => {
   const queryStartRange = new Date(`${req.params.year}-${req.params.month}-01`);
   const queryEndRange = new Date(+queryStartRange);
 
@@ -40,5 +40,5 @@ export const getMonthlyTransaction = async (req: Request) => {
     },
   });
 
-  return transactions;
+  return res.json(transactions);
 };
