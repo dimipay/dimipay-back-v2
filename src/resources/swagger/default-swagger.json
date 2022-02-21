@@ -10,11 +10,6 @@
       "url": "http://localhost:4000",
       "description": "localhost",
       "variables": {}
-    },
-    {
-      "url": "https://dimipay.up.railway.app",
-      "description": "localhost",
-      "variables": {}
     }
   ],
   "info": {
