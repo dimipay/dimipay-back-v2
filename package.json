@@ -29,7 +29,9 @@
   "dependencies": {
     "@notionhq/client": "^0.4.11",
     "@prisma/client": "3.9.2",
+    "@types/bcrypt": "^5.0.0",
     "axios": "^0.25.0",
+    "bcrypt": "^5.0.1",
     "cors": "^2.8.5",
     "cross-env": "^7.0.3",
     "dimipay-backend-crypto-engine": "https://github.com/dimipay/dimipay-backend-crypto-engine.git",

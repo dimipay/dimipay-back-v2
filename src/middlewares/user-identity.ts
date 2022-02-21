@@ -12,7 +12,10 @@ const attachIdentity = async (
   const { token } = req;
   try {
     const identity = await veriToken(token);
-    req.user = identity;
+    if (identity) {
+      if (identity.systemId) req.user = identity;
+      else req.pos = identity;
+    }
     next();
   } catch (e) {
     return next(e);

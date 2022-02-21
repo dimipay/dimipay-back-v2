@@ -33,6 +33,16 @@ export const verify = async (token: string) => {
   }
 };
 
+export const issueCustomToken = (
+  payload: Record<string, string | number | undefined>,
+  expires?: string
+) => {
+  jwt.sign(payload, config.jwtSecret as string, {
+    algorithm: "HS512",
+    expiresIn: expires,
+  });
+};
+
 export const issue = async (identity: Partial<User>, refresh: boolean) => {
   if (refresh) {
     const token = await jwt.sign(
