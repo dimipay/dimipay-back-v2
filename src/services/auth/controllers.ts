@@ -42,6 +42,7 @@ export const identifyUser = async (req: Request, res: Response) => {
     const queriedUser = await prisma.user.findFirst({
       where: { systemId: mappedUser.systemId },
       select: {
+        systemId: true,
         accountName: true,
         isDisabled: true,
         isTeacher: true,
@@ -91,5 +92,5 @@ export const refreshAccessToken = async (req: Request, res: Response) => {
 
   const payload = await verify(refreshToken);
   const identity = await prisma.user.findUnique({ where: { id: payload.id } });
-  res.json(await createTokensFromUser(identity));
+  return res.json(await createTokensFromUser(identity));
 };

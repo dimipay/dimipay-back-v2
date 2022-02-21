@@ -9,6 +9,7 @@ export default createService({
       method: "get",
       path: "/me",
       handler: controllers.getMyInfo,
+      description: "",
       needAuth: true,
       needPermission: false,
     },
