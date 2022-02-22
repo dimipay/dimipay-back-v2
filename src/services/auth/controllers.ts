@@ -37,7 +37,9 @@ export const identifyUser = async (req: Request, res: Response) => {
       studentNumber: apiData.studentNumber,
       systemId: apiData.id.toString(),
       isTeacher: ["D", "T"].includes(apiData.user_type),
-      phoneNumber: apiData.phone,
+      phoneNumber: apiData.phone.startsWith("01")
+        ? "+82 " + apiData.phone.slice(1)
+        : null,
     };
 
     const queriedUser = await prisma.user.findFirst({
