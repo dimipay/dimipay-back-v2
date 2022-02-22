@@ -11,9 +11,10 @@ import { LoginInfo } from "@src/interfaces";
 import { Prisma, User } from "@prisma/client";
 
 const createTokensFromUser = async (user: Partial<User>) => {
+  const { id, systemId } = user;
   return {
-    accessToken: await issueToken(user, false),
-    refreshToken: await issueToken(user, true),
+    accessToken: await issueToken({ id, systemId }, false),
+    refreshToken: await issueToken({ id, systemId }, true),
   };
 };
 
