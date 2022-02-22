@@ -3,11 +3,9 @@ import dotenv from "dotenv";
 const env = dotenv.config();
 if (!env) throw new Error(".env file not exist");
 
-export default {
+const config = {
+  redisUri: process.env.REDIS_URI,
   port: process.env.SERVER_PORT!,
-  telegramToken: process.env.TELEGRAM_TOKEN!,
-  telegramChatID: process.env.TELEGRAM_CHATID!,
-  mongoURI: process.env.MONGO_URI!,
   jwtSecret: process.env.JWT_SECRET!,
 
   notionToken: process.env.NOTION_TOKEN!,
@@ -18,4 +16,31 @@ export default {
     apiId: process.env.DIMIAPI_ID!,
     apiPw: process.env.DIMIAPI_PW!,
   },
+
+  navercloud: {
+    smsServiceId: process.env.NAVER_SMS_API_SERVICE_ID!,
+    smsUri: process.env.NAVER_SMS_API_URI!,
+    smsKey: process.env.NAVER_SMS_API_KEY!,
+    accessKey: process.env.NAVER_API_ACCESS_KEY!,
+    smsSendingNumber: process.env.NAVER_SMS_SENDING_NUMBER!,
+  },
 };
+
+type Config = {
+  [key: string]: string | Config;
+};
+
+function checkEnvs(tree: Config) {
+  Object.keys(tree).forEach((key) => {
+    if (typeof tree[key] === "object") {
+      checkEnvs(tree[key] as Config);
+    }
+    if (!tree[key]) {
+      throw new Error(`"${key}" is not defined in env var`);
+    }
+  });
+}
+
+checkEnvs(config);
+
+export default config;
