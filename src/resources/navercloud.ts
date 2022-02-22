@@ -33,9 +33,9 @@ export const sendSms = async (phoneNumber: string, content: string) => {
     url,
     {
       type: "SMS",
-      countryCode: "82",
+      countryCode: phoneNumber.split(" ")[0].slice(1),
       content,
-      messages: [{ to: phoneNumber }],
+      messages: [{ to: phoneNumber.split(" ")[1] }],
       from: config.navercloud.smsSendingNumber,
     },
     {

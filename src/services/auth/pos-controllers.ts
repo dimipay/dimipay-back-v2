@@ -74,8 +74,8 @@ export const requestSmsVerification = async (req: Request, res: Response) => {
 
   // 주의! 마스킹 로직을 변경할 때에는 한/중/일/몽의 전화번호 형식을 고려해주세요
 
-  // "010-3728-5016" -> "010-37**-**16"
-  // "+976-7007-1020" -> "+976-70**-**20"
+  // "+82 10-3728-5016" -> "+82 10-37**-**16"
+  // "+976 7007-1020" -> "+976 70**-**20"
 
   const maskedPhoneNumber = [
     ...phoneNumber.slice(0, maskStartIndex),
