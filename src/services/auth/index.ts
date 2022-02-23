@@ -57,5 +57,29 @@ export default createService({
         pin: Joi.string().length(4).required(),
       },
     },
+    {
+      method: "post",
+      path: "/request-sms-code",
+      handler: posControllers.getPinMatchedUser,
+      description: "인증번호를 발송합니다",
+      needAuth: true,
+      needPermission: false,
+      validateSchema: {
+        studentNumber: Joi.string().required(),
+        pin: Joi.string().required(),
+      },
+    },
+    {
+      method: "post",
+      path: "/validate-sms-code",
+      handler: posControllers.getPinMatchedUser,
+      description: "인증번호를 확인합니다",
+      needAuth: true,
+      needPermission: false,
+      validateSchema: {
+        smsCode: Joi.string().required(),
+        studentNumber: Joi.string().required(),
+      },
+    },
   ],
 });
