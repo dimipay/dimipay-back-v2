@@ -12,18 +12,13 @@ export default createService({
       handler: getPaymentMethods,
       needAuth: true,
       path: "/method",
-      needPermission: true,
       description: "결제수단 목록을 조회합니다",
-      validateSchema: {
-        isCreditOnly: Joi.boolean().optional(),
-      },
     },
     {
       method: "post",
       handler: addGeneralPaymentmethod,
       needAuth: true,
       path: "/method",
-      needPermission: true,
       description: "카드 결제수단을 추가합니다",
       validateSchema: {
         cardNumber: Joi.string().required(),
@@ -36,7 +31,6 @@ export default createService({
       handler: createPrepaidCard,
       needAuth: true,
       path: "/create-prepaid",
-      needPermission: true,
       description: "선불카드를 생성합니다",
     },
   ],
