@@ -9,7 +9,7 @@ import {
 } from "express";
 import j2s from "joi-to-swagger";
 import { join as pathJoin } from "path";
-import { HTTPMethod } from "../types";
+import { HTTPMethod, ApiAuthType } from "../types";
 import { checkPermissions, validator } from "../middlewares";
 import swaggerUi from "swagger-ui-express";
 import defaultSwagger from "@src/resources/swagger/default-swagger.json";
@@ -26,7 +26,7 @@ export interface Route {
   handler: RequestHandler;
   validateSchema?: KeyValue<Joi.Schema>;
   needAuth: boolean;
-  needPermission: boolean;
+  permission?: ApiAuthType[];
 }
 
 // 임포트 된 서비스 (서비스 디렉토리 명 추가)
