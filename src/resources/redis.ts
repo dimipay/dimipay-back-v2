@@ -15,5 +15,5 @@ export async function loadRedis() {
 }
 
 export const key = {
-  smsCode: (phoneNumber: string) => `sms:${phoneNumber}`,
+  smsCode: (systemId: string) => `sms:${systemId}`,
 };
