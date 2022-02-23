@@ -8,3 +8,5 @@ export type Gender = typeof GenderValues[number];
 
 export const TokenTypeValues = ["REFRESH", "ACCESS"];
 export type TokenType = typeof TokenTypeValues[number];
+
+export type ApiAuthType = "Student" | "Teacher" | "Pos";

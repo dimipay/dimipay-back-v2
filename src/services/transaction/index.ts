@@ -11,7 +11,6 @@ export default createService({
       path: "/my",
       handler: controllers.getTransactionHistories,
       needAuth: true,
-      needPermission: false,
       validateSchema: {
         lastId: Joi.number().optional(),
         amount: Joi.number(),
@@ -22,7 +21,6 @@ export default createService({
       method: "get",
       path: "/monthly/year/:year/month/:month",
       needAuth: true,
-      needPermission: false,
     },
   ],
 });

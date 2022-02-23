@@ -10,7 +10,6 @@ export default createService({
       path: "/current",
       handler: controllers.getCurrentNotice,
       needAuth: false,
-      needPermission: false,
     },
   ],
 });

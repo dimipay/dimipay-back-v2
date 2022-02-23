@@ -17,16 +17,20 @@ const checkPermissions =
       );
     }
 
-    // 관리자 권한이 필요한 라우트에 접근하는데 권한이 없는 경우
-    // if (req.user?.userType !== "Administrator" && route.needPermission) {
-    //   throw new HttpException(
-    //     403,
-    //     "해당 라우트에 접근하기 위해 필요한 권한이 없습니다."
-    //   );
-    // }
-
-    // 모든 검사 통과
-    return next();
+    if (!route.permission) {
+      return next();
+    } else if (route.permission.includes("Pos") && !req.user && req.pos) {
+      return next();
+    } else if (route.permission.includes("Student") && !req.user.isTeacher) {
+      return next();
+    } else if (route.permission.includes("Teacher") && req.user.isTeacher) {
+      return next();
+    } else {
+      throw new HttpException(
+        403,
+        "해당 라우트에 접근하기 위해 필요한 권한이 없습니다."
+      );
+    }
   };
 
 export default checkPermissions;
