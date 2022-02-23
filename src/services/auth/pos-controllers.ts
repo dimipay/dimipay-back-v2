@@ -13,12 +13,14 @@ import { Prisma, User } from "@prisma/client";
 // 이 엔드포인트는 FaceSign 서비스에 등록되어,
 // 얼굴인증이 완료됐을 때 인증정보를 포함하여 호출됩니다
 export const faceSignResultListener = async (req: Request, res: Response) => {
+  // TODO
   // 1. 얼굴인증 결과를 데이터베이스에 저장
   // 2. 20초 후에 데이터베이스에서 삭제
   res.send();
 };
 
 export const getFaceSignResult = async (req: Request, res: Response) => {
+  // TODO
   // 1. 얼굴인증 결과를 데이터베이스에서 조회
   // 2. 조회된 결과를 반환
   throw new HttpException(501, "NOT IMPLEMENTED");

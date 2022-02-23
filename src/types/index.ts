@@ -12,3 +12,9 @@ export const TokenTypeValues = ["REFRESH", "ACCESS"];
 export type TokenType = typeof TokenTypeValues[number];
 
 export type ReqWithBody<T> = Request<unknown, unknown, T>;
+
+export interface CardInfo {
+  cardNumber: string;
+  validMonth: number;
+  validYear: number;
+}

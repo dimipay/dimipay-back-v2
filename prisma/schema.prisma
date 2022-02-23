@@ -47,7 +47,7 @@ model PrepaidCard {
   id                       String                     @id @default(uuid())
   createdAt                DateTime                   @default(now())
   updatedAt                DateTime                   @default(now()) @updatedAt
-  balance                  Int
+  balance                  Int                        @default(0)
   paymentMethodId          String                     @unique
   paymentMethod            PaymentMethod              @relation("prepaidCard", fields: [paymentMethodId], references: [id])
   prepaidCardChargeHistory PrepaidCardChargeHistory[]
