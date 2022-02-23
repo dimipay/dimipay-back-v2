@@ -11,7 +11,6 @@ export default createService({
       handler: controllers.getMyInfo,
       description: "",
       needAuth: true,
-      needPermission: false,
     },
   ],
 });

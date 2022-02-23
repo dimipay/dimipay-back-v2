@@ -13,7 +13,7 @@ model User {
   id                  String          @id @default(uuid())
   systemId            String          @unique
   createdAt           DateTime        @default(now())
-  updatedAt           DateTime        @updatedAt
+  updatedAt           DateTime        @default(now()) @updatedAt
   isDisabled          Boolean         @default(false)
   accountName         String          @unique
   name                String
@@ -32,7 +32,7 @@ model User {
 model PaymentMethod {
   id          String            @id @default(uuid())
   createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
+  updatedAt   DateTime          @default(now()) @updatedAt
   type        PaymentMethodType
   color       String?
   name        String?
@@ -46,8 +46,8 @@ model PaymentMethod {
 model PrepaidCard {
   id                       String                     @id @default(uuid())
   createdAt                DateTime                   @default(now())
-  updatedAt                DateTime                   @updatedAt
-  balance                  Int
+  updatedAt                DateTime                   @default(now()) @updatedAt
+  balance                  Int                        @default(0)
   paymentMethodId          String                     @unique
   paymentMethod            PaymentMethod              @relation("prepaidCard", fields: [paymentMethodId], references: [id])
   prepaidCardChargeHistory PrepaidCardChargeHistory[]
@@ -56,7 +56,7 @@ model PrepaidCard {
 model PrepaidCardChargeHistory {
   id                  String            @id @default(uuid())
   createdAt           DateTime          @default(now())
-  updatedAt           DateTime          @updatedAt
+  updatedAt           DateTime          @default(now()) @updatedAt
   delta               Int
   status              TransactionStatus
   method              String
@@ -68,7 +68,7 @@ model PrepaidCardChargeHistory {
 model GeneralCard {
   id              String        @id @default(uuid())
   createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  updatedAt       DateTime      @default(now()) @updatedAt
   cardNumber      String
   validMonth      Int
   validYear       Int
@@ -80,7 +80,7 @@ model GeneralCard {
 model Coupon {
   id                String       @id @default(uuid())
   createdAt         DateTime     @default(now())
-  updatedAt         DateTime     @updatedAt
+  updatedAt         DateTime     @default(now()) @updatedAt
   name              String
   expiresAt         DateTime?
   amount            Int
@@ -95,7 +95,7 @@ model Coupon {
 model Transaction {
   id            String                 @id @default(uuid())
   createdAt     DateTime               @default(now())
-  updatedAt     DateTime               @updatedAt
+  updatedAt     DateTime               @default(now()) @updatedAt
   billingId     String
   totalPrice    Int
   status        Transaction_status
@@ -114,7 +114,7 @@ model Transaction {
 model Category {
   id               String           @id @default(uuid())
   createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @updatedAt
+  updatedAt        DateTime         @default(now()) @updatedAt
   name             String
   color            String
   discountPolicyId String?
@@ -125,7 +125,7 @@ model Category {
 model Product {
   id                      String            @id @default(uuid())
   createdAt               DateTime          @default(now())
-  updatedAt               DateTime          @updatedAt
+  updatedAt               DateTime          @default(now()) @updatedAt
   name                    String
   barcode                 String?
   price                   Int
@@ -141,7 +141,7 @@ model Product {
 model ProductInOutLog {
   id        String   @id @default(uuid())
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime @default(now()) @updatedAt
   delta     Int
   message   String?
   productId String
@@ -151,7 +151,7 @@ model ProductInOutLog {
 model DiscountPolicy {
   id              String     @id
   createdAt       DateTime   @default(now())
-  updatedAt       DateTime
+  updatedAt       DateTime   @default(now())
   endsAt          DateTime?
   fixedPrice      Int?
   percentRate     Int?
@@ -163,19 +163,18 @@ model DiscountPolicy {
 }
 
 model PosDevice {
-  id                 String        @id
-  createdAt          DateTime      @default(now())
-  updatedAt          DateTime
-  name               String
-  disabled           Boolean       @default(false)
-  enabledAuthMethods AuthMethod
-  transaction        Transaction[]
+  id          String        @id
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @default(now())
+  name        String
+  disabled    Boolean       @default(false)
+  transaction Transaction[]
 }
 
 model Event {
   id               String           @id
   createdAt        DateTime         @default(now())
-  updatedAt        DateTime
+  updatedAt        DateTime         @default(now())
   content          String
   url              String
   discountPolicies DiscountPolicy[]
@@ -184,7 +183,7 @@ model Event {
 model Notice {
   id          String    @id
   createdAt   DateTime  @default(now())
-  updatedAt   DateTime
+  updatedAt   DateTime  @default(now())
   startsAt    DateTime  @default(now())
   endsAt      DateTime?
   title       String
@@ -197,7 +196,7 @@ model Notice {
 model AdminAccount {
   id                   String   @id
   createdAt            DateTime @default(now())
-  updatedAt            DateTime
+  updatedAt            DateTime @default(now())
   relatedUser          User?    @relation(fields: [relatedUserSystemUid], references: [systemId])
   relatedUserSystemUid String?  @unique
   username             String
@@ -250,12 +249,6 @@ enum TransactionStatus {
   CONFIRMED
   CANCELED
   ERROR
-}
-
-enum AuthMethod {
-  SMS
-  APP_QR
-  FACESIGN
 }
 
 enum Transaction_status {
