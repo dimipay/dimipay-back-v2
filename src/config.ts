@@ -5,7 +5,7 @@ if (!env) throw new Error(".env file not exist");
 
 const config = {
   redisUri: process.env.REDIS_URI,
-  port: process.env.SERVER_PORT!,
+  port: process.env.PORT!,
   jwtSecret: process.env.JWT_SECRET!,
 
   notionToken: process.env.NOTION_TOKEN!,
