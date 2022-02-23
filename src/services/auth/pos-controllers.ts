@@ -61,37 +61,43 @@ export const requestSmsVerification = async (req: Request, res: Response) => {
   const body: {
     studentNumber: string;
     pin: string;
-    phoneNumber?: string;
   } = req.body;
 
   try {
     const user = await prisma.user.findFirst({
       where: { studentNumber: body.studentNumber },
+      select: {
+        phoneNumber: true,
+        isDisabled: true,
+        paymentPin: true,
+        systemId: true,
+      },
     });
 
-    if (!user) {
-      throw new HttpException(400, "학번이 올바르지 않습니다.");
-    } else if (user.isDisabled) {
-      throw new HttpException(400, "휴면 계정입니다.");
-    } else if (!user.paymentPin) {
-      throw new HttpException(400, "pin이 설정되지 않았습니다.");
-    } else if (bcrypt.compareSync(body.pin, user.paymentPin)) {
-      body.phoneNumber = user.phoneNumber;
-    }
+    if (!user) throw new HttpException(400, "학번이 올바르지 않습니다.");
+    if (user.isDisabled) throw new HttpException(400, "비활성화된 계정입니다.");
+    if (!user.paymentPin)
+      throw new HttpException(400, "결제비밀번호가 설정되지 않았습니다.");
 
-    if (!body.phoneNumber) {
-      return res.status(400).json({
-        isValid: false,
-        message:
-          "디미페이에 전화번호가 등록되지 않았어요. 앱에서 전화번호를 등록하고 다시 시도해주세요.",
-      });
-    }
+    const isPinWrong = !bcrypt.compareSync(body.pin, user.paymentPin);
+    if (isPinWrong) throw new HttpException(400, "비밀번호가 올바르지 않아요");
 
-    const otp = Math.floor(Math.random() * 10000);
-    await sendSms(body.phoneNumber, `[디미페이] 현장결제 인증번호 ${otp}`);
+    const { phoneNumber } = user;
 
-    const maskStartIndex = body.phoneNumber.length - 7;
-    const maskEndIndex = body.phoneNumber.length - 2;
+    if (!phoneNumber)
+      throw new HttpException(
+        400,
+        "문자인증이 비활성화되어있어요. 앱에서 문자인증을 설정해주세요."
+      );
+
+    const otp = Math.floor(Math.random() * 10000)
+      .toString()
+      .padStart(4, "0");
+
+    await sendSms(user.phoneNumber, `[디미페이] 현장결제 인증번호 ${otp}`);
+
+    const maskStartIndex = phoneNumber.length - 7;
+    const maskEndIndex = phoneNumber.length - 2;
 
     // 주의! 마스킹 로직을 변경할 때에는 한/중/일/몽의 전화번호 형식을 고려해주세요
 
@@ -99,23 +105,21 @@ export const requestSmsVerification = async (req: Request, res: Response) => {
     // "+976 7007-1020" -> "+976 70**-**20"
 
     const maskedPhoneNumber = [
-      ...body.phoneNumber.slice(0, maskStartIndex),
-      ...body.phoneNumber
-        .slice(maskStartIndex, maskEndIndex)
-        .replace(/[0-9]/g, "*"),
-      ...body.phoneNumber.slice(maskEndIndex),
+      ...phoneNumber.slice(0, maskStartIndex),
+      ...phoneNumber.slice(maskStartIndex, maskEndIndex).replace(/[0-9]/g, "*"),
+      ...phoneNumber.slice(maskEndIndex),
     ].join("");
 
-    const redis = await loadRedis();
-    const redisKey = key.smsCode(req.user.systemId);
-    await redis.set(redisKey, bcrypt.hashSync(otp.toString(), 10));
-    redis.expire(redisKey, 64);
-
-    return res.json({
+    res.json({
       isValid: true,
       maskedPhoneNumber,
       timeLimitSeconds: 60,
     });
+
+    const redis = await loadRedis();
+    const redisKey = key.smsCode(user.systemId);
+    await redis.set(redisKey, bcrypt.hashSync(otp.toString(), 10));
+    await redis.expire(redisKey, 64);
   } catch (e) {
     if (e.status) {
       if (e instanceof HttpException) throw e;
