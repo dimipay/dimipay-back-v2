@@ -43,32 +43,19 @@ export const issueCustomToken = (
   });
 };
 
-export const issue = async (identity: Partial<User>, refresh: boolean) => {
-  if (refresh) {
-    const token = await jwt.sign(
-      {
-        identity: {
-          id: identity.id,
-        },
-        refresh: true,
-      },
-      config.jwtSecret as string,
-      {
-        algorithm: "HS512",
-        expiresIn: "1y",
-      }
-    );
-    return token;
-  }
+export const issue = async (
+  identity: { id: string; systemId?: string },
+  refresh: boolean
+) => {
   const token = await jwt.sign(
     {
       identity,
-      refresh: false,
+      refresh,
     },
     config.jwtSecret as string,
     {
       algorithm: "HS512",
-      expiresIn: "1w",
+      expiresIn: "1y",
     }
   );
   return token;
