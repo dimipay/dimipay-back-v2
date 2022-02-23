@@ -18,3 +18,5 @@ export interface CardInfo {
   validMonth: number;
   validYear: number;
 }
+
+export type ApiAuthType = "Student" | "Teacher" | "Pos";
