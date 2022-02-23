@@ -74,20 +74,25 @@ export const requestSmsVerification = async (req: Request, res: Response) => {
       },
     });
 
-    if (!user) throw new HttpException(400, "학번이 올바르지 않습니다.");
-    if (user.isDisabled) throw new HttpException(400, "비활성화된 계정입니다.");
+    if (!user) throw new HttpException(400, "일치하는 학번을 찾을 수 없어요");
+    if (user.isDisabled)
+      throw new HttpException(
+        400,
+        "비활성화된 계정입니다. 관리자에게 문의해주세요."
+      );
     if (!user.paymentPin)
       throw new HttpException(400, "결제비밀번호가 설정되지 않았습니다.");
 
     const isPinWrong = !bcrypt.compareSync(body.pin, user.paymentPin);
-    if (isPinWrong) throw new HttpException(400, "비밀번호가 올바르지 않아요");
+    if (isPinWrong)
+      throw new HttpException(400, "결제비밀번호가 올바르지 않아요");
 
     const { phoneNumber } = user;
 
     if (!phoneNumber)
       throw new HttpException(
         400,
-        "문자인증이 비활성화되어있어요. 앱에서 문자인증을 설정해주세요."
+        "문자인증이 비활성화되어있어요, 앱에서 문자인증을 설정해야 사용할 수 있어요."
       );
 
     const otp = Math.floor(Math.random() * 10000)
