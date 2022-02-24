@@ -27,9 +27,9 @@ export default createService({
       needAuth: true,
       permission: ["Teacher"],
       validateSchema: {
-        name: Joi.string().required(),
-        to: Joi.array().items(Joi.string().required()).required(),
-        amount: Joi.number().required(),
+        name: Joi.string(),
+        to: Joi.array().items(Joi.string().required()).min(1).required(),
+        amount: Joi.number().min(300).required(),
         expiresAt: Joi.date(),
       },
     },
