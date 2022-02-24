@@ -25,7 +25,7 @@ export const createPosTokenFromKey = async (req: Request, res: Response) => {
     const redisKey = "reg_pos";
 
     const redis = await loadRedis();
-    const [posId, keyHash] = await (await redis.get(redisKey)).split(":");
+    const [posId, keyHash] = (await redis.get(redisKey)).split(":");
     const pos = await prisma.posDevice.findFirst({ where: { id: posId } });
 
     if (!bcrypt.compare(authKey, keyHash)) {
