@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { verify as veriToken, getTokenType } from "@src/resources";
 import { HttpException } from "@src/exceptions";
+import { prisma } from "@src/resources";
 
 const attachIdentity = async (
   req: Request,
@@ -17,8 +18,14 @@ const attachIdentity = async (
     }
     const identity = await veriToken(token);
     if (identity) {
-      if (identity.systemId) req.user = identity;
-      else req.pos = identity;
+      if (identity.systemId)
+        req.user = await prisma.user.findFirst({
+          where: { systemId: identity.systemId },
+        });
+      else
+        req.pos = await prisma.posDevice.findFirst({
+          where: { id: identity.id },
+        });
     }
     next();
   } catch (e) {
