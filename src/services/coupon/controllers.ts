@@ -49,13 +49,13 @@ export const purchaseCoupon = async (
           where: {
             systemId,
           },
+          select: { id: true },
         })
       )
     );
 
-    if (!receivers.every(Boolean)) {
+    if (!receivers.every(Boolean))
       throw new HttpException(400, "쿠폰의 수신자가 올바르지 않아요");
-    }
 
     const coupons: Prisma.CouponCreateManyInput[] = to.map((systemId) => ({
       name,
