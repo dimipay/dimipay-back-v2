@@ -1,5 +1,6 @@
 import { prisma } from "@src/resources";
 import { Request, Response } from "express";
+import { HttpException } from "@src/exceptions";
 
 export const getMyInfo = async (req: Request, res: Response) => {
   const user = await prisma.user.findFirst({
@@ -21,4 +22,27 @@ export const getMyInfo = async (req: Request, res: Response) => {
   });
 
   return res.json({ me: user });
+};
+
+export const getUserbySearch = async (req: Request, res: Response) => {
+  try {
+    res.json(
+      await prisma.user.findMany({
+        where: {
+          OR: [
+            { name: { contains: req.params.search } },
+            { studentNumber: { startsWith: req.params.search } },
+          ],
+        },
+        select: {
+          systemId: true,
+          studentNumber: true,
+          name: true,
+        },
+        take: 5,
+      })
+    );
+  } catch (e) {
+    throw new HttpException(400, e);
+  }
 };
