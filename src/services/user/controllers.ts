@@ -30,7 +30,7 @@ export const getUserbySearch = async (req: Request, res: Response) => {
       await prisma.user.findMany({
         where: {
           OR: [
-            { name: { startsWith: req.params.search } },
+            { name: { contains: req.params.search } },
             { studentNumber: { startsWith: req.params.search } },
           ],
         },
@@ -39,6 +39,7 @@ export const getUserbySearch = async (req: Request, res: Response) => {
           studentNumber: true,
           name: true,
         },
+        take: 5,
       })
     );
   } catch (e) {
