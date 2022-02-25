@@ -12,5 +12,12 @@ export default createService({
       description: "",
       needAuth: true,
     },
+    {
+      method: "get",
+      path: "/search/:search",
+      handler: controllers.getUserbySearch,
+      description: "",
+      needAuth: true,
+    },
   ],
 });
