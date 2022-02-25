@@ -30,7 +30,6 @@ export const identifyUser = async (req: Request, res: Response) => {
     if (status !== 200 || !apiData) {
       throw new HttpException(403, "아이디 혹은 비밀번호가 올바르지 않습니다.");
     }
-    console.log(apiData);
     const mappedUser: Prisma.UserCreateInput = {
       accountName: apiData.username,
       name: apiData.name,
@@ -83,7 +82,7 @@ export const identifyUser = async (req: Request, res: Response) => {
       throw new HttpException(e.status, e.message);
     }
 
-    throw new HttpException(400, e);
+    throw new HttpException(400, "리프레시 토큰이 아닙니다.");
   }
 };
 
