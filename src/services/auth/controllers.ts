@@ -30,7 +30,7 @@ export const identifyUser = async (req: Request, res: Response) => {
     if (status !== 200 || !apiData) {
       throw new HttpException(403, "아이디 혹은 비밀번호가 올바르지 않습니다.");
     }
-
+    console.log(apiData);
     const mappedUser: Prisma.UserCreateInput = {
       accountName: apiData.username,
       name: apiData.name,
@@ -38,8 +38,10 @@ export const identifyUser = async (req: Request, res: Response) => {
       studentNumber: apiData.studentNumber,
       systemId: apiData.id.toString(),
       isTeacher: ["D", "T"].includes(apiData.user_type),
-      phoneNumber: apiData.phone.startsWith("01")
-        ? "+82 " + apiData.phone.slice(1)
+      phoneNumber: apiData.phone
+        ? apiData.phone.startsWith("01")
+          ? "+82 " + apiData.phone.slice(1)
+          : null
         : null,
     };
 
@@ -81,7 +83,7 @@ export const identifyUser = async (req: Request, res: Response) => {
       throw new HttpException(e.status, e.message);
     }
 
-    throw new HttpException(400, "로그인할 수 없습니다.");
+    throw new HttpException(400, e);
   }
 };
 
