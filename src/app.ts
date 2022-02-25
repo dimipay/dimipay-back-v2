@@ -6,7 +6,7 @@ import cors from "cors";
 
 import { httpLogStream } from "@src/resources";
 import { serviceDocsRouter, serviceRouter, serviceSwaggerUi } from "./services";
-import { attachIdentity } from "./middlewares";
+import { attachIdentity, errorProcessingMiddleware } from "./middlewares";
 import { HttpException } from "./exceptions";
 
 class App {
@@ -24,21 +24,7 @@ class App {
     this.app.use("/api-docs", serviceSwaggerUi);
   }
   private errorProcessingMiddleware() {
-    this.app.use(
-      "/",
-      (err: unknown, req: Request, res: Response, next: NextFunction) => {
-        if (err instanceof HttpException) {
-          return res.status(err.status).json({
-            message: err.message,
-            error: err.name,
-          });
-        }
-
-        res.status(500).json({
-          message: "알 수 없는 오류가 발생했어요",
-        });
-      }
-    );
+    this.app.use("/", errorProcessingMiddleware);
   }
   private initializeMiddlewares() {
     this.app.use(helmet());
