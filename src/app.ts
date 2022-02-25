@@ -1,12 +1,13 @@
-import express from "express";
+import express, { NextFunction, Request, Response } from "express";
 import bearerToken from "express-bearer-token";
 import morgan from "morgan";
 import helmet from "helmet";
 import cors from "cors";
 
-import { httpLogStream, logger } from "@src/resources";
+import { httpLogStream } from "@src/resources";
 import { serviceDocsRouter, serviceRouter, serviceSwaggerUi } from "./services";
-import { attachIdentity } from "./middlewares";
+import { attachIdentity, errorProcessingMiddleware } from "./middlewares";
+import { HttpException } from "./exceptions";
 
 class App {
   public app: express.Application;
@@ -15,11 +16,15 @@ class App {
     this.initializeMiddlewares(); // initialize middlewares
     this.initializeMorgan(); // initialize morgan
     this.initializeRouter(); // initialize router
+    this.errorProcessingMiddleware(); // error processing middleware
   }
   private initializeRouter() {
     this.app.use("/", serviceRouter);
     this.app.use("/docs", serviceDocsRouter);
     this.app.use("/api-docs", serviceSwaggerUi);
+  }
+  private errorProcessingMiddleware() {
+    this.app.use("/", errorProcessingMiddleware);
   }
   private initializeMiddlewares() {
     this.app.use(helmet());
