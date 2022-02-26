@@ -19,5 +19,12 @@ export default createService({
       description: "",
       needAuth: true,
     },
+    {
+      method: "get",
+      path: "/certkey",
+      handler: controllers.getUserCertkey,
+      description: "결제 요청에 필요한 인증키를 발급합니다.",
+      needAuth: true,
+    },
   ],
 });
