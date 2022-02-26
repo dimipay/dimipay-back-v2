@@ -1,6 +1,10 @@
 import Joi from "joi";
 import { createService } from "..";
-import { addGeneralPaymentmethod, getPaymentMethods } from "./controllers";
+import {
+  addGeneralPaymentmethod,
+  getPaymentMethods,
+  getPaymentToken,
+} from "./controllers";
 import { createPrepaidCard } from "./controllers/createPrepaidCard";
 
 export default createService({
@@ -32,6 +36,25 @@ export default createService({
       needAuth: true,
       path: "/create-prepaid",
       description: "선불카드를 생성합니다",
+    },
+    {
+      method: "post",
+      handler: getPaymentToken,
+      needAuth: true,
+      path: "/token",
+      description: "앱 결제를 위한 토큰을 생성합니다.",
+      permission: ["Student"],
+      validateSchema: {
+        token: Joi.string().required(),
+      },
+    },
+    {
+      method: "post",
+      handler: getPaymentToken,
+      needAuth: true,
+      path: "/approval",
+      description: "실 결제 승인을 요청합니다.",
+      permission: ["Pos"],
     },
   ],
 });
