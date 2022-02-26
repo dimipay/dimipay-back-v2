@@ -37,7 +37,7 @@ export const issueCustomToken = (
   payload: Record<string, string | number | undefined>,
   expires?: string
 ) => {
-  jwt.sign(payload, config.jwtSecret as string, {
+  return jwt.sign(payload, config.jwtSecret as string, {
     algorithm: "HS512",
     expiresIn: expires,
   });
