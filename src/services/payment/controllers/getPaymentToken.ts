@@ -1,10 +1,7 @@
 import { HttpException } from "@src/exceptions";
 import { prisma, issueCustomToken } from "@src/resources";
 import { Response, Request } from "express";
-import {
-  decryptPaymentToken,
-  encryptByPubkey,
-} from "dimipay-backend-crypto-engine";
+import { decryptPaymentToken, encrypt } from "dimipay-backend-crypto-engine";
 import bcrypt from "bcrypt";
 
 export const getPaymentToken = async (req: Request, res: Response) => {
@@ -25,8 +22,9 @@ export const getPaymentToken = async (req: Request, res: Response) => {
     }
 
     return res.json({
-      approvalToken: encryptByPubkey(
-        issueCustomToken({ systemId: token.systemId }, "3min")
+      approvalToken: issueCustomToken(
+        { a: [token.systemId, token.paymentMethod] },
+        "3min"
       ),
     });
   } catch (e) {
