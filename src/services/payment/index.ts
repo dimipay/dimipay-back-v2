@@ -4,6 +4,7 @@ import {
   addGeneralPaymentmethod,
   getPaymentMethods,
   getPaymentToken,
+  paymentApproval,
 } from "./controllers";
 import { createPrepaidCard } from "./controllers/createPrepaidCard";
 
@@ -50,7 +51,7 @@ export default createService({
     },
     {
       method: "post",
-      handler: getPaymentToken,
+      handler: paymentApproval,
       needAuth: true,
       path: "/approval",
       description: "실 결제 승인을 요청합니다.",
