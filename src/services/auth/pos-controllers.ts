@@ -161,9 +161,16 @@ export const validateSmsVerification = async (req: Request, res: Response) => {
     const isValid = bcrypt.compareSync(body.smsCode, redisValue);
 
     if (isValid) {
+      const { id } = await prisma.paymentMethod.findFirst({
+        where: {
+          ownerId: user.systemId,
+          type: "PREPAID",
+        },
+      });
+
       return res.json({
         isValid,
-        // 결제 qr Token 규격이 확정되면 여기에 들어갑니다.
+        approvalToken: issueCustomToken({ a: [user.systemId, id] }, "3min"),
       });
     } else {
       return res.status(400).json({

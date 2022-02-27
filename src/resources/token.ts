@@ -34,10 +34,10 @@ export const verify = async (token: string) => {
 };
 
 export const issueCustomToken = (
-  payload: Record<string, string | number | undefined>,
+  payload: string | object | Buffer,
   expires?: string
 ) => {
-  jwt.sign(payload, config.jwtSecret as string, {
+  return jwt.sign(payload, config.jwtSecret as string, {
     algorithm: "HS512",
     expiresIn: expires,
   });
