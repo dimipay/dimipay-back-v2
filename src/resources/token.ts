@@ -34,7 +34,7 @@ export const verify = async (token: string) => {
 };
 
 export const issueCustomToken = (
-  payload: Record<string, string | number | undefined>,
+  payload: string | object | Buffer,
   expires?: string
 ) => {
   return jwt.sign(payload, config.jwtSecret as string, {
