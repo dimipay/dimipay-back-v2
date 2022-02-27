@@ -1,6 +1,8 @@
 import { prisma } from "@src/resources";
 import { Request, Response } from "express";
 import { HttpException } from "@src/exceptions";
+import { genPubKey, decrypt } from "dimipay-backend-crypto-engine";
+import { User } from "@prisma/client";
 
 export const getMyInfo = async (req: Request, res: Response) => {
   const user = await prisma.user.findFirst({
@@ -44,5 +46,13 @@ export const getUserbySearch = async (req: Request, res: Response) => {
     );
   } catch (e) {
     throw new HttpException(400, e);
+  }
+};
+
+export const getUserCertkey = async (req: Request, res: Response) => {
+  try {
+    return res.json({ certkey: genPubKey<User>(req.user) });
+  } catch (e) {
+    throw new HttpException(400, "결제 키 생성 실패");
   }
 };
