@@ -77,12 +77,7 @@ export const identifyUser = async (req: Request, res: Response) => {
       isFirstVisit: true,
     });
   } catch (e) {
-    if (e.status) {
-      if (e instanceof HttpException) throw e;
-      throw new HttpException(e.status, e.message);
-    }
-
-    throw new HttpException(400, "리프레시 토큰이 아닙니다.");
+    throw new HttpException(e.status, e.message);
   }
 };
 
