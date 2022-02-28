@@ -9,14 +9,14 @@ export default createService({
       method: "get",
       path: "/me",
       handler: controllers.getMyInfo,
-      description: "",
+      description: "내 정보 조회",
       needAuth: true,
     },
     {
       method: "get",
       path: "/search/:search",
       handler: controllers.getUserbySearch,
-      description: "",
+      description: "키워드로 사용자 검색",
       needAuth: true,
     },
     {
@@ -25,6 +25,7 @@ export default createService({
       handler: controllers.getUserCertkey,
       description: "결제 요청에 필요한 인증키를 발급합니다.",
       needAuth: true,
+      permission: ["Student", "Teacher"],
     },
     {
       method: "post",
