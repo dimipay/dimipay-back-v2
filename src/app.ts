@@ -7,7 +7,6 @@ import cors from "cors";
 import { httpLogStream } from "@src/resources";
 import { serviceDocsRouter, serviceRouter, serviceSwaggerUi } from "./services";
 import { attachIdentity, errorProcessingMiddleware } from "./middlewares";
-import { HttpException } from "./exceptions";
 
 class App {
   public app: express.Application;
@@ -24,7 +23,7 @@ class App {
     this.app.use("/api-docs", serviceSwaggerUi);
   }
   private errorProcessingMiddleware() {
-    this.app.use("/", errorProcessingMiddleware);
+    this.app.use(errorProcessingMiddleware);
   }
   private initializeMiddlewares() {
     this.app.use(helmet());
