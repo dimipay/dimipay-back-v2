@@ -29,7 +29,7 @@ export default createService({
     },
     {
       method: "post",
-      path: "/approvalToken",
+      path: "/approval-token",
       handler: controllers.getUserbyApprovalToken,
       description: "결제에 필요한 유저 정보를 반환합니다.",
       needAuth: true,
