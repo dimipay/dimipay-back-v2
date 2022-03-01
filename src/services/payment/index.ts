@@ -3,7 +3,7 @@ import { createService } from "..";
 import {
   addGeneralPaymentmethod,
   getPaymentMethods,
-  getPaymentToken,
+  getApprovalToken,
   paymentApproval,
 } from "./controllers";
 import { createPrepaidCard } from "./controllers/createPrepaidCard";
@@ -40,7 +40,7 @@ export default createService({
     },
     {
       method: "post",
-      handler: getPaymentToken,
+      handler: getApprovalToken,
       needAuth: true,
       path: "/token",
       description: "앱 결제를 위한 토큰을 생성합니다.",

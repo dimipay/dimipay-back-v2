@@ -4,10 +4,10 @@ import { Response, Request } from "express";
 import { decryptPaymentToken, encrypt } from "dimipay-backend-crypto-engine";
 import bcrypt from "bcrypt";
 
-export const getPaymentToken = async (req: Request, res: Response) => {
+export const getApprovalToken = async (req: Request, res: Response) => {
   try {
     const { token: encryptedToken } = req.body;
-    const { authMethod, ...token } = decryptPaymentToken(encryptedToken);
+    const { authMethod, ...token } = decryptPaymentToken(encryptedToken); //paymentToken은 Client에서 생성.
 
     if (authMethod === "PIN") {
       const user = await prisma.user.findUnique({

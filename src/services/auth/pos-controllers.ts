@@ -50,6 +50,7 @@ export const getPinMatchedUser = async (req: Request, res: Response) => {
       ...matchedUser,
       succeed: true,
       paymentToken: issueCustomToken({
+        //paymentToken 명칭이 중복됩니다.
         userId: matchedUser.systemId,
         method: "FACESIGN_PIN_MATCH",
       }),
