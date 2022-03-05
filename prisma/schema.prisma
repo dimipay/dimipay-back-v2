@@ -149,7 +149,7 @@ model ProductInOutLog {
 }
 
 model DiscountPolicy {
-  id              String     @id
+  id              String     @id @default(uuid())
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @default(now())
   endsAt          DateTime?
@@ -163,7 +163,7 @@ model DiscountPolicy {
 }
 
 model PosDevice {
-  id          String        @id
+  id          String        @id @default(uuid())
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @default(now())
   name        String
@@ -172,7 +172,7 @@ model PosDevice {
 }
 
 model Event {
-  id               String           @id
+  id               String           @id @default(uuid())
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @default(now())
   content          String
@@ -181,7 +181,7 @@ model Event {
 }
 
 model Notice {
-  id          String    @id
+  id          String    @id @default(uuid())
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @default(now())
   startsAt    DateTime  @default(now())
@@ -194,7 +194,7 @@ model Notice {
 }
 
 model AdminAccount {
-  id                   String   @id
+  id                   String   @id @default(uuid())
   createdAt            DateTime @default(now())
   updatedAt            DateTime @default(now())
   relatedUser          User?    @relation(fields: [relatedUserSystemUid], references: [systemId])
