@@ -7,7 +7,18 @@ import { Request, Response } from "express";
 export const getRecivedCoupons = async (req: Request, res: Response) => {
   try {
     return res.json(
-      await prisma.coupon.findMany({ where: { receiverId: req.user.systemId } })
+      await prisma.coupon.findMany({
+        where: { receiverId: req.user.systemId },
+        include: {
+          issuer: {
+            select: {
+              name: true,
+              isTeacher: true,
+              systemId: true,
+            },
+          },
+        },
+      })
     );
   } catch (e) {
     throw new HttpException(400, "쿠폰을 조회하는 중 오류가 발생했습니다.");
@@ -17,7 +28,19 @@ export const getRecivedCoupons = async (req: Request, res: Response) => {
 export const getIssuedCoupons = async (req: Request, res: Response) => {
   try {
     return res.json(
-      await prisma.coupon.findMany({ where: { issuerId: req.user.systemId } })
+      await prisma.coupon.findMany({
+        where: { issuerId: req.user.systemId },
+        include: {
+          issuer: {
+            select: {
+              name: true,
+              isTeacher: true,
+              systemId: true,
+              studentNumber: true,
+            },
+          },
+        },
+      })
     );
   } catch (e) {
     throw new HttpException(400, "쿠폰을 조회하는 중 오류가 발생했습니다.");
