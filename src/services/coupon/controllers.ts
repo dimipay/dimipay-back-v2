@@ -31,7 +31,7 @@ export const getIssuedCoupons = async (req: Request, res: Response) => {
       await prisma.coupon.findMany({
         where: { issuerId: req.user.systemId },
         include: {
-          issuer: {
+          receiver: {
             select: {
               name: true,
               isTeacher: true,
