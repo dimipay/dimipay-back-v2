@@ -27,6 +27,7 @@ model User {
   paymentMethods      PaymentMethod[]
   paymentPin          String?
   phoneNumber         String?
+  notice              Notice[]
 }
 
 model PaymentMethod {
@@ -188,9 +189,9 @@ model Notice {
   endsAt      DateTime?
   title       String
   description String?
-  url         String
+  url         String?
   authorId    String
-  content     String    @db.LongText
+  author      User      @relation(fields: [authorId], references: [systemId])
 }
 
 model AdminAccount {
