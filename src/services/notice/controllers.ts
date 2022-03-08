@@ -6,18 +6,27 @@ export const getCurrentNotice = async (req: Request, res: Response) => {
   return res.json(
     await prisma.notice.findFirst({
       where: {
-        startsAt: {
-          lte: current,
-        },
-        endsAt: {
-          gte: current,
-        },
+        OR: [
+          {
+            startsAt: {
+              lte: current,
+            },
+            endsAt: {
+              gte: current,
+            },
+          },
+          {
+            startsAt: {
+              lte: current,
+            },
+            endsAt: null,
+          },
+        ],
       },
       select: {
         createdAt: true,
         title: true,
         description: true,
-        content: true,
       },
     })
   );
