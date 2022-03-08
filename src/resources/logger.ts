@@ -48,9 +48,9 @@ if (process.env.NODE_ENV !== "prod") {
   );
 } else {
   logger.on("data", ({ level, message, timestamp: time }) => {
-    if (!message.startsWith("[HttpException]")) {
-      notionLogger(level, message, new Date(time).toISOString());
-    }
+    // if (!message.startsWith("[HttpException]")) {
+    notionLogger(level, message, new Date(time).toISOString());
+    // }
   });
 }
 
