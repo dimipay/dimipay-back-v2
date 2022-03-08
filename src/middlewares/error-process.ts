@@ -1,4 +1,5 @@
 import { HttpException } from "@src/exceptions";
+import { logger } from "@src/resources";
 import { NextFunction, Request, Response } from "express";
 
 export const errorProcessingMiddleware = (
@@ -13,6 +14,8 @@ export const errorProcessingMiddleware = (
       error: err.name,
     });
   }
+
+  logger.error(`UNCATCHE_ERROR: ${err}`);
 
   res.status(500).json({
     message: "알 수 없는 오류가 발생했어요",
