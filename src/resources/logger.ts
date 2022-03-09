@@ -36,23 +36,19 @@ const logger = winston.createLogger({
   ],
 });
 
-if (process.env.NODE_ENV !== "prod") {
-  logger.add(
-    new winston.transports.Console({
-      level: "http",
-      format: winston.format.combine(
-        winston.format.colorize(),
-        winston.format.simple()
-      ),
-    })
-  );
-} else {
-  logger.on("data", ({ level, message, timestamp: time }) => {
-    // if (!message.startsWith("[HttpException]")) {
-    notionLogger(level, message, new Date(time).toISOString());
-    // }
-  });
-}
+logger.add(
+  new winston.transports.Console({
+    level: "http",
+    format: winston.format.combine(
+      winston.format.colorize(),
+      winston.format.simple()
+    ),
+  })
+);
+
+logger.on("data", ({ level, message, timestamp: time }) => {
+  notionLogger(level, message, new Date(time).toISOString());
+});
 
 const httpLogStream = {
   write: (message: string) => {
