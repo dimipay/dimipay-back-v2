@@ -55,7 +55,7 @@ export default createService({
     {
       method: "post",
       path: "/request-sms-code",
-      handler: posControllers.getPinMatchedUser,
+      handler: posControllers.requestSmsVerification,
       description: "인증번호를 발송합니다",
       needAuth: true,
       validateSchema: {
@@ -66,7 +66,7 @@ export default createService({
     {
       method: "post",
       path: "/validate-sms-code",
-      handler: posControllers.getPinMatchedUser,
+      handler: posControllers.validateSmsVerification,
       description: "인증번호를 확인합니다",
       needAuth: true,
       validateSchema: {
