@@ -22,6 +22,8 @@ const attachIdentity = async (
         req.user = await prisma.user.findFirst({
           where: { systemId: identity.systemId },
         });
+      if (req.user.isDisabled)
+        throw new HttpException(401, "사용 중지된 계정입니다.");
       else
         req.pos = await prisma.posDevice.findFirst({
           where: { id: identity.id },
