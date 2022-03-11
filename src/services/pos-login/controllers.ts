@@ -30,10 +30,17 @@ export const createPosTokenFromKey = async (req: Request, res: Response) => {
 
     if (!bcrypt.compare(passcode, keyHash)) {
       throw new HttpException(400, "로그인에 실패했습니다.");
-    } else if (!pos) {
+    }
+    if (!pos) {
       throw new HttpException(400, "등록되지 않은 단말기입니다.");
     }
-    res.json(await createTokens(pos));
+    if (pos.disabled) {
+      throw new HttpException(400, "사용이 중지된 단말기입니다");
+    }
+    res.json({
+      ...(await createTokens(pos)),
+      posName: pos.name,
+    });
   } catch (e) {}
 };
 
