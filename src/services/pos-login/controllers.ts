@@ -41,7 +41,9 @@ export const createPosTokenFromKey = async (req: Request, res: Response) => {
       ...(await createTokens(pos)),
       posName: pos.name,
     });
-  } catch (e) {}
+  } catch (e) {
+    throw new HttpException(e.status, e.message);
+  }
 };
 
 export const refreshPosToken = async (req: Request, res: Response) => {
@@ -60,5 +62,7 @@ export const refreshPosToken = async (req: Request, res: Response) => {
       where: { id: payload.id },
     });
     return res.json(await createTokens(identity));
-  } catch (e) {}
+  } catch (e) {
+    throw new HttpException(e.status, e.message);
+  }
 };
