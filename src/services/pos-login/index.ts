@@ -13,7 +13,7 @@ export default createService({
       handler: controllers.createPosTokenFromKey,
       needAuth: false,
       validateSchema: {
-        Authkey: Joi.string().required(),
+        passcode: Joi.string().required().length(4),
       },
       permission: ["Pos"],
     },

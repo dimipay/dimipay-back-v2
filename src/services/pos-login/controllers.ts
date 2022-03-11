@@ -21,14 +21,14 @@ const createTokens = async (pos: Partial<PosDevice>) => {
 
 export const createPosTokenFromKey = async (req: Request, res: Response) => {
   try {
-    const { authKey } = req.body;
+    const { passcode } = req.body;
     const redisKey = "reg_pos";
 
     const redis = await loadRedis();
     const [posId, keyHash] = (await redis.get(redisKey)).split(":");
     const pos = await prisma.posDevice.findFirst({ where: { id: posId } });
 
-    if (!bcrypt.compare(authKey, keyHash)) {
+    if (!bcrypt.compare(passcode, keyHash)) {
       throw new HttpException(400, "로그인에 실패했습니다.");
     } else if (!pos) {
       throw new HttpException(400, "등록되지 않은 단말기입니다.");
