@@ -25,7 +25,13 @@ export const createPosTokenFromKey = async (req: Request, res: Response) => {
     const redisKey = "reg_pos";
 
     const redis = await loadRedis();
-    const [posId, keyHash] = (await redis.get(redisKey)).split(":");
+    const registrationKey = await redis.get(redisKey);
+
+    if (!registrationKey) {
+      throw new HttpException(400, "로그인에 실패했습니다");
+    }
+
+    const [posId, keyHash] = registrationKey.split(":");
     const pos = await prisma.posDevice.findFirst({ where: { id: posId } });
 
     if (!bcrypt.compare(passcode, keyHash)) {
