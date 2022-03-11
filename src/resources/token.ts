@@ -10,7 +10,7 @@ export const getTokenType = async (token: string): Promise<TokenType> => {
     return payload.refresh ? "REFRESH" : "ACCESS";
   } catch (error) {
     if (error.name === "TokenExpiredError") {
-      throw new HttpException(401, "토큰이 만료되었습니다.");
+      throw new HttpException(418, "토큰이 만료되었습니다.");
     } else if (["jwt malformed", "invalid signature"].includes(error.message)) {
       throw new HttpException(401, "토큰이 변조되었습니다.");
     } else throw new HttpException(401, "토큰에 문제가 있습니다.");
