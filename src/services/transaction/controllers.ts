@@ -2,7 +2,7 @@ import { prisma } from "@src/resources";
 import { Request, Response } from "express";
 
 export const getTransactionHistories = async (req: Request, res: Response) => {
-  const transactions = await prisma.transaction.findFirst({
+  const transactions = await prisma.transaction.findMany({
     where: {
       userId: req.user.systemId,
     },
