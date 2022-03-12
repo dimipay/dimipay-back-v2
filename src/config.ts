@@ -20,7 +20,7 @@ const config = {
   navercloud: {
     smsServiceId: process.env.NAVER_SMS_API_SERVICE_ID!,
     smsUri: process.env.NAVER_SMS_API_URI!,
-    smsKey: process.env.NAVER_SMS_API_KEY!,
+    secretKey: process.env.NAVER_API_SECRET_KEY!,
     accessKey: process.env.NAVER_API_ACCESS_KEY!,
     smsSendingNumber: process.env.NAVER_SMS_SENDING_NUMBER!,
   },
