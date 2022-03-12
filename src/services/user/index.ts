@@ -1,5 +1,6 @@
 import * as controllers from "./controllers";
 import { createService } from "../index";
+import Joi from "joi";
 
 export default createService({
   name: "사용자 정보 서비스",
@@ -34,6 +35,9 @@ export default createService({
       description: "결제에 필요한 유저 정보를 반환합니다.",
       needAuth: true,
       permission: ["Pos"],
+      validateSchema: {
+        approvalToken: Joi.string().required(),
+      },
     },
   ],
 });
