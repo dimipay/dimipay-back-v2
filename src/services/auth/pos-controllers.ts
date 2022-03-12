@@ -145,6 +145,9 @@ export const validateSmsVerification = async (req: Request, res: Response) => {
 
     const user = await prisma.user.findFirst({
       where: { studentNumber: body.studentNumber },
+      include: {
+        receivedCoupons: true,
+      },
     });
     body.systemId = user.systemId;
 
@@ -171,6 +174,9 @@ export const validateSmsVerification = async (req: Request, res: Response) => {
       return res.json({
         isValid,
         approvalToken: issueCustomToken({ a: [user.systemId, id] }, "3min"),
+        username: user.name,
+        receivedCoupons: user.receivedCoupons,
+        profileImage: user.profileImage,
       });
     } else {
       return res.status(400).json({
