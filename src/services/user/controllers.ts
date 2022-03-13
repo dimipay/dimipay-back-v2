@@ -1,8 +1,9 @@
-import { prisma, verify } from "@src/resources";
+import { prisma, verify, loadRedis, key } from "@src/resources";
 import { Request, Response } from "express";
 import { HttpException } from "@src/exceptions";
 import { genPubKey, decrypt } from "dimipay-backend-crypto-engine";
 import { User } from "@prisma/client";
+import SHA3 from "sha3";
 
 export const getMyInfo = async (req: Request, res: Response) => {
   const user = await prisma.user.findFirst({
@@ -59,8 +60,19 @@ export const getUserCertkey = async (req: Request, res: Response) => {
 
 export const getUserbyApprovalToken = async (req: Request, res: Response) => {
   try {
-    const { a } = await verify(req.body.approvalToken);
-    const [systemId, paymentMethod] = a;
+    const { approvalCode } = req.body;
+
+    const hash = new SHA3(224);
+    const redis = await loadRedis();
+    const redisKey = key.approvalCode(
+      hash.update(hash.update(approvalCode).digest("hex")).digest("hex")
+    );
+    const redisValue = await redis.get(redisKey);
+    if (!redisValue) {
+      throw new HttpException(400, "유효하지 않거나 만료된 승인 코드입니다.");
+    }
+
+    const { systemId, paymentMethod } = JSON.parse(redisValue);
     const user = await prisma.user.findFirst({
       where: {
         systemId,
@@ -75,8 +87,7 @@ export const getUserbyApprovalToken = async (req: Request, res: Response) => {
       },
     });
 
-    if (!user.isDisabled)
-      throw new HttpException(400, "비활성화된 계정입니다.");
+    if (user.isDisabled) throw new HttpException(400, "비활성화된 계정입니다.");
     return res.json({ ...user, paymentMethod });
   } catch (e) {
     throw new HttpException(e.status, e.message);

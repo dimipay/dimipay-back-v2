@@ -36,7 +36,7 @@ export default createService({
       needAuth: true,
       permission: ["Pos"],
       validateSchema: {
-        approvalToken: Joi.string().required(),
+        approvalCode: Joi.string().required(),
       },
     },
   ],
