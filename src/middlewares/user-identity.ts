@@ -18,16 +18,16 @@ const attachIdentity = async (
     }
     const identity = await veriToken(token);
     if (identity) {
-      if (identity.systemId)
+      if (identity.systemId) {
         req.user = await prisma.user.findFirst({
           where: { systemId: identity.systemId },
         });
-      else
+      } else
         req.pos = await prisma.posDevice.findFirst({
           where: { id: identity.id },
         });
     }
-    next();
+    return next();
   } catch (e) {
     return next(e);
   }
