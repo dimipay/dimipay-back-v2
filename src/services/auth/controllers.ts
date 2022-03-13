@@ -21,14 +21,13 @@ const createTokensFromUser = async (user: Partial<User>) => {
 export const identifyUser = async (req: Request, res: Response) => {
   const body: LoginInfo = req.body;
   try {
-    if (body.username == body.password) {
-      throw new HttpException(400, "아이디와 비밀번호가 동일합니다.");
-    }
-
     const { apiData, status } = await getIdentity(body);
 
     if (status !== 200 || !apiData) {
       throw new HttpException(403, "아이디 혹은 비밀번호가 올바르지 않습니다.");
+    }
+    if (body.username == body.password) {
+      throw new HttpException(400, "아이디와 비밀번호가 동일합니다.");
     }
     const mappedUser: Prisma.UserCreateInput = {
       accountName: apiData.username,
@@ -56,12 +55,16 @@ export const identifyUser = async (req: Request, res: Response) => {
         profileImage: true,
         createdAt: true,
         updatedAt: true,
+        paymentPin: true,
       },
     });
     if (queriedUser) {
       if (queriedUser.paymentMethods.length)
         return res.json(await createTokensFromUser(queriedUser));
+      if (queriedUser.paymentPin)
+        return res.json(await createTokensFromUser(queriedUser));
 
+      // Payment method 미등록 사용자
       return res.status(201).json({
         ...(await createTokensFromUser(queriedUser)),
         isFirstVisit: true,
@@ -72,6 +75,7 @@ export const identifyUser = async (req: Request, res: Response) => {
       data: mappedUser,
     });
 
+    // 최초 등록 사용자
     return res.status(201).json({
       ...(await createTokensFromUser(user)),
       isFirstVisit: true,

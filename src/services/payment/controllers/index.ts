@@ -1,5 +1,6 @@
 export * from "./getPaymentMethods";
 export * from "./addGeneralPaymentMethod";
-export * from "./getPaymentToken";
+export * from "./getApprovalToken";
 export * from "./createPrepaidCard";
 export * from "./paymentApproval";
+export * from "./paymentPin";

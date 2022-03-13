@@ -17,4 +17,5 @@ export async function loadRedis() {
 
 export const key = {
   smsCode: (systemId: string) => `sms:${systemId}`,
+  approvalCode: (hashedCode: string) => `approval:${hashedCode}`,
 };

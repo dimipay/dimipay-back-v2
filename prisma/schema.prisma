@@ -176,7 +176,8 @@ model Event {
   id               String           @id @default(uuid())
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @default(now())
-  content          String
+  title            String
+  description      String
   url              String
   discountPolicies DiscountPolicy[]
 }
