@@ -22,10 +22,6 @@ export const identifyUser = async (req: Request, res: Response) => {
   const body: LoginInfo = req.body;
   try {
     const { apiData, status } = await getIdentity(body);
-
-    if (status !== 200 || !apiData) {
-      throw new HttpException(403, "아이디 혹은 비밀번호가 올바르지 않습니다.");
-    }
     if (body.username == body.password) {
       throw new HttpException(400, "아이디와 비밀번호가 동일합니다.");
     }
