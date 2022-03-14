@@ -64,8 +64,8 @@ export default createService({
       method: "post",
       handler: registerPaymentPin,
       needAuth: true,
-      path: "/register-pin",
-      description: "실 결제 승인을 요청합니다.",
+      path: "/pin",
+      description: "결제 비밀번호를 설정합니다.",
       permission: ["Student"],
       validateSchema: {
         paymentPin: Joi.string()
@@ -75,11 +75,11 @@ export default createService({
       },
     },
     {
-      method: "post",
+      method: "put",
       handler: resetPaymentPin,
       needAuth: true,
-      path: "/reset-pin",
-      description: "실 결제 승인을 요청합니다.",
+      path: "/pin",
+      description: "결제 비밀번호를 변경합니다.",
       permission: ["Student"],
       validateSchema: {
         originalPin: Joi.string()
