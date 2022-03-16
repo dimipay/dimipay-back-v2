@@ -10,6 +10,8 @@ const config = {
 
   notionToken: process.env.NOTION_TOKEN!,
   notionPageId: process.env.NOTION_PAGE_ID!,
+  cryptoAccessKey: process.env.DIMIPAY_CRYPTO_ACCESS_KEY!,
+  dimipayCrypto: process.env.DIMIPAY_CRYPTO_URL!,
 
   dimi: {
     baseUrl: process.env.DIMIAPI_BASEURL!,

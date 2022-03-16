@@ -1,7 +1,7 @@
 import { HttpException } from "@src/exceptions";
 import { prisma, issueCustomToken, loadRedis, key } from "@src/resources";
 import { Response, Request } from "express";
-import { decryptPaymentToken, encrypt } from "dimipay-backend-crypto-engine";
+import { paymentToken } from "@src/resources";
 import bcrypt from "bcrypt";
 import { csprng } from "@src/resources";
 import { dotcode } from "@src/resources/dotcode";
@@ -10,7 +10,9 @@ import SHA3 from "sha3";
 export const getApprovalToken = async (req: Request, res: Response) => {
   try {
     const { token: encryptedToken } = req.body;
-    const { authMethod, pin, ...token } = decryptPaymentToken(encryptedToken);
+    const { authMethod, pin, ...token } = await paymentToken.decrypt(
+      encryptedToken
+    );
 
     if (authMethod === "PIN") {
       const user = await prisma.user.findUnique({
