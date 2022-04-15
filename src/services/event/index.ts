@@ -7,9 +7,21 @@ export default createService({
   baseURL: "/event",
   routes: [
     {
-      handler: controllers.getEvents,
+      handler: controllers.getOngoingEvents,
       method: "get",
-      path: "/",
+      path: "/ongoing",
+      needAuth: true,
+    },
+    {
+      handler: controllers.getUpcommingEvents,
+      method: "get",
+      path: "/upcomming",
+      needAuth: true,
+    },
+    {
+      handler: controllers.getPastEvents,
+      method: "get",
+      path: "/past/:page",
       needAuth: true,
     },
   ],

@@ -153,7 +153,6 @@ model DiscountPolicy {
   id              String     @id @default(uuid())
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @default(now())
-  endsAt          DateTime?
   fixedPrice      Int?
   percentRate     Int?
   eventId         String?
@@ -176,6 +175,8 @@ model Event {
   id               String           @id @default(uuid())
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @default(now())
+  startsAt         DateTime?
+  endsAt           DateTime?
   title            String
   description      String
   url              String
@@ -240,6 +241,29 @@ model discountTargetProduct {
   @@unique([A, B], map: "_discountTargetProduct_AB_unique")
   @@index([B], map: "_discountTargetProduct_B_index")
   @@map("_discountTargetProduct")
+}
+
+model b706f91_ccb8_587b_8e35_bebfa84e341d_20220414051800_del {
+  id          String    @id
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @default(now())
+  endsAt      DateTime?
+  fixedPrice  Int?
+  percentRate Int?
+  eventId     String?
+
+  @@map("_6b706f91_ccb8_587b_8e35_bebfa84e341d_20220414051800_del")
+}
+
+model c916fc38_32bd_5db9_a322_a666ff0bc2e8_20220414051803_del {
+  id          String   @id
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now())
+  url         String
+  description String
+  title       String
+
+  @@map("_c916fc38_32bd_5db9_a322_a666ff0bc2e8_20220414051803_del")
 }
 
 enum PaymentMethodType {
