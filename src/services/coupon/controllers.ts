@@ -8,7 +8,22 @@ export const getRecivedCoupons = async (req: Request, res: Response) => {
   try {
     return res.json(
       await prisma.coupon.findMany({
-        where: { receiverId: req.user.systemId },
+        where: {
+          AND: [{
+            receiverId: req.user.systemId
+          },
+          {
+            OR: [
+              {
+                expiresAt: { gt: new Date() },
+              },
+              {
+                expiresAt: null,
+              }
+            ]
+          }
+        ]
+        },
         include: {
           issuer: {
             select: {
@@ -29,7 +44,22 @@ export const getIssuedCoupons = async (req: Request, res: Response) => {
   try {
     return res.json(
       await prisma.coupon.findMany({
-        where: { issuerId: req.user.systemId },
+        where: { 
+          AND: [{
+            issuerId: req.user.systemId
+          },
+          {
+            OR: [
+              {
+                expiresAt: { gt: new Date() },
+              },
+              {
+                expiresAt: null,
+              }
+            ]
+          }
+        ]
+        },
         include: {
           receiver: {
             select: {
