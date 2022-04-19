@@ -18,16 +18,28 @@ const attachIdentity = async (
     }
     const identity = await veriToken(token);
     if (identity) {
-      if (identity.systemId)
+      if (identity.systemId) {
         req.user = await prisma.user.findFirst({
           where: { systemId: identity.systemId },
         });
-      if (req.user.isDisabled)
-        throw new HttpException(401, "사용 중지된 계정입니다.");
-      else
+      }
+      if (req.user) {
+        if(req.user.isDisabled) {
+          throw new HttpException(401, "사용 중지된 계정입니다.");
+        }
+      }
+      else {
         req.pos = await prisma.posDevice.findFirst({
           where: { id: identity.id },
         });
+        if(req.pos) {
+          if(req.pos.disabled) {
+            throw new HttpException(401, "사용 중지된 POS입니다.");
+          }
+        } else {
+          throw new HttpException(401, "잘못된 AccessToken입니다.");
+        }
+      }
     }
     return next();
   } catch (e) {

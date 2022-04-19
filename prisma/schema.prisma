@@ -1,6 +1,6 @@
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["referentialIntegrity"]
+  previewFeatures = ["referentialIntegrity", "interactiveTransactions"]
 }
 
 datasource db {
@@ -94,20 +94,20 @@ model Coupon {
 }
 
 model Transaction {
-  id            String                 @id @default(uuid())
-  createdAt     DateTime               @default(now())
-  updatedAt     DateTime               @default(now()) @updatedAt
-  billingId     String
+  id            String                @id @default(uuid())
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @default(now()) @updatedAt
+  billingId     String?
   totalPrice    Int
   status        Transaction_status
   statusText    String?
-  authMethod    Transaction_authMethod
+  authMethod    TransactionAuthMethod
   usedCardId    String
   posDeviceId   String
   userId        String
-  user          User                   @relation(fields: [userId], references: [systemId])
-  posDevice     PosDevice              @relation(fields: [posDeviceId], references: [id])
-  paymentMethod PaymentMethod          @relation(fields: [usedCardId], references: [id])
+  user          User                  @relation(fields: [userId], references: [systemId])
+  posDevice     PosDevice             @relation(fields: [posDeviceId], references: [id])
+  paymentMethod PaymentMethod         @relation(fields: [usedCardId], references: [id])
   coupon        Coupon[]
   products      Product[]
 }
@@ -157,7 +157,7 @@ model DiscountPolicy {
   percentRate     Int?
   eventId         String?
   relatedEvent    Event?     @relation(fields: [eventId], references: [id])
-  taretCategory   Category[]
+  targetCategory  Category[]
   excludedProduct Product[]  @relation("discountExcludedProduct")
   targetProduct   Product[]  @relation("discountTargetProduct")
 }
@@ -243,29 +243,6 @@ model discountTargetProduct {
   @@map("_discountTargetProduct")
 }
 
-model b706f91_ccb8_587b_8e35_bebfa84e341d_20220414051800_del {
-  id          String    @id
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @default(now())
-  endsAt      DateTime?
-  fixedPrice  Int?
-  percentRate Int?
-  eventId     String?
-
-  @@map("_6b706f91_ccb8_587b_8e35_bebfa84e341d_20220414051800_del")
-}
-
-model c916fc38_32bd_5db9_a322_a666ff0bc2e8_20220414051803_del {
-  id          String   @id
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @default(now())
-  url         String
-  description String
-  title       String
-
-  @@map("_c916fc38_32bd_5db9_a322_a666ff0bc2e8_20220414051803_del")
-}
-
 enum PaymentMethodType {
   PREPAID
   GENERAL
@@ -274,17 +251,19 @@ enum PaymentMethodType {
 enum TransactionStatus {
   CONFIRMED
   CANCELED
+  PENDING
   ERROR
+}
+
+enum TransactionAuthMethod {
+  SMS
+  APP_QR
+  FACESIGN
 }
 
 enum Transaction_status {
   CONFIRMED
   CANCELED
+  PENDING
   ERROR
-}
-
-enum Transaction_authMethod {
-  SMS
-  APP_QR
-  FACESIGN
 }

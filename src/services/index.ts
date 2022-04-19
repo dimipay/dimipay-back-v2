@@ -207,7 +207,6 @@ const getSwaggerJson = async (req: Request, res: Response) => {
     ...defaultSwagger,
     ...createSwaggerDocs(importedServices),
   };
-  // console.log(swagger);
   return res.json(swagger);
 };
 
