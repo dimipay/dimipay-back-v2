@@ -124,7 +124,6 @@ export const purchaseCoupon = async (
 
     return res.sendStatus(201);
   } catch (e) {
-    console.log(e);
     if (e instanceof HttpException) throw e;
     throw new HttpException(400, "쿠폰을 구매하는 중 오류가 발생했습니다.");
   }
