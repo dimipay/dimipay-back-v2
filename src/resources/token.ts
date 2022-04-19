@@ -55,7 +55,7 @@ export const issue = async (
     config.jwtSecret as string,
     {
       algorithm: "HS512",
-      expiresIn: "1y",
+      expiresIn: refresh ? "1y" : "1d",
     }
   );
   return token;
