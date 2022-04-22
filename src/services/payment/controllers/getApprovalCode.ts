@@ -7,7 +7,7 @@ import { csprng } from "@src/resources";
 import { dotcode } from "@src/resources/dotcode";
 import SHA3 from "sha3";
 
-export const getApprovalToken = async (req: Request, res: Response) => {
+export const getApprovalCode = async (req: Request, res: Response) => {
   try {
     const { token: encryptedToken } = req.body;
     const { authMethod, pin, ...token } = await paymentToken.decrypt(

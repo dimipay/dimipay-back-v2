@@ -4,7 +4,7 @@ import createJoiError from "@src/resources/createJoiError";
 import { createService } from "..";
 import {
   addGeneralPaymentmethod,
-  getApprovalToken,
+  getApprovalCode,
   getPaymentMethods,
   paymentApproval,
 } from "./controllers";
@@ -43,10 +43,10 @@ export default createService({
     },
     {
       method: "post",
-      handler: getApprovalToken,
+      handler: getApprovalCode,
       needAuth: true,
       path: "/token",
-      description: "앱 결제를 위한 토큰을 생성합니다.",
+      description: "앱 결제를 위한 코드를 생성합니다.",
       permission: ["Student"],
       validateSchema: {
         token: Joi.string().required(),
