@@ -1,28 +1,30 @@
-import { Prisma, User } from "@prisma/client";
-import { HttpException } from "@src/exceptions";
-import { prisma } from "@src/resources";
-import { ReqWithBody } from "@src/types";
-import { Request, Response } from "express";
+import { Prisma, User } from '@prisma/client';
+import { HttpException } from '@src/exceptions';
+import { CouponPurchase, CouponPurchaseReqBody } from '@src/interfaces';
+import { prisma, paymentToken } from '@src/resources';
+import { ReqWithBody } from '@src/types';
+import { Request, Response } from 'express';
 
 export const getRecivedCoupons = async (req: Request, res: Response) => {
   try {
     return res.json(
       await prisma.coupon.findMany({
         where: {
-          AND: [{
-            receiverId: req.user.systemId
-          },
-          {
-            OR: [
-              {
-                expiresAt: { gt: new Date() },
-              },
-              {
-                expiresAt: null,
-              }
-            ]
-          }
-        ]
+          AND: [
+            {
+              receiverId: req.user.systemId,
+            },
+            {
+              OR: [
+                {
+                  expiresAt: { gt: new Date() },
+                },
+                {
+                  expiresAt: null,
+                },
+              ],
+            },
+          ],
         },
         include: {
           issuer: {
@@ -36,7 +38,7 @@ export const getRecivedCoupons = async (req: Request, res: Response) => {
       })
     );
   } catch (e) {
-    throw new HttpException(400, "쿠폰을 조회하는 중 오류가 발생했습니다.");
+    throw new HttpException(400, '쿠폰을 조회하는 중 오류가 발생했습니다.');
   }
 };
 
@@ -44,21 +46,22 @@ export const getIssuedCoupons = async (req: Request, res: Response) => {
   try {
     return res.json(
       await prisma.coupon.findMany({
-        where: { 
-          AND: [{
-            issuerId: req.user.systemId
-          },
-          {
-            OR: [
-              {
-                expiresAt: { gt: new Date() },
-              },
-              {
-                expiresAt: null,
-              }
-            ]
-          }
-        ]
+        where: {
+          AND: [
+            {
+              issuerId: req.user.systemId,
+            },
+            {
+              OR: [
+                {
+                  expiresAt: { gt: new Date() },
+                },
+                {
+                  expiresAt: null,
+                },
+              ],
+            },
+          ],
         },
         include: {
           receiver: {
@@ -73,27 +76,24 @@ export const getIssuedCoupons = async (req: Request, res: Response) => {
       })
     );
   } catch (e) {
-    throw new HttpException(400, "쿠폰을 조회하는 중 오류가 발생했습니다.");
+    throw new HttpException(400, '쿠폰을 조회하는 중 오류가 발생했습니다.');
   }
 };
 
 export const purchaseCoupon = async (
-  req: ReqWithBody<{
-    name?: string;
-    to: string[];
-    amount: number;
-    expiresAt?: string;
-  }>,
+  req: ReqWithBody<CouponPurchaseReqBody>,
   res: Response
 ) => {
   try {
-    const {
-      name = `${req.user.name} 선생님의 사랑`,
-      to,
-      amount,
-      expiresAt,
-    } = req.body;
+    const { purchaseToken, coupon } = req.body;
+    const { title, to, amount, expiresAt } = coupon;
+    const { purchaseType, paymentMethod } = await paymentToken.decrypt({
+      encryptedToken: purchaseToken,
+    });
 
+    if (purchaseType !== 'COUPON') {
+      throw new HttpException(400, '잘못된 구매 요청입니다.');
+    }
     // 여기에 PG 연동 함수가 들어갑니다.
 
     const receivers = await Promise.all(
@@ -108,10 +108,10 @@ export const purchaseCoupon = async (
     );
 
     if (!receivers.every(Boolean))
-      throw new HttpException(400, "쿠폰의 수신자가 올바르지 않아요");
+      throw new HttpException(400, '쿠폰의 수신자가 올바르지 않아요');
 
     const coupons: Prisma.CouponCreateManyInput[] = to.map((systemId) => ({
-      name,
+      name: title,
       amount,
       expiresAt,
       receiverId: systemId,
@@ -125,6 +125,6 @@ export const purchaseCoupon = async (
     return res.sendStatus(201);
   } catch (e) {
     if (e instanceof HttpException) throw e;
-    throw new HttpException(400, "쿠폰을 구매하는 중 오류가 발생했습니다.");
+    throw new HttpException(400, '쿠폰을 구매하는 중 오류가 발생했습니다.');
   }
 };
