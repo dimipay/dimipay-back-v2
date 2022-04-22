@@ -1,5 +1,4 @@
 import { prisma } from "@src/resources";
-import { ReqWithBody } from "@src/types";
 import { Request, Response } from "express";
 
 export const getPaymentMethods = async (req: Request, res: Response) => {

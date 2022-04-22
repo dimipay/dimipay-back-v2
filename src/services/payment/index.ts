@@ -1,4 +1,3 @@
-import { HttpException } from "@src/exceptions";
 import Joi from "joi";
 import createJoiError from "@src/resources/createJoiError";
 import { createService } from "..";

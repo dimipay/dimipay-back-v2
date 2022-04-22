@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import { User } from "@prisma/client";
-import config from "../config";
-import { HttpException } from "../exceptions";
+import config from "@src/config";
+import { HttpException } from "@src/exceptions";
 import { TokenType } from "../types";
 
 export const getTokenType = async (token: string): Promise<TokenType> => {

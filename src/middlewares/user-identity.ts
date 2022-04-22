@@ -24,16 +24,15 @@ const attachIdentity = async (
         });
       }
       if (req.user) {
-        if(req.user.isDisabled) {
+        if (req.user.isDisabled) {
           throw new HttpException(401, "사용 중지된 계정입니다.");
         }
-      }
-      else {
+      } else {
         req.pos = await prisma.posDevice.findFirst({
           where: { id: identity.id },
         });
-        if(req.pos) {
-          if(req.pos.disabled) {
+        if (req.pos) {
+          if (req.pos.disabled) {
             throw new HttpException(401, "사용 중지된 POS입니다.");
           }
         } else {

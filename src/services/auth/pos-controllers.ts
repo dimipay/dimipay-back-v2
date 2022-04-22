@@ -1,13 +1,13 @@
 import { Request, Response } from "express";
 import { HttpException } from "@src/exceptions";
 import bcrypt from "bcrypt";
-import { csprng } from "@src/resources";
 import {
   issueCustomToken,
   key,
   loadRedis,
   prisma,
   sendSms,
+  csprng,
 } from "@src/resources";
 import { Prisma, User } from "@prisma/client";
 

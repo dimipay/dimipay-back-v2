@@ -9,8 +9,8 @@ export const getOngoingEvents = async (req: Request, res: Response) => {
       await prisma.event.findMany({
         orderBy: [
           {
-            endsAt: 'asc',
-          }
+            endsAt: "asc",
+          },
         ],
         where: {
           OR: [
@@ -61,8 +61,8 @@ export const getUpcommingEvents = async (req: Request, res: Response) => {
       await prisma.event.findMany({
         orderBy: [
           {
-            startsAt: 'asc',
-          }
+            startsAt: "asc",
+          },
         ],
         where: {
           OR: [
@@ -97,8 +97,8 @@ export const getPastEvents = async (req: Request, res: Response) => {
         take: 3,
         orderBy: [
           {
-            endsAt: 'desc',
-          }
+            endsAt: "desc",
+          },
         ],
         where: {
           OR: [

@@ -46,7 +46,7 @@ logger.add(
   })
 );
 
-if(process.env.NODE_ENV === "prod") {
+if (process.env.NODE_ENV === "prod") {
   logger.on("data", ({ level, message, timestamp: time }) => {
     notionLogger(level, message, new Date(time).toISOString());
   });
