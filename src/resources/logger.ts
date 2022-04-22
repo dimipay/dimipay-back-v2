@@ -46,9 +46,11 @@ logger.add(
   })
 );
 
-logger.on("data", ({ level, message, timestamp: time }) => {
-  notionLogger(level, message, new Date(time).toISOString());
-});
+if(process.env.NODE_ENV === "prod") {
+  logger.on("data", ({ level, message, timestamp: time }) => {
+    notionLogger(level, message, new Date(time).toISOString());
+  });
+}
 
 const httpLogStream = {
   write: (message: string) => {
