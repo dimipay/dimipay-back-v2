@@ -8,6 +8,7 @@ import {
   SpecialPurchase,
 } from "@src/interfaces";
 import { TransactionException, HttpException } from "@src/exceptions";
+import product from "@src/services/product";
 
 export const approvePrepaidCard = async (
   paymentMethod: TransactionPaymentMethod,
@@ -333,18 +334,20 @@ export const specialPurchaseTransaction = async (
               id: user.id,
             },
           },
-          posDevice: {
-            connect: {
-              id: products.pos
-                ? products.pos.id
-                : "f280858f-c1e4-43da-b89d-49245b76b3da",
-            },
-          },
-          paymentMethod: {
-            connect: {
-              id: isCouponOnly ? "" : paymentMethod.id,
-            },
-          },
+          posDevice: products.pos
+            ? {
+                connect: {
+                  id: products.pos.id,
+                },
+              }
+            : undefined,
+          paymentMethod: isCouponOnly
+            ? undefined
+            : {
+                connect: {
+                  id: paymentMethod.id,
+                },
+              },
           coupon: {
             connect: usedCouponIds,
           },
