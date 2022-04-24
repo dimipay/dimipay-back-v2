@@ -19,7 +19,6 @@ export const getMyInfo = async (req: Request, res: Response) => {
       name: true,
       profileImage: true,
       studentNumber: true,
-      receivedCoupons: true,
       paymentMethods: true,
     },
   });
