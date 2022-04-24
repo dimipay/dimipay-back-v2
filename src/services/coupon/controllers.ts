@@ -10,7 +10,7 @@ import { ReqWithBody } from "@src/types";
 import { Request, Response } from "express";
 import { v4 as uuidv4 } from "uuid";
 
-export const getRecivedCoupons = async (req: Request, res: Response) => {
+export const getVaildReceivedCoupons = async (req: Request, res: Response) => {
   try {
     return res.json(
       await prisma.coupon.findMany({
@@ -28,6 +28,9 @@ export const getRecivedCoupons = async (req: Request, res: Response) => {
                   expiresAt: null,
                 },
               ],
+            },
+            {
+              usedTransactionId: null,
             },
           ],
         },
@@ -47,26 +50,36 @@ export const getRecivedCoupons = async (req: Request, res: Response) => {
   }
 };
 
+export const getAllReceivedCoupons = async (req: Request, res: Response) => {
+  try {
+    return res.json(
+      await prisma.coupon.findMany({
+        where: {
+          receiverId: req.user.systemId,
+        },
+        include: {
+          receiver: {
+            select: {
+              name: true,
+              isTeacher: true,
+              systemId: true,
+              studentNumber: true,
+            },
+          },
+        },
+      })
+    );
+  } catch (e) {
+    throw new HttpException(400, "쿠폰을 조회하는 중 오류가 발생했습니다.");
+  }
+};
+
 export const getIssuedCoupons = async (req: Request, res: Response) => {
   try {
     return res.json(
       await prisma.coupon.findMany({
         where: {
-          AND: [
-            {
-              issuerId: req.user.systemId,
-            },
-            {
-              OR: [
-                {
-                  expiresAt: { gt: new Date() },
-                },
-                {
-                  expiresAt: null,
-                },
-              ],
-            },
-          ],
+          issuerId: req.user.systemId,
         },
         include: {
           receiver: {

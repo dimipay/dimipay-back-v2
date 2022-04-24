@@ -8,10 +8,20 @@ export default createService({
   routes: [
     {
       method: "get",
-      path: "/",
-      handler: controllers.getRecivedCoupons,
+      path: "/all",
+      description:
+        "받은 전체 쿠폰을 조회합니다. (이미 사용된 쿠폰, 만료된 쿠폰 포함)",
+      handler: controllers.getAllReceivedCoupons,
       needAuth: true,
-      permission: ["Student"],
+      permission: ["Student", "Teacher"],
+    },
+    {
+      method: "get",
+      path: "/",
+      description: "현재 사용 가능한 쿠폰을 조회합니다.",
+      handler: controllers.getVaildReceivedCoupons,
+      needAuth: true,
+      permission: ["Student", "Teacher"],
     },
     {
       method: "get",
