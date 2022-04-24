@@ -278,7 +278,7 @@ export const useualPurchaseTransaction = async (
 
 export const specialPurchaseTransaction = async (
   userIdentity: ApprovalUserIdentity,
-  totalPrice: any,
+  totalPrice: number,
   products: SpecialPurchase,
   hasCoupons = true
 ) => {
@@ -333,18 +333,20 @@ export const specialPurchaseTransaction = async (
               id: user.id,
             },
           },
-          posDevice: {
-            connect: {
-              id: products.pos
-                ? products.pos.id
-                : "f280858f-c1e4-43da-b89d-49245b76b3da",
-            },
-          },
-          paymentMethod: {
-            connect: {
-              id: isCouponOnly ? "" : paymentMethod.id,
-            },
-          },
+          posDevice: products.pos
+            ? {
+                connect: {
+                  id: products.pos.id,
+                },
+              }
+            : undefined,
+          paymentMethod: isCouponOnly
+            ? {
+                connect: {
+                  id: paymentMethod.id,
+                },
+              }
+            : undefined,
           coupon: {
             connect: usedCouponIds,
           },

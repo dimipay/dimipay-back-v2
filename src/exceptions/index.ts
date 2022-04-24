@@ -24,7 +24,7 @@ export class TransactionException extends Error {
     message = "알 수 없는 거래 오류가 발생했습니다."
   ) {
     super(message);
-    this.name = "HttpException";
+    this.name = "TransactionException";
     this.status = status;
     this.message = message;
 
