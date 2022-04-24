@@ -27,7 +27,13 @@ export default createService({
       needAuth: true,
       permission: ["Teacher"],
       validateSchema: {
-        couponPurchaseToken: Joi.string().required(),
+        purchaseToken: Joi.string().required(),
+        coupon: Joi.object({
+          title: Joi.string(),
+          to: Joi.array().items(Joi.string()).required(),
+          amount: Joi.number().required(),
+          expiresAt: Joi.date(),
+        }),
       },
     },
   ],

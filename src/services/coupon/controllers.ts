@@ -1,9 +1,14 @@
-import { Prisma, User } from "@prisma/client";
+import { Prisma, TransactionAuthMethod, User } from "@prisma/client";
 import { HttpException } from "@src/exceptions";
-import { CouponPurchase, CouponPurchaseReqBody } from "@src/interfaces";
-import { prisma, paymentToken } from "@src/resources";
+import { CouponPurchaseReqBody } from "@src/interfaces";
+import {
+  prisma,
+  paymentToken,
+  specialPurchaseTransaction,
+} from "@src/resources";
 import { ReqWithBody } from "@src/types";
 import { Request, Response } from "express";
+import { v4 as uuidv4 } from "uuid";
 
 export const getRecivedCoupons = async (req: Request, res: Response) => {
   try {
@@ -94,37 +99,56 @@ export const purchaseCoupon = async (
     if (purchaseType !== "COUPON") {
       throw new HttpException(400, "잘못된 구매 요청입니다.");
     }
-    // 여기에 PG 연동 함수가 들어갑니다.
 
-    const receivers = await Promise.all(
-      to.map((systemId) =>
-        prisma.user.findUnique({
-          where: {
-            systemId,
-          },
-          select: { id: true },
-        })
-      )
-    );
+    const userIdentity = {
+      systemId: req.user.systemId,
+      paymentMethod,
+      authMethod: "INAPP" as TransactionAuthMethod,
+    };
 
-    if (!receivers.every(Boolean))
-      throw new HttpException(400, "쿠폰의 수신자가 올바르지 않아요");
+    const totalPrice = amount * to.length;
 
-    const coupons: Prisma.CouponCreateManyInput[] = to.map((systemId) => ({
-      name: title,
-      amount,
-      expiresAt,
-      receiverId: systemId,
-      issuerId: req.user.systemId,
-    }));
+    await prisma.$transaction(async (prisma) => {
+      const coupons: Prisma.CouponCreateManyInput[] = to.map((systemId) => ({
+        id: uuidv4(),
+        name: title,
+        amount,
+        expiresAt,
+        receiverId: systemId,
+        issuerId: req.user.systemId,
+      }));
 
-    await prisma.coupon.createMany({
-      data: coupons,
+      const purchaseId = coupons.map((coupon) => coupon.id);
+
+      await prisma.coupon.createMany({ data: coupons });
+
+      const transaction = await specialPurchaseTransaction(
+        userIdentity,
+        totalPrice,
+        {
+          purchaseId,
+          purchaseType,
+        },
+        false
+      );
+
+      const receivers = await Promise.all(
+        to.map((systemId) =>
+          prisma.user.findUnique({
+            where: {
+              systemId,
+            },
+            select: { id: true },
+          })
+        )
+      );
+
+      if (!receivers.every(Boolean))
+        throw new HttpException(400, "쿠폰의 수신자가 올바르지 않아요");
+
+      return res.json(transaction).status(201);
     });
-
-    return res.sendStatus(201);
   } catch (e) {
-    if (e instanceof HttpException) throw e;
-    throw new HttpException(400, "쿠폰을 구매하는 중 오류가 발생했습니다.");
+    throw new HttpException(400, e.message);
   }
 };
