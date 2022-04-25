@@ -1,12 +1,6 @@
 import axios from "axios";
 import config from "@src/config";
-import {
-  Message,
-  Cryptogram,
-  Pubkey,
-  EncryptedToken,
-  PaymentToken,
-} from "@src/interfaces";
+import { Message, Cryptogram, Pubkey, EncryptedToken } from "@src/interfaces";
 import { User } from "@prisma/client";
 import { HttpException } from "@src/exceptions";
 

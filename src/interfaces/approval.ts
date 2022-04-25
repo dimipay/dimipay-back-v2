@@ -3,6 +3,8 @@ import {
   Product,
   DiscountPolicy,
   Category,
+  PosDevice,
+  SpecialPurchaseType,
 } from "@prisma/client";
 
 export interface ApprovalProduct {
@@ -27,4 +29,15 @@ export interface ApprovalUserIdentity {
 export interface ApprovalOrder {
   products: ApprovalProduct[];
   userIdentity: ApprovalUserIdentity;
+}
+
+export interface UseualPurchase {
+  orderedProducts: ApprovalProduct[];
+  pos: PosDevice;
+}
+
+export interface SpecialPurchase {
+  purchaseId: string[];
+  purchaseType: SpecialPurchaseType;
+  pos?: PosDevice;
 }
