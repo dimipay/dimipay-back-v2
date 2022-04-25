@@ -279,7 +279,7 @@ export const useualPurchaseTransaction = async (
 
 export const specialPurchaseTransaction = async (
   userIdentity: ApprovalUserIdentity,
-  totalPrice: any,
+  totalPrice: number,
   products: SpecialPurchase,
   hasCoupons = true
 ) => {
