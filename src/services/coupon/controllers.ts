@@ -34,8 +34,11 @@ export const getVaildReceivedCoupons = async (req: Request, res: Response) => {
             },
           ],
         },
+        orderBy: {
+          createdAt: "desc",
+        },
         include: {
-          issuer: {
+          receiver: {
             select: {
               name: true,
               isTeacher: true,
@@ -56,6 +59,9 @@ export const getAllReceivedCoupons = async (req: Request, res: Response) => {
       await prisma.coupon.findMany({
         where: {
           receiverId: req.user.systemId,
+        },
+        orderBy: {
+          usedTransactionId: "asc",
         },
         include: {
           receiver: {
