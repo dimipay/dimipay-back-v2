@@ -1,14 +1,12 @@
-import { TransactionStatus, PosDevice, Coupon, Prisma } from "@prisma/client";
+import { TransactionStatus, Coupon, Prisma } from "@prisma/client";
 import { prisma } from "@src/resources";
 import {
   TransactionPaymentMethod,
   ApprovalUserIdentity,
-  ApprovalProduct,
   UseualPurchase,
   SpecialPurchase,
 } from "@src/interfaces";
 import { TransactionException, HttpException } from "@src/exceptions";
-import product from "@src/services/product";
 
 export const approvePrepaidCard = async (
   paymentMethod: TransactionPaymentMethod,

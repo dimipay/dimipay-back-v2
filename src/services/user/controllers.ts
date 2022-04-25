@@ -2,7 +2,6 @@ import { prisma, verify, loadRedis, key } from "@src/resources";
 import { Request, Response } from "express";
 import { HttpException } from "@src/exceptions";
 import { rsa } from "@src/resources";
-import { User } from "@prisma/client";
 import SHA3 from "sha3";
 
 export const getMyInfo = async (req: Request, res: Response) => {

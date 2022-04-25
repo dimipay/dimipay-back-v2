@@ -9,7 +9,6 @@ import {
   sendSms,
   csprng,
 } from "@src/resources";
-import { Prisma, User } from "@prisma/client";
 
 // 이 엔드포인트는 FaceSign 서비스에 등록되어,
 // 얼굴인증이 완료됐을 때 인증정보를 포함하여 호출됩니다
