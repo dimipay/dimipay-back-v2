@@ -1,10 +1,10 @@
 FROM node:12
 
 WORKDIR /usr/src/app
-ENV DATABASE_URL=mysql://d9km6vnpf6c0:pscale_pw__uRp0iUIMxQ1lJk7viLpCgfMHVhg9y9FtK7b5R2yqLc@32r714fllgrd.ap-northeast-2.psdb.cloud/planetscale?sslaccept=strict
+ENV DATABASE_URL='mysql://2adtc02ykedy:pscale_pw_s8P6UluLqL8dW0RLqm9dkxDTc3PuJoCXvpSfp-6_axc@32r714fllgrd.ap-northeast-2.psdb.cloud/planetscale?sslaccept=strict'
 COPY package.json ./
 
-RUN yarn install
+RUN yarn install --production=true
 
 COPY . .
 
