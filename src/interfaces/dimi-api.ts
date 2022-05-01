@@ -3,6 +3,9 @@ import { DimiUserType, Gender } from "@src/types";
 export interface LoginInfo {
   username: string;
   password: string;
+  pin: string;
+  deviceUid: string;
+  resetDevice?: string;
 }
 
 export interface UserIdentity {

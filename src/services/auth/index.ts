@@ -17,6 +17,9 @@ export default createService({
       validateSchema: {
         username: Joi.string().required(),
         password: Joi.string().required(),
+        pin: Joi.string().required(),
+        deviceUid: Joi.string().required(),
+        resetDevice: Joi.boolean(),
       },
     },
     {
