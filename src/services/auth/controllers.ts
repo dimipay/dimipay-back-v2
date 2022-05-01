@@ -73,8 +73,7 @@ const registerOrLogin = async (apiData: Partial<UserIdentity>) => {
 export const identifyUser = async (req: Request, res: Response) => {
   const body: LoginInfo = req.body;
   try {
-    // const { apiData, status } = await getIdentity(body);
-    const apiData = { id: 2499 };
+    const { apiData, status } = await getIdentity(body);
     // if (body.username == body.password) {
     //   throw new HttpException(400, "아이디와 비밀번호가 동일합니다.");
     // }
