@@ -181,7 +181,7 @@ export const useualPurchaseTransaction = async (
   hasCoupons = true
 ) => {
   try {
-    if (userIdentity.authMethod === "INAPP" && !products.pos) {
+    if (userIdentity.transactionMethod === "INAPP" && !products.pos) {
       throw new TransactionException("CANCELED", "비정상적인 결제 요청입니다.");
     }
 
@@ -243,7 +243,7 @@ export const useualPurchaseTransaction = async (
         data: {
           totalPrice: totalPrice,
           status: approvalStatus as TransactionStatus,
-          authMethod: userIdentity.authMethod,
+          transactionMethod: userIdentity.transactionMethod,
           user: {
             connect: {
               id: user.id,
@@ -282,7 +282,7 @@ export const specialPurchaseTransaction = async (
   hasCoupons = true
 ) => {
   try {
-    if (userIdentity.authMethod == "INAPP" && products.pos) {
+    if (userIdentity.transactionMethod == "INAPP" && products.pos) {
       throw new TransactionException("CANCELED", "비정상적인 결제 요청입니다.");
     }
 
@@ -326,7 +326,7 @@ export const specialPurchaseTransaction = async (
         data: {
           totalPrice: totalPrice,
           status: approvalStatus as TransactionStatus,
-          authMethod: userIdentity.authMethod,
+          transactionMethod: userIdentity.transactionMethod,
           user: {
             connect: {
               id: user.id,
