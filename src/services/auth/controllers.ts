@@ -37,11 +37,7 @@ const registerOrLogin = async (apiData: Partial<UserIdentity>) => {
     },
   });
   if (queriedUser) {
-    if (
-      // 아마 셋중 하나만 있는 일은 없음.
-      queriedUser.paymentPin ||
-      queriedUser.deviceUid
-    ) {
+    if (queriedUser.paymentPin || queriedUser.deviceUid) {
       return { user: queriedUser, isFirstVisit: false };
     }
     // PIN, device 미등록 사용자
@@ -80,12 +76,12 @@ export const identifyUser = async (req: Request, res: Response) => {
     const { user, isFirstVisit } = await registerOrLogin(apiData);
     if (isFirstVisit) {
       if (body.pin && body.deviceUid) {
-        console.log("daffdsf");
-        prisma.user.update({
+        await prisma.user.update({
           where: { systemId: user.systemId },
           data: {
             paymentPin: bcrypt.hashSync(body.pin, 10),
-            deviceUid: bcrypt.hashSync(body.deviceUid, 10),
+            deviceUid: body.deviceUid,
+            deviceKey: bcrypt.hashSync(body.deviceKey, 10),
           },
         });
 
@@ -95,23 +91,17 @@ export const identifyUser = async (req: Request, res: Response) => {
       }
     } else {
       if (bcrypt.compareSync(body.pin, user.paymentPin)) {
-        if (!bcrypt.compareSync(body.deviceUid, user.deviceUid)) {
-          if (body.resetDevice) {
-            // deviceUid 재설정
-            prisma.user.update({
-              where: { systemId: user.systemId },
-              data: {
-                deviceUid: bcrypt.hashSync(body.deviceUid, 10),
-              },
-            });
+        if (body.deviceUid !== user.deviceUid) {
+          // deviceUid 재설정
+          await prisma.user.update({
+            where: { systemId: user.systemId },
+            data: {
+              deviceUid: body.deviceUid,
+              deviceKey: bcrypt.hashSync(body.deviceKey, 10),
+            },
+          });
 
-            return res.json({ ...(await createTokensFromUser(user)) });
-          } else {
-            throw new HttpException(
-              401,
-              "새로운 장치로 로그인하셨습니다. 기기를 변경할까요?"
-            );
-          }
+          return res.json({ ...(await createTokensFromUser(user)) });
         } else {
           // 등록된 기기에서 재로그인하는 경우
           return res.json({ ...(await createTokensFromUser(user)) });
