@@ -1,14 +1,15 @@
-import { Prisma, TransactionAuthMethod, User } from "@prisma/client";
+import { Prisma, TransactionMethod, User } from "@prisma/client";
 import { HttpException } from "@src/exceptions";
-import { CouponPurchaseReqBody } from "@src/interfaces";
 import {
   prisma,
   paymentToken,
   specialPurchaseTransaction,
+  verify,
 } from "@src/resources";
-import { ReqWithBody } from "@src/types";
+import { CouponPurchaseFields } from "@src/interfaces";
 import { Request, Response } from "express";
 import { v4 as uuidv4 } from "uuid";
+import bcrypt from "bcrypt";
 
 export const getVaildReceivedCoupons = async (req: Request, res: Response) => {
   try {
@@ -104,17 +105,11 @@ export const getIssuedCoupons = async (req: Request, res: Response) => {
   }
 };
 
-export const purchaseCoupon = async (
-  req: ReqWithBody<CouponPurchaseReqBody>,
-  res: Response
-) => {
+export const purchaseCoupon = async (req: Request, res: Response) => {
   try {
-    const { purchaseToken, coupon } = req.body;
-    const { title, to, amount, expiresAt } = coupon;
-    const { purchaseType, paymentMethod } = await paymentToken.decrypt({
-      encryptedToken: purchaseToken,
-    });
-
+    const { paymentMethod, purchaseType, extraFields } = req.body;
+    const { title, to, amount, expiresAt } =
+      extraFields as CouponPurchaseFields;
     if (purchaseType !== "COUPON") {
       throw new HttpException(400, "잘못된 구매 요청입니다.");
     }
@@ -122,7 +117,7 @@ export const purchaseCoupon = async (
     const userIdentity = {
       systemId: req.user.systemId,
       paymentMethod,
-      authMethod: "INAPP" as TransactionAuthMethod,
+      transactionMethod: "INAPP" as TransactionMethod,
     };
 
     const totalPrice = amount * to.length;
