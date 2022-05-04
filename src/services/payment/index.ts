@@ -50,7 +50,6 @@ export default createService({
       permission: ["Student", "Teacher"],
       middlewares: [paymentToken],
       validateSchema: {
-        authMethod: Joi.string().required(),
         paymentMethod: Joi.string().required(),
       },
     },
@@ -88,7 +87,7 @@ export default createService({
           .regex(/^\d{4}$/)
           .required()
           .error(createJoiError(400, "비밀번호 규칙에 맞춰 입력해주세요")),
-        paymentPin: Joi.string()
+        resetPin: Joi.string()
           .regex(/^\d{4}$/)
           .required()
           .error(createJoiError(400, "비밀번호 규칙에 맞춰 입력해주세요")),

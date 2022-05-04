@@ -20,7 +20,7 @@ export const registerPaymentPin = async (req: Request, res: Response) => {
 
 export const resetPaymentPin = async (req: Request, res: Response) => {
   try {
-    const { originalPin, paymentPin } = req.body;
+    const { originalPin, resetPin } = req.body;
     if (!req.user.paymentPin)
       throw new HttpException(400, "결제 비밀번호가 등록되지 않았어요.");
     const { paymentPin: encryptedOriginalPin } = await prisma.user.findFirst({
@@ -31,7 +31,7 @@ export const resetPaymentPin = async (req: Request, res: Response) => {
       throw new HttpException(400, "이전 결제 비밀번호가 일치하지 않아요.");
     await prisma.user.update({
       where: { systemId: req.user.systemId },
-      data: { paymentPin: bcrypt.hashSync(paymentPin, 10) },
+      data: { paymentPin: bcrypt.hashSync(resetPin, 10) },
     });
     return res.sendStatus(201);
   } catch (e) {
