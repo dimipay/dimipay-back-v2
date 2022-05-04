@@ -5,27 +5,51 @@ import bcrypt from "bcrypt";
 import { dotcode } from "@src/resources/dotcode";
 import SHA3 from "sha3";
 
+const issueCode = async (paymentMethod: string, systemId: string) => {
+  const code = csprng().toString(16).padStart(8, "0");
+
+  const hash = new SHA3(224);
+  const redis = await loadRedis();
+  const redisKey = key.approvalCode(
+    hash.update(hash.update(code).digest("hex")).digest("hex")
+  );
+  await redis.set(
+    redisKey,
+    JSON.stringify({ paymentMethod, systemId: systemId })
+  );
+  await redis.expire(redisKey, 64);
+
+  return { code, codeBuffer: await dotcode(code) };
+};
+
 export const getApprovalCode = async (req: Request, res: Response) => {
   try {
-    const { authMethod, paymentMethod } = req.body;
+    const { paymentMethod } = req.body;
+    // res.setHeader("Content-Type", "image/png");
+    return res.json(await issueCode(paymentMethod, req.user.systemId));
+  } catch (e) {
+    throw new HttpException(e.status, e.message);
+  }
+};
 
-    const code = csprng().toString(16).padStart(8, "0");
+export const refreshApprovalCode = async (req: Request, res: Response) => {
+  try {
+    const { code: approvalCode, paymentMethod } = req.body;
 
     const hash = new SHA3(224);
     const redis = await loadRedis();
     const redisKey = key.approvalCode(
-      hash.update(hash.update(code).digest("hex")).digest("hex")
+      hash.update(hash.update(approvalCode).digest("hex")).digest("hex")
     );
-    await redis.set(
-      redisKey,
-      JSON.stringify({ paymentMethod, authMethod, systemId: req.user.systemId })
-    );
-    await redis.expire(redisKey, 64);
+    const redisValue = await redis.get(redisKey);
+    redis.del(redisKey);
 
-    const codeBuffer = await dotcode(code);
-    res.setHeader("Content-Type", "image/png");
-    return res.send(codeBuffer);
-  } catch (e) {
-    throw new HttpException(e.status, e.message);
-  }
+    if (!redisValue) {
+      throw new HttpException(400, "유효하지 않거나 만료된 승인 코드입니다.");
+    }
+
+    const { systemId } = JSON.parse(redisValue);
+
+    return res.json(await issueCode(paymentMethod, systemId));
+  } catch (e) {}
 };
