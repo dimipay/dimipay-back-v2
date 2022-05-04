@@ -3,13 +3,13 @@ import { SpecialPurchaseType } from "@prisma/client";
 export interface GeneralPaymentToken {
   paymentMethod: string;
   pin?: string;
-  deviceKey?: string;
+  bioKey?: string;
 }
 
 export interface SpecialPaymentToken {
   purchaseType: SpecialPurchaseType;
   paymentMethod: string;
   pin?: string;
-  deviceKey?: string;
+  bioKey?: string;
   extraFields: object;
 }

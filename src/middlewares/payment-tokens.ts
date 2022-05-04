@@ -6,7 +6,7 @@ import { GeneralPaymentToken, SpecialPaymentToken } from "@src/interfaces";
 
 export default async (req: Request, res: Response, next: NextFunction) => {
   const { token: encryptedToken } = req.body;
-  const { pin, deviceKey, ...token } = (await verifyCustomToken(
+  const { pin, bioKey, ...token } = (await verifyCustomToken(
     encryptedToken,
     req.user.deviceUid
   )) as GeneralPaymentToken | SpecialPaymentToken;
@@ -15,8 +15,8 @@ export default async (req: Request, res: Response, next: NextFunction) => {
   if (pin) {
     if (!bcrypt.compareSync(pin, req.user.paymentPin))
       throw new HttpException(400, "올바르지 않은 결제 비밀번호입니다.");
-  } else if (deviceKey) {
-    if (!bcrypt.compareSync(deviceKey, req.user.deviceKey))
+  } else if (bioKey) {
+    if (!bcrypt.compareSync(bioKey, req.user.bioKey))
       throw new HttpException(400, "올바르지 않은 결제 요청입니다.");
   } else {
     throw new HttpException(400, "올바르지 않은 결제 요청입니다.");

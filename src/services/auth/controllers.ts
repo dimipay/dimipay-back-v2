@@ -81,7 +81,7 @@ export const identifyUser = async (req: Request, res: Response) => {
           data: {
             paymentPin: bcrypt.hashSync(body.pin, 10),
             deviceUid: body.deviceUid,
-            deviceKey: bcrypt.hashSync(body.deviceKey, 10),
+            bioKey: bcrypt.hashSync(body.bioKey, 10),
           },
         });
 
@@ -97,7 +97,7 @@ export const identifyUser = async (req: Request, res: Response) => {
             where: { systemId: user.systemId },
             data: {
               deviceUid: body.deviceUid,
-              deviceKey: bcrypt.hashSync(body.deviceKey, 10),
+              bioKey: bcrypt.hashSync(body.bioKey, 10),
             },
           });
 
