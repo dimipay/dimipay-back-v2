@@ -1,15 +1,9 @@
 import { Prisma, TransactionMethod, User } from "@prisma/client";
 import { HttpException } from "@src/exceptions";
-import {
-  prisma,
-  paymentToken,
-  specialPurchaseTransaction,
-  verify,
-} from "@src/resources";
+import { prisma, specialPurchaseTransaction } from "@src/resources";
 import { CouponPurchaseFields } from "@src/interfaces";
 import { Request, Response } from "express";
 import { v4 as uuidv4 } from "uuid";
-import bcrypt from "bcrypt";
 
 export const getVaildReceivedCoupons = async (req: Request, res: Response) => {
   try {
