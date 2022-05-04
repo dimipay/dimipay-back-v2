@@ -301,6 +301,9 @@ export const specialPurchaseTransaction = async (
         prepaidCard: true,
       },
     });
+    if (!paymentMethod) {
+      throw new TransactionException("CANCELED", "잘못된 결제 수단입니다.");
+    }
 
     const receipt = await prisma.$transaction(async (prisma) => {
       //1. 쿠폰 금액 차감
@@ -357,6 +360,9 @@ export const specialPurchaseTransaction = async (
     });
     return receipt;
   } catch (e) {
+    if (e instanceof TransactionException) {
+      throw new HttpException(403, e.message);
+    }
     throw new HttpException(e.status, e.message);
   }
 };

@@ -100,62 +100,61 @@ export const getIssuedCoupons = async (req: Request, res: Response) => {
 };
 
 export const purchaseCoupon = async (req: Request, res: Response) => {
+  const { paymentMethod, purchaseType, extraFields } = req.body;
+  const { title, to, amount, expiresAt } = extraFields as CouponPurchaseFields;
+  if (purchaseType !== "COUPON") {
+    throw new HttpException(400, "잘못된 구매 요청입니다.");
+  }
+
+  const userIdentity = {
+    systemId: req.user.systemId,
+    paymentMethod,
+    transactionMethod: "INAPP" as TransactionMethod,
+  };
+
+  const totalPrice = amount * to.length;
+
+  await prisma.$transaction(async (prisma) => {
+    const coupons: Prisma.CouponCreateManyInput[] = to.map((systemId) => ({
+      id: uuidv4(),
+      name: title,
+      amount,
+      expiresAt,
+      receiverId: systemId,
+      issuerId: req.user.systemId,
+    }));
+
+    const purchaseId = coupons.map((coupon) => coupon.id);
+
+    await prisma.coupon.createMany({ data: coupons });
+
+    const transaction = await specialPurchaseTransaction(
+      userIdentity,
+      totalPrice,
+      {
+        purchaseId,
+        purchaseType,
+      },
+      false
+    );
+
+    const receivers = await Promise.all(
+      to.map((systemId) =>
+        prisma.user.findUnique({
+          where: {
+            systemId,
+          },
+          select: { id: true },
+        })
+      )
+    );
+
+    if (!receivers.every(Boolean))
+      throw new HttpException(400, "쿠폰의 수신자가 올바르지 않아요");
+
+    return res.json(transaction).status(201);
+  });
   try {
-    const { paymentMethod, purchaseType, extraFields } = req.body;
-    const { title, to, amount, expiresAt } =
-      extraFields as CouponPurchaseFields;
-    if (purchaseType !== "COUPON") {
-      throw new HttpException(400, "잘못된 구매 요청입니다.");
-    }
-
-    const userIdentity = {
-      systemId: req.user.systemId,
-      paymentMethod,
-      transactionMethod: "INAPP" as TransactionMethod,
-    };
-
-    const totalPrice = amount * to.length;
-
-    await prisma.$transaction(async (prisma) => {
-      const coupons: Prisma.CouponCreateManyInput[] = to.map((systemId) => ({
-        id: uuidv4(),
-        name: title,
-        amount,
-        expiresAt,
-        receiverId: systemId,
-        issuerId: req.user.systemId,
-      }));
-
-      const purchaseId = coupons.map((coupon) => coupon.id);
-
-      await prisma.coupon.createMany({ data: coupons });
-
-      const transaction = await specialPurchaseTransaction(
-        userIdentity,
-        totalPrice,
-        {
-          purchaseId,
-          purchaseType,
-        },
-        false
-      );
-
-      const receivers = await Promise.all(
-        to.map((systemId) =>
-          prisma.user.findUnique({
-            where: {
-              systemId,
-            },
-            select: { id: true },
-          })
-        )
-      );
-
-      if (!receivers.every(Boolean))
-        throw new HttpException(400, "쿠폰의 수신자가 올바르지 않아요");
-
-      return res.json(transaction).status(201);
-    });
   } catch (e) {
     throw new HttpException(400, e.message);
   }

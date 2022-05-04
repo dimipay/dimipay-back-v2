@@ -36,7 +36,7 @@ export default createService({
       path: "/purchase",
       handler: controllers.purchaseCoupon,
       needAuth: true,
-      permission: ["Teacher"],
+      permission: ["Teacher", "Student"],
       middlewares: [paymentToken],
       validateSchema: {
         purchaseType: Joi.string().required(),
