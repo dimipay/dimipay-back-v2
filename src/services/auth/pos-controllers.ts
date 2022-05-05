@@ -144,7 +144,12 @@ export const validateSmsVerification = async (req: Request, res: Response) => {
 
     const user = await prisma.user.findFirst({
       where: { studentNumber: body.studentNumber },
-      include: {
+      select: {
+        systemId: true,
+        isDisabled: true,
+        name: true,
+        profileImage: true,
+        studentNumber: true,
         receivedCoupons: true,
       },
     });
@@ -163,20 +168,14 @@ export const validateSmsVerification = async (req: Request, res: Response) => {
     const isValid = bcrypt.compareSync(body.smsCode, redisValue);
 
     if (isValid) {
-      const { id } = await prisma.paymentMethod.findFirst({
+      const { id: paymentMethod } = await prisma.paymentMethod.findFirst({
         where: {
           ownerId: user.systemId,
           type: "PREPAID",
         },
       });
 
-      return res.json({
-        isValid,
-        approvalToken: issueCustomToken({ a: [user.systemId, id] }, "3min"),
-        username: user.name,
-        receivedCoupons: user.receivedCoupons,
-        profileImage: user.profileImage,
-      });
+      return res.json({ ...user, paymentMethod });
     } else {
       return res.status(400).json({
         isValid,
