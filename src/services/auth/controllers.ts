@@ -7,8 +7,9 @@ import {
   prisma,
   getIdentity,
 } from "@src/resources";
-import { LoginInfo } from "@src/interfaces";
+import { LoginInfo, UserIdentity } from "@src/interfaces";
 import { Prisma, User } from "@prisma/client";
+import bcrypt from "bcrypt";
 
 const createTokensFromUser = async (user: Partial<User>) => {
   const { id, systemId } = user;
@@ -18,6 +19,57 @@ const createTokensFromUser = async (user: Partial<User>) => {
   };
 };
 
+const registerOrLogin = async (apiData: Partial<UserIdentity>) => {
+  const queriedUser = await prisma.user.findFirst({
+    where: { systemId: apiData.id.toString() },
+    select: {
+      systemId: true,
+      accountName: true,
+      isDisabled: true,
+      isTeacher: true,
+      name: true,
+      paymentMethods: true,
+      profileImage: true,
+      createdAt: true,
+      updatedAt: true,
+      paymentPin: true,
+      deviceUid: true,
+    },
+  });
+  if (queriedUser) {
+    if (
+      // 아마 셋중 하나만 있는 일은 없음.
+      queriedUser.paymentPin ||
+      queriedUser.deviceUid
+    ) {
+      return { user: queriedUser, isFirstVisit: false };
+    }
+    // PIN, device 미등록 사용자
+    return { user: queriedUser, isFirstVisit: true };
+  }
+
+  const mappedUser: Prisma.UserCreateInput = {
+    accountName: apiData.username,
+    name: apiData.name,
+    profileImage: apiData.photofile2 || apiData.photofile1,
+    studentNumber: apiData.studentNumber,
+    systemId: apiData.id.toString(),
+    isTeacher: ["D", "T"].includes(apiData.user_type),
+    phoneNumber: apiData.phone
+      ? apiData.phone.startsWith("01")
+        ? "+82 " + apiData.phone.slice(1)
+        : null
+      : null,
+  };
+
+  const user = await prisma.user.create({
+    data: mappedUser,
+  });
+
+  // 최초 등록 사용자
+  return { user, isFirstVisit: true };
+};
+
 export const identifyUser = async (req: Request, res: Response) => {
   const body: LoginInfo = req.body;
   try {
@@ -25,57 +77,49 @@ export const identifyUser = async (req: Request, res: Response) => {
     // if (body.username == body.password) {
     //   throw new HttpException(400, "아이디와 비밀번호가 동일합니다.");
     // }
-    const mappedUser: Prisma.UserCreateInput = {
-      accountName: apiData.username,
-      name: apiData.name,
-      profileImage: apiData.photofile2 || apiData.photofile1,
-      studentNumber: apiData.studentNumber,
-      systemId: apiData.id.toString(),
-      isTeacher: ["D", "T"].includes(apiData.user_type),
-      phoneNumber: apiData.phone
-        ? apiData.phone.startsWith("01")
-          ? "+82 " + apiData.phone.slice(1)
-          : null
-        : null,
-    };
+    const { user, isFirstVisit } = await registerOrLogin(apiData);
+    if (isFirstVisit) {
+      if (body.pin && body.deviceUid) {
+        console.log("daffdsf");
+        prisma.user.update({
+          where: { systemId: user.systemId },
+          data: {
+            paymentPin: bcrypt.hashSync(body.pin, 10),
+            deviceUid: bcrypt.hashSync(body.deviceUid, 10),
+          },
+        });
 
-    const queriedUser = await prisma.user.findFirst({
-      where: { systemId: mappedUser.systemId },
-      select: {
-        systemId: true,
-        accountName: true,
-        isDisabled: true,
-        isTeacher: true,
-        name: true,
-        paymentMethods: true,
-        profileImage: true,
-        createdAt: true,
-        updatedAt: true,
-        paymentPin: true,
-      },
-    });
-    if (queriedUser) {
-      if (queriedUser.paymentMethods.length)
-        return res.json(await createTokensFromUser(queriedUser));
-      if (queriedUser.paymentPin)
-        return res.json(await createTokensFromUser(queriedUser));
+        return res.json({ ...(await createTokensFromUser(user)) });
+      } else {
+        throw new HttpException(400, "신규 등록이 필요합니다.");
+      }
+    } else {
+      if (bcrypt.compareSync(body.pin, user.paymentPin)) {
+        if (!bcrypt.compareSync(body.deviceUid, user.deviceUid)) {
+          if (body.resetDevice) {
+            // deviceUid 재설정
+            prisma.user.update({
+              where: { systemId: user.systemId },
+              data: {
+                deviceUid: bcrypt.hashSync(body.deviceUid, 10),
+              },
+            });
 
-      // Payment method 미등록 사용자
-      return res.status(201).json({
-        ...(await createTokensFromUser(queriedUser)),
-        isFirstVisit: true,
-      });
+            return res.json({ ...(await createTokensFromUser(user)) });
+          } else {
+            throw new HttpException(
+              401,
+              "새로운 장치로 로그인하셨습니다. 기기를 변경할까요?"
+            );
+          }
+        } else {
+          // 등록된 기기에서 재로그인하는 경우
+          return res.json({ ...(await createTokensFromUser(user)) });
+        }
+      } else {
+        throw new HttpException(400, "올바르지 않은 PIN입니다.");
+      }
     }
-
-    const user = await prisma.user.create({
-      data: mappedUser,
-    });
-
-    // 최초 등록 사용자
-    return res.status(201).json({
-      ...(await createTokensFromUser(user)),
-      isFirstVisit: true,
-    });
   } catch (e) {
     throw new HttpException(e.status, e.message);
   }

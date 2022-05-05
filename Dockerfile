@@ -1,14 +1,13 @@
-FROM node:12
+FROM node:lts
 
 WORKDIR /usr/src/app
-ENV DATABASE_URL=mysql://d9km6vnpf6c0:pscale_pw__uRp0iUIMxQ1lJk7viLpCgfMHVhg9y9FtK7b5R2yqLc@32r714fllgrd.ap-northeast-2.psdb.cloud/planetscale?sslaccept=strict
 COPY package.json ./
 
-RUN yarn install
+RUN yarn install --production=true
 
 COPY . .
 
-EXPOSE 3000
+EXPOSE 4000
 RUN yarn prisma db pull
 RUN yarn prisma generate
 

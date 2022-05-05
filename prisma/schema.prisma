@@ -26,6 +26,7 @@ model User {
   receivedCoupons     Coupon[]        @relation("receive")
   paymentMethods      PaymentMethod[]
   paymentPin          String?
+  deviceUid           String?
   phoneNumber         String?
   notice              Notice[]
 }
