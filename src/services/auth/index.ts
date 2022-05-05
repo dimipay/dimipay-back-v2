@@ -18,7 +18,7 @@ export default createService({
         username: Joi.string().required(),
         password: Joi.string().required(),
         pin: Joi.string().required(),
-        deviceKey: Joi.string().required(),
+        bioKey: Joi.string().required(),
         deviceUid: Joi.string().required(),
       },
     },
