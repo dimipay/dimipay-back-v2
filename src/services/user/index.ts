@@ -36,19 +36,7 @@ export default createService({
       needAuth: true,
       permission: ["Pos"],
       validateSchema: {
-        approvalCode: Joi.string().required(),
-      },
-    },
-    {
-      method: "post",
-      path: "/purchase-code",
-      handler: controllers.getUserbyPurchaseCode,
-      description: "특수결제에 필요한 유저 정보를 반환합니다.",
-      needAuth: true,
-      permission: ["Pos"],
-      validateSchema: {
-        purchaseCode: Joi.string().required(),
-        purchaseType: Joi.string().required(),
+        code: Joi.string().required(),
       },
     },
   ],

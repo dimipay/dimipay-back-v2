@@ -181,7 +181,7 @@ export const useualPurchaseTransaction = async (
   hasCoupons = true
 ) => {
   try {
-    if (userIdentity.authMethod === "INAPP" && !products.pos) {
+    if (userIdentity.transactionMethod === "INAPP" && !products.pos) {
       throw new TransactionException("CANCELED", "비정상적인 결제 요청입니다.");
     }
 
@@ -243,7 +243,7 @@ export const useualPurchaseTransaction = async (
         data: {
           totalPrice: totalPrice,
           status: approvalStatus as TransactionStatus,
-          authMethod: userIdentity.authMethod,
+          transactionMethod: userIdentity.transactionMethod,
           user: {
             connect: {
               id: user.id,
@@ -282,7 +282,7 @@ export const specialPurchaseTransaction = async (
   hasCoupons = true
 ) => {
   try {
-    if (userIdentity.authMethod == "INAPP" && products.pos) {
+    if (userIdentity.transactionMethod == "INAPP" && products.pos) {
       throw new TransactionException("CANCELED", "비정상적인 결제 요청입니다.");
     }
 
@@ -301,6 +301,9 @@ export const specialPurchaseTransaction = async (
         prepaidCard: true,
       },
     });
+    if (!paymentMethod) {
+      throw new TransactionException("CANCELED", "잘못된 결제 수단입니다.");
+    }
 
     const receipt = await prisma.$transaction(async (prisma) => {
       //1. 쿠폰 금액 차감
@@ -326,7 +329,7 @@ export const specialPurchaseTransaction = async (
         data: {
           totalPrice: totalPrice,
           status: approvalStatus as TransactionStatus,
-          authMethod: userIdentity.authMethod,
+          transactionMethod: userIdentity.transactionMethod,
           user: {
             connect: {
               id: user.id,
@@ -357,6 +360,9 @@ export const specialPurchaseTransaction = async (
     });
     return receipt;
   } catch (e) {
+    if (e instanceof TransactionException) {
+      throw new HttpException(403, e.message);
+    }
     throw new HttpException(e.status, e.message);
   }
 };

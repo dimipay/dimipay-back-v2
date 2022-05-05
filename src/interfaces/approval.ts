@@ -1,5 +1,5 @@
 import {
-  TransactionAuthMethod,
+  TransactionMethod,
   Product,
   DiscountPolicy,
   Category,
@@ -22,7 +22,7 @@ export interface ApprovalProduct {
 export interface ApprovalUserIdentity {
   systemId: string;
   paymentMethod: string;
-  authMethod: TransactionAuthMethod;
+  transactionMethod: TransactionMethod;
   coupons?: string[];
 }
 

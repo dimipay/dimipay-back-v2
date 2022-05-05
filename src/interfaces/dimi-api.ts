@@ -5,7 +5,7 @@ export interface LoginInfo {
   password: string;
   pin: string;
   deviceUid: string;
-  resetDevice?: string;
+  bioKey: string;
 }
 
 export interface UserIdentity {

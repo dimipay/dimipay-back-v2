@@ -16,13 +16,29 @@ export const getTokenType = async (token: string): Promise<TokenType> => {
   }
 };
 
-export const verify = async (token: string) => {
+export const verify = async (
+  token: string,
+  jwtKey = config.jwtSecret as string
+) => {
   try {
-    const { identity }: any = await jwt.verify(
-      token,
-      config.jwtSecret as string
-    );
+    const { identity }: any = await jwt.verify(token, jwtKey);
     return identity;
+  } catch (error) {
+    if (error.name === "TokenExpiredError") {
+      throw new HttpException(401, "토큰이 만료되었습니다.");
+    } else if (["jwt malformed", "invalid signature"].includes(error.message)) {
+      throw new HttpException(401, "토큰이 변조되었습니다.");
+    } else throw new HttpException(401, "토큰에 문제가 있습니다.");
+  }
+};
+
+export const verifyCustomToken = async (
+  token: string,
+  jwtKey = config.jwtSecret as string
+) => {
+  try {
+    const payload: any = await jwt.verify(token, jwtKey);
+    return payload;
   } catch (error) {
     if (error.name === "TokenExpiredError") {
       throw new HttpException(401, "토큰이 만료되었습니다.");
@@ -34,9 +50,10 @@ export const verify = async (token: string) => {
 
 export const issueCustomToken = (
   payload: string | object | Buffer,
-  expires?: string
+  expires?: string,
+  jwtKey = config.jwtSecret as string
 ) => {
-  return jwt.sign(payload, config.jwtSecret as string, {
+  return jwt.sign(payload, jwtKey, {
     algorithm: "HS512",
     expiresIn: expires,
   });

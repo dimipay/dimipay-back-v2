@@ -9,6 +9,7 @@ import {
 } from "./controllers";
 import { createPrepaidCard } from "./controllers/createPrepaidCard";
 import { registerPaymentPin, resetPaymentPin } from "./controllers/paymentPin";
+import { paymentToken } from "@src/middlewares";
 
 export default createService({
   name: "결제 서비스",
@@ -46,9 +47,22 @@ export default createService({
       needAuth: true,
       path: "/token",
       description: "앱 결제를 위한 코드를 생성합니다.",
-      permission: ["Student"],
+      permission: ["Student", "Teacher"],
+      middlewares: [paymentToken],
       validateSchema: {
-        token: Joi.string().required(),
+        paymentMethod: Joi.string().required(),
+      },
+    },
+    {
+      method: "post",
+      handler: getApprovalCode,
+      needAuth: true,
+      path: "/token/refresh",
+      description: "앱 결제를 위한 코드를 리프레시합니다.",
+      permission: ["Student", "Teacher"],
+      validateSchema: {
+        code: Joi.string().required(),
+        paymentMethod: Joi.string().required(),
       },
     },
     {
@@ -85,7 +99,7 @@ export default createService({
           .regex(/^\d{4}$/)
           .required()
           .error(createJoiError(400, "비밀번호 규칙에 맞춰 입력해주세요")),
-        paymentPin: Joi.string()
+        resetPin: Joi.string()
           .regex(/^\d{4}$/)
           .required()
           .error(createJoiError(400, "비밀번호 규칙에 맞춰 입력해주세요")),

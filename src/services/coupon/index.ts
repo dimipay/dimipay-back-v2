@@ -1,6 +1,7 @@
 import * as controllers from "./controllers";
 import { createService } from "../index";
 import Joi from "joi";
+import { paymentToken } from "@src/middlewares";
 
 export default createService({
   name: "쿠폰 구매/조회 서비스",
@@ -35,10 +36,14 @@ export default createService({
       path: "/purchase",
       handler: controllers.purchaseCoupon,
       needAuth: true,
-      permission: ["Teacher"],
+      permission: ["Teacher", "Student"],
+      middlewares: [paymentToken],
       validateSchema: {
-        purchaseToken: Joi.string().required(),
-        coupon: Joi.object({
+        purchaseType: Joi.string().required(),
+        paymentMethod: Joi.string().required(),
+        pin: Joi.string(),
+        deviceKey: Joi.string(),
+        extraFields: Joi.object({
           title: Joi.string(),
           to: Joi.array().items(Joi.string()).required(),
           amount: Joi.number().required(),
