@@ -5,7 +5,7 @@ import { verifyCustomToken } from "@src/resources";
 import { GeneralPaymentToken, SpecialPaymentToken } from "@src/interfaces";
 
 export default async (req: Request, res: Response, next: NextFunction) => {
-  const { token: encryptedToken } = req.body;
+  const encryptedToken = req.get("Dimipay-Transaction-Token");
   const { pin, bioKey, iat, exp, ...token } = (await verifyCustomToken(
     encryptedToken,
     req.user.deviceUid
