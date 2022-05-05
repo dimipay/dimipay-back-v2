@@ -6,7 +6,7 @@ import { GeneralPaymentToken, SpecialPaymentToken } from "@src/interfaces";
 
 export default async (req: Request, res: Response, next: NextFunction) => {
   const { token: encryptedToken } = req.body;
-  const { pin, bioKey, ...token } = (await verifyCustomToken(
+  const { pin, bioKey, iat, exp, ...token } = (await verifyCustomToken(
     encryptedToken,
     req.user.deviceUid
   )) as GeneralPaymentToken | SpecialPaymentToken;
