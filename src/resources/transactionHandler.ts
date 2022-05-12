@@ -1,5 +1,5 @@
 import { TransactionStatus, Coupon, Prisma } from "@prisma/client";
-import { prisma } from "@src/resources";
+import { prisma, loadRedis, key } from "@src/resources";
 import {
   TransactionPaymentMethod,
   ApprovalUserIdentity,
@@ -196,6 +196,9 @@ export const useualPurchaseTransaction = async (
     return { id: product.product.id };
   });
 
+  const redis = await loadRedis();
+  const redisKey = key.approvalResponse(user.id);
+
   try {
     if (userIdentity.transactionMethod === "INAPP" || !products.pos) {
       throw new TransactionException("CANCELED", "비정상적인 결제 요청입니다.");
@@ -265,35 +268,43 @@ export const useualPurchaseTransaction = async (
       });
       return receipt;
     });
+    await redis.publish(
+      redisKey,
+      JSON.stringify({ status: receipt.status, transactionId: receipt.id })
+    );
     return receipt;
   } catch (e) {
-    if (e instanceof TransactionException) {
-      await prisma.transaction.create({
-        data: {
-          totalPrice: totalPrice,
-          status: e.status ? e.status : "CANCELED",
-          transactionMethod: userIdentity.transactionMethod,
-          user: {
-            connect: {
-              id: user.id,
-            },
-          },
-          statusText: e.message,
-          posDevice: {
-            connect: {
-              id: products.pos.id,
-            },
-          },
-          paymentMethod: {
-            connect: {
-              id: paymentMethod.id,
-            },
-          },
-          products: {
-            connect: productIds,
+    const receipt = await prisma.transaction.create({
+      data: {
+        totalPrice: totalPrice,
+        status: e.status ? e.status : "CANCELED",
+        transactionMethod: userIdentity.transactionMethod,
+        user: {
+          connect: {
+            id: user.id,
           },
         },
-      });
+        statusText: e.message ? e.message : "알 수 없는 에러",
+        posDevice: {
+          connect: {
+            id: products.pos.id,
+          },
+        },
+        paymentMethod: {
+          connect: {
+            id: paymentMethod.id,
+          },
+        },
+        products: {
+          connect: productIds,
+        },
+      },
+    });
+    await redis.publish(
+      redisKey,
+      JSON.stringify({ status: receipt.status, transactionId: receipt.id })
+    );
+    if (e instanceof TransactionException) {
       throw new HttpException(402, `${e.status} ${e.message}`);
     } else {
       throw new HttpException(e.status, e.message);
@@ -312,6 +323,9 @@ export const specialPurchaseTransaction = async (
       systemId: userIdentity.systemId,
     },
   });
+
+  const redis = await loadRedis();
+  const redisKey = key.approvalResponse(user.id);
 
   const paymentMethod = await prisma.paymentMethod.findFirst({
     where: {
@@ -382,16 +396,20 @@ export const specialPurchaseTransaction = async (
           specialPurchaseType: products.purchaseType,
         },
       });
+      await redis.publish(
+        redisKey,
+        JSON.stringify({ status: receipt.status, transactionId: receipt.id })
+      );
       return receipt;
     });
     return receipt;
   } catch (e) {
     if (e instanceof TransactionException) {
-      await prisma.transaction.create({
+      const receipt = await prisma.transaction.create({
         data: {
           totalPrice: totalPrice,
           status: e.status ? e.status : "CANCELED",
-          statusText: e.message,
+          statusText: e.message ? e.message : "알 수 없는 에러",
           transactionMethod: userIdentity.transactionMethod,
           user: {
             connect: {
@@ -414,6 +432,10 @@ export const specialPurchaseTransaction = async (
           specialPurchaseType: products.purchaseType,
         },
       });
+      await redis.publish(
+        redisKey,
+        JSON.stringify({ status: receipt.status, transactionId: receipt.id })
+      );
       throw new HttpException(402, `${e.status} ${e.message}`);
     } else {
       throw new HttpException(e.status, e.message);
