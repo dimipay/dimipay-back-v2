@@ -3,6 +3,7 @@ import createJoiError from "@src/resources/createJoiError";
 import { createService } from "..";
 import {
   addGeneralPaymentmethod,
+  approvalResponse,
   getApprovalCode,
   getPaymentMethods,
   paymentApproval,
@@ -104,6 +105,13 @@ export default createService({
           .required()
           .error(createJoiError(400, "비밀번호 규칙에 맞춰 입력해주세요")),
       },
+    },
+    {
+      method: "get",
+      handler: approvalResponse,
+      needAuth: true,
+      path: "/response",
+      description: "결제 승인 여부를 응답합니다.",
     },
   ],
 });
