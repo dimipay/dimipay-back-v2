@@ -128,3 +128,13 @@ export const refreshAccessToken = async (req: Request, res: Response) => {
   const identity = await prisma.user.findUnique({ where: { id: payload.id } });
   return res.json(await createTokensFromUser(identity));
 };
+
+export const checkUser = async (req: Request, res: Response) => {
+  const body: LoginInfo = req.body;
+  try {
+    await getIdentity(body);
+    return res.sendStatus(200);
+  } catch (e) {
+    throw new HttpException(e.status, e.message);
+  }
+};

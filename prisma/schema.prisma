@@ -23,11 +23,11 @@ model User {
   relatedAdminAccount AdminAccount?
   transactions        Transaction[]
   issuedCoupons       Coupon[]        @relation("issue")
+  bioKey              String?
   receivedCoupons     Coupon[]        @relation("receive")
   paymentMethods      PaymentMethod[]
   paymentPin          String?
   deviceUid           String?
-  bioKey              String?
   phoneNumber         String?
   notice              Notice[]
 }
@@ -96,22 +96,22 @@ model Coupon {
 }
 
 model Transaction {
-  id                  String               @id @default(uuid())
-  createdAt           DateTime             @default(now())
-  updatedAt           DateTime             @default(now()) @updatedAt
+  id                  String                        @id @default(uuid())
+  createdAt           DateTime                      @default(now())
+  updatedAt           DateTime                      @default(now()) @updatedAt
   billingId           String?
   totalPrice          Int
   status              Transaction_status
   statusText          String?
-  transactionMethod   TransactionMethod
   usedCardId          String
   posDeviceId         String?
   userId              String
   specialPurchase     String?
-  user                User                 @relation(fields: [userId], references: [systemId])
+  transactionMethod   Transaction_transactionMethod
+  user                User                          @relation(fields: [userId], references: [systemId])
   specialPurchaseType SpecialPurchaseType?
-  posDevice           PosDevice?           @relation(fields: [posDeviceId], references: [id])
-  paymentMethod       PaymentMethod        @relation(fields: [usedCardId], references: [id])
+  posDevice           PosDevice?                    @relation(fields: [posDeviceId], references: [id])
+  paymentMethod       PaymentMethod                 @relation(fields: [usedCardId], references: [id])
   coupon              Coupon[]
   products            Product[]
 }
@@ -259,13 +259,6 @@ enum TransactionStatus {
   ERROR
 }
 
-enum TransactionMethod {
-  SMS
-  APP_QR
-  FACESIGN
-  INAPP
-}
-
 enum SpecialPurchaseType {
   COUPON
   PRINTER
@@ -276,4 +269,11 @@ enum Transaction_status {
   CANCELED
   PENDING
   ERROR
+}
+
+enum Transaction_transactionMethod {
+  SMS
+  APP_QR
+  FACESIGN
+  INAPP
 }

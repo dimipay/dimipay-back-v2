@@ -24,6 +24,17 @@ export default createService({
     },
     {
       method: "post",
+      path: "/login-check",
+      handler: controllers.checkUser,
+      needAuth: false,
+      description: "username과 password의 유효성을 검증합니다.",
+      validateSchema: {
+        username: Joi.string().required(),
+        password: Joi.string().required(),
+      },
+    },
+    {
+      method: "post",
       path: "/refresh",
       handler: controllers.refreshAccessToken,
       description:
