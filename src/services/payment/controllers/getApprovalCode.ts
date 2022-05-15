@@ -17,9 +17,9 @@ const issueCode = async (paymentMethod: string, systemId: string) => {
     redisKey,
     JSON.stringify({ paymentMethod, systemId: systemId })
   );
-  await redis.expire(redisKey, 64);
+  await redis.expire(redisKey, 35);
 
-  return { code, codeBuffer: await dotcode(code) };
+  return { code, codeBuffer: (await dotcode(code)).toString("base64") };
 };
 
 export const getApprovalCode = async (req: Request, res: Response) => {
