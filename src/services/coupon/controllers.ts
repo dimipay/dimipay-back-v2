@@ -1,4 +1,4 @@
-import { Prisma, TransactionMethod, User } from "@prisma/client";
+import { Prisma, Transaction_transactionMethod, User } from "@prisma/client";
 import { HttpException } from "@src/exceptions";
 import { prisma, specialPurchaseTransaction } from "@src/resources";
 import { CouponPurchaseFields } from "@src/interfaces";
@@ -109,7 +109,7 @@ export const purchaseCoupon = async (req: Request, res: Response) => {
   const userIdentity = {
     systemId: req.user.systemId,
     paymentMethod,
-    transactionMethod: "INAPP" as TransactionMethod,
+    transactionMethod: "INAPP" as Transaction_transactionMethod,
   };
 
   const totalPrice = amount * to.length;
