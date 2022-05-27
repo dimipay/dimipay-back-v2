@@ -12,10 +12,10 @@ import { Prisma, User } from "@prisma/client";
 import bcrypt from "bcrypt";
 
 const createTokensFromUser = async (user: Partial<User>) => {
-  const { id, systemId } = user;
+  const { systemId } = user;
   return {
-    accessToken: await issueToken({ id, systemId }, false),
-    refreshToken: await issueToken({ id, systemId }, true),
+    accessToken: await issueToken({ systemId }, false),
+    refreshToken: await issueToken({ systemId }, true),
   };
 };
 
@@ -48,8 +48,6 @@ const registerOrLogin = async (apiData: Partial<UserIdentity>) => {
     accountName: apiData.username,
     name: apiData.name,
     profileImage: apiData.photofile2 || apiData.photofile1,
-    studentNumber: apiData.studentNumber,
-    systemId: apiData.id.toString(),
     isTeacher: ["D", "T"].includes(apiData.user_type),
     phoneNumber: apiData.phone
       ? apiData.phone.startsWith("01")

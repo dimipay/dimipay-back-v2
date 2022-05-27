@@ -21,14 +21,6 @@ export default createService({
       needAuth: true,
     },
     {
-      method: "get",
-      path: "/certkey",
-      handler: controllers.getUserCertkey,
-      description: "결제 요청에 필요한 인증키를 발급합니다.",
-      needAuth: true,
-      permission: ["Student", "Teacher"],
-    },
-    {
       method: "post",
       path: "/approval-code",
       handler: controllers.getUserbyApprovalCode,

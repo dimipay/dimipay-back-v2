@@ -1,7 +1,6 @@
-import { prisma, verify, loadRedis, key } from "@src/resources";
+import { prisma, loadRedis, key } from "@src/resources";
 import { Request, Response } from "express";
 import { HttpException } from "@src/exceptions";
-import { rsa } from "@src/resources";
 import SHA3 from "sha3";
 
 export const getMyInfo = async (req: Request, res: Response) => {
@@ -17,7 +16,6 @@ export const getMyInfo = async (req: Request, res: Response) => {
       accountName: true,
       name: true,
       profileImage: true,
-      studentNumber: true,
       paymentMethods: true,
     },
   });
@@ -30,14 +28,10 @@ export const getUserbySearch = async (req: Request, res: Response) => {
     res.json(
       await prisma.user.findMany({
         where: {
-          OR: [
-            { name: { contains: req.params.search } },
-            { studentNumber: { startsWith: req.params.search } },
-          ],
+          OR: [{ name: { contains: req.params.search } }],
         },
         select: {
           systemId: true,
-          studentNumber: true,
           name: true,
         },
         take: 5,
@@ -45,16 +39,6 @@ export const getUserbySearch = async (req: Request, res: Response) => {
     );
   } catch (e) {
     throw new HttpException(400, e);
-  }
-};
-
-export const getUserCertkey = async (req: Request, res: Response) => {
-  try {
-    return res.json({
-      certkey: await rsa.pubkey({ identity: req.user }),
-    });
-  } catch (e) {
-    throw new HttpException(400, "결제 암호키 생성 실패");
   }
 };
 
@@ -83,7 +67,6 @@ export const getUserbyApprovalCode = async (req: Request, res: Response) => {
         isDisabled: true,
         name: true,
         profileImage: true,
-        studentNumber: true,
         receivedCoupons: true,
       },
     });
