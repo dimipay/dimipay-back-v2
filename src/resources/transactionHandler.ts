@@ -1,4 +1,4 @@
-import { TransactionStatus, Coupon, Prisma, Transaction } from "@prisma/client";
+import { TransactionStatus, Coupon, Prisma } from "@prisma/client";
 import { prisma, loadRedis, key } from "@src/resources";
 import {
   TransactionPaymentMethod,

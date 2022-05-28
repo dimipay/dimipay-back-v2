@@ -21,7 +21,7 @@ const createTokensFromUser = async (user: Partial<User>) => {
 
 const registerOrLogin = async (apiData: Partial<UserIdentity>) => {
   const queriedUser = await prisma.user.findFirst({
-    where: { systemId: apiData.id.toString() },
+    where: { accountName: apiData.username },
     select: {
       systemId: true,
       accountName: true,

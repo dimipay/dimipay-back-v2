@@ -44,7 +44,7 @@ export const getUserbySearch = async (req: Request, res: Response) => {
 
 export const getUserbyApprovalCode = async (req: Request, res: Response) => {
   try {
-    const { code } = req.body;
+    const { code } = req.params;
 
     const hash = new SHA3(224);
     const redis = await loadRedis();
