@@ -10,6 +10,15 @@ export const getPaymentMethods = async (req: Request, res: Response) => {
       ownerId: user.systemId,
       type: isCreditOnly !== undefined ? "GENERAL" : undefined,
     },
+    select: {
+      createdAt: true,
+      updatedAt: true,
+      type: true,
+      color: true,
+      name: true,
+      ownerId: true,
+      systemId: true,
+    },
   });
 
   res.json({ paymentMethod });

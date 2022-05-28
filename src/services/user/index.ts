@@ -21,15 +21,12 @@ export default createService({
       needAuth: true,
     },
     {
-      method: "post",
-      path: "/approval-code",
+      method: "get",
+      path: "/code/:code",
       handler: controllers.getUserbyApprovalCode,
       description: "일반결제에 필요한 유저 정보를 반환합니다.",
       needAuth: true,
       permission: ["Pos"],
-      validateSchema: {
-        code: Joi.string().required(),
-      },
     },
   ],
 });
