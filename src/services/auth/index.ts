@@ -62,7 +62,7 @@ export default createService({
       description: "인증번호를 발송합니다",
       needAuth: true,
       validateSchema: {
-        studentNumber: Joi.string().required(),
+        phoneNumber: Joi.string().required(),
         pin: Joi.string().required(),
       },
     },
@@ -74,7 +74,7 @@ export default createService({
       needAuth: true,
       validateSchema: {
         smsCode: Joi.string().required(),
-        studentNumber: Joi.string().required(),
+        phoneNumber: Joi.string().required(),
       },
     },
   ],

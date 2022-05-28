@@ -9,7 +9,7 @@ const getProducts = async (productIds: string[]) => {
   const current = new Date();
   return await prisma.product.findMany({
     where: {
-      id: { in: productIds },
+      systemId: { in: productIds },
     },
     include: {
       category: {
@@ -188,7 +188,9 @@ export const paymentApproval = async (
     const productsInfo = await getProducts(productIds);
 
     const orderedProducts = products.map((product) => {
-      const productInfo = productsInfo.find((p) => p.id === product.productId);
+      const productInfo = productsInfo.find(
+        (p) => p.systemId === product.productId
+      );
       const calculatedPrice = calculateProductTotalPrice(
         product.amount,
         productInfo

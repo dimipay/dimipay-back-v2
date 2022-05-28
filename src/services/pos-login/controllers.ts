@@ -64,7 +64,7 @@ export const refreshPosToken = async (req: Request, res: Response) => {
       throw new HttpException(400, "리프레시 토큰이 아닙니다.");
     }
     const payload = await verify(refreshToken);
-    const identity = await prisma.user.findUnique({
+    const identity = await prisma.posDevice.findUnique({
       where: { id: payload.id },
     });
     return res.json(await createTokens(identity));

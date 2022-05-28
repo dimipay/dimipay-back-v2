@@ -22,22 +22,11 @@ export default createService({
     },
     {
       method: "get",
-      path: "/certkey",
-      handler: controllers.getUserCertkey,
-      description: "결제 요청에 필요한 인증키를 발급합니다.",
-      needAuth: true,
-      permission: ["Student", "Teacher"],
-    },
-    {
-      method: "post",
-      path: "/approval-code",
+      path: "/code/:code",
       handler: controllers.getUserbyApprovalCode,
       description: "일반결제에 필요한 유저 정보를 반환합니다.",
       needAuth: true,
       permission: ["Pos"],
-      validateSchema: {
-        code: Joi.string().required(),
-      },
     },
   ],
 });

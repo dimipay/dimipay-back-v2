@@ -60,14 +60,17 @@ export const getPinMatchedUser = async (req: Request, res: Response) => {
 };
 
 export const requestSmsVerification = async (req: Request, res: Response) => {
-  const body: {
-    studentNumber: string;
-    pin: string;
-  } = req.body;
-
   try {
+    const body: {
+      phoneNumber: string;
+      pin: string;
+    } = req.body;
     const user = await prisma.user.findFirst({
-      where: { studentNumber: body.studentNumber },
+      where: {
+        phoneNumber: {
+          endsWith: body.phoneNumber,
+        },
+      },
       select: {
         phoneNumber: true,
         isDisabled: true,
@@ -76,7 +79,7 @@ export const requestSmsVerification = async (req: Request, res: Response) => {
       },
     });
 
-    if (!user) throw new HttpException(400, "일치하는 학번을 찾을 수 없어요");
+    if (!user) throw new HttpException(400, "일치하는 사용자 찾을 수 없어요");
     if (user.isDisabled)
       throw new HttpException(
         400,
@@ -130,6 +133,7 @@ export const requestSmsVerification = async (req: Request, res: Response) => {
       if (e instanceof HttpException) throw e;
       throw new HttpException(e.status, e.message);
     }
+    console.log(e);
     throw new HttpException(400, "로그인할 수 없습니다.");
   }
 };
@@ -138,18 +142,17 @@ export const validateSmsVerification = async (req: Request, res: Response) => {
   try {
     const body: {
       smsCode: string;
-      studentNumber: string;
+      phoneNumber: string;
       systemId?: string;
     } = req.body;
 
     const user = await prisma.user.findFirst({
-      where: { studentNumber: body.studentNumber },
+      where: { phoneNumber: { endsWith: body.phoneNumber } },
       select: {
         systemId: true,
         isDisabled: true,
         name: true,
         profileImage: true,
-        studentNumber: true,
         receivedCoupons: true,
       },
     });
