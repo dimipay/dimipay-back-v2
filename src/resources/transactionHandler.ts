@@ -1,4 +1,4 @@
-import { TransactionStatus, Coupon, Prisma } from "@prisma/client";
+import { TransactionStatus, Coupon, Prisma, Transaction } from "@prisma/client";
 import { prisma, loadRedis, key } from "@src/resources";
 import {
   TransactionPaymentMethod,
@@ -184,7 +184,7 @@ export const useualPurchaseTransaction = async (
 
   const paymentMethod = await prisma.paymentMethod.findFirst({
     where: {
-      id: userIdentity.paymentMethod,
+      systemId: userIdentity.paymentMethod,
     },
     include: {
       generalCard: true,
@@ -329,7 +329,7 @@ export const specialPurchaseTransaction = async (
 
   const paymentMethod = await prisma.paymentMethod.findFirst({
     where: {
-      id: userIdentity.paymentMethod,
+      systemId: userIdentity.paymentMethod,
     },
     include: {
       generalCard: true,
