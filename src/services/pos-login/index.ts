@@ -15,7 +15,6 @@ export default createService({
       validateSchema: {
         passcode: Joi.string().required().length(4),
       },
-      permission: ["Pos"],
     },
     {
       method: "post",
@@ -23,7 +22,6 @@ export default createService({
       description: "",
       handler: controllers.refreshPosToken,
       needAuth: false,
-      permission: ["Pos"],
     },
   ],
 });

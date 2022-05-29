@@ -61,6 +61,7 @@ export default createService({
       handler: posControllers.requestSmsVerification,
       description: "인증번호를 발송합니다",
       needAuth: true,
+      permission: ["Pos"],
       validateSchema: {
         phoneNumber: Joi.string().required(),
         pin: Joi.string().required(),
@@ -72,6 +73,7 @@ export default createService({
       handler: posControllers.validateSmsVerification,
       description: "인증번호를 확인합니다",
       needAuth: true,
+      permission: ["Pos"],
       validateSchema: {
         smsCode: Joi.string().required(),
         phoneNumber: Joi.string().required(),

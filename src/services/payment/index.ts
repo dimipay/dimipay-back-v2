@@ -48,7 +48,6 @@ export default createService({
       needAuth: true,
       path: "/token",
       description: "앱 결제를 위한 코드를 생성합니다.",
-      permission: ["Student", "Teacher"],
       middlewares: [paymentToken],
       validateSchema: {
         paymentMethod: Joi.string().required(),
@@ -60,7 +59,6 @@ export default createService({
       needAuth: true,
       path: "/token/refresh",
       description: "앱 결제를 위한 코드를 리프레시합니다.",
-      permission: ["Student", "Teacher"],
       validateSchema: {
         code: Joi.string().required(),
         paymentMethod: Joi.string().required(),

@@ -14,7 +14,6 @@ export default createService({
         "받은 전체 쿠폰을 조회합니다. (이미 사용된 쿠폰, 만료된 쿠폰 포함)",
       handler: controllers.getAllReceivedCoupons,
       needAuth: true,
-      permission: ["Student", "Teacher"],
     },
     {
       method: "get",
@@ -22,7 +21,6 @@ export default createService({
       description: "현재 사용 가능한 쿠폰을 조회합니다.",
       handler: controllers.getVaildReceivedCoupons,
       needAuth: true,
-      permission: ["Student", "Teacher"],
     },
     {
       method: "get",
@@ -36,7 +34,7 @@ export default createService({
       path: "/purchase",
       handler: controllers.purchaseCoupon,
       needAuth: true,
-      permission: ["Teacher", "Student"],
+      permission: ["Teacher"],
       middlewares: [paymentToken],
       validateSchema: {
         purchaseType: Joi.string().required(),
