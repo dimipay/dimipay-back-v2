@@ -1,11 +1,11 @@
 import { HttpException } from "@src/exceptions";
-import { prisma, loadRedis, key, csprng, verify } from "@src/resources";
+import { loadRedis, key, csprng } from "@src/resources";
 import { Response, Request } from "express";
-import bcrypt from "bcrypt";
 import { dotcode } from "@src/resources/dotcode";
 import SHA3 from "sha3";
 
 const issueCode = async (paymentMethod: string, systemId: string) => {
+  const TIME_LIMIT = 60;
   const code = csprng().toString(16).padStart(8, "0");
 
   const hash = new SHA3(224);
@@ -17,9 +17,13 @@ const issueCode = async (paymentMethod: string, systemId: string) => {
     redisKey,
     JSON.stringify({ paymentMethod, systemId: systemId })
   );
-  await redis.expire(redisKey, 64);
+  await redis.expire(redisKey, TIME_LIMIT + 5);
 
-  return { code, codeBuffer: (await dotcode(code)).toString("base64") };
+  return {
+    code,
+    timeLimitSeconds: TIME_LIMIT,
+    codeBuffer: (await dotcode(code)).toString("base64"),
+  };
 };
 
 export const getApprovalCode = async (req: Request, res: Response) => {

@@ -100,7 +100,7 @@ export const requestSmsVerification = async (req: Request, res: Response) => {
         "문자인증이 비활성화되어있어요, 앱에서 문자인증을 설정해야 사용할 수 있어요."
       );
 
-    const otp = csprng().toString().substr(0, 4);
+    const otp = csprng().toString().padStart(4, "0");
 
     await sendSms(user.phoneNumber, `[디미페이] 현장결제 인증번호 ${otp}`);
 
