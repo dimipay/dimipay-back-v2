@@ -16,7 +16,17 @@ export const getMyInfo = async (req: Request, res: Response) => {
       accountName: true,
       name: true,
       profileImage: true,
-      paymentMethods: true,
+      paymentMethods: {
+        select: {
+          createdAt: true,
+          updatedAt: true,
+          type: true,
+          color: true,
+          name: true,
+          ownerId: true,
+          systemId: true,
+        },
+      },
     },
   });
 
