@@ -18,8 +18,25 @@ export const getPaymentMethods = async (req: Request, res: Response) => {
       name: true,
       ownerId: true,
       systemId: true,
+      prepaidCard: {
+        select: {
+          balance: true,
+        },
+      },
     },
   });
 
-  res.json({ paymentMethod });
+  const methods = paymentMethod.map((method) => {
+    const { prepaidCard, ...methodData } = method;
+    if (method.prepaidCard) {
+      return {
+        ...methodData,
+        balance: method.prepaidCard.balance,
+      };
+    } else {
+      return methodData;
+    }
+  });
+
+  res.json({ methods });
 };
