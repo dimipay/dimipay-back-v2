@@ -1,5 +1,5 @@
 import { HttpException } from "@src/exceptions";
-import { prisma, useualPurchaseTransaction } from "@src/resources";
+import { prisma, generalPurchaseTransaction } from "@src/resources";
 import { Response } from "express";
 import { ReqWithBody } from "@src/types";
 import { Product, Category, DiscountPolicy } from "@prisma/client";
@@ -202,7 +202,7 @@ export const paymentApproval = async (
       };
     });
     const totalPrice = orderedProducts.reduce((acc, cur) => acc + cur.price, 0);
-    const receipt = await useualPurchaseTransaction(userIdentity, totalPrice, {
+    const receipt = await generalPurchaseTransaction(userIdentity, totalPrice, {
       orderedProducts,
       pos: req.pos,
     });
