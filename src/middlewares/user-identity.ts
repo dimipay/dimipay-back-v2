@@ -1,49 +1,48 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response, NextFunction, Router } from "express";
 import { verify as veriToken, getTokenType } from "@src/resources";
 import { HttpException } from "@src/exceptions";
 import { prisma } from "@src/resources";
+import { Route, services } from "../services";
 
-const attachIdentity = async (
-  req: Request,
-  Res: Response,
-  next: NextFunction
-) => {
-  if (!req.token) {
-    return next();
-  }
-  const { token } = req;
-  try {
-    if ((await getTokenType(token)) !== "ACCESS") {
-      throw new HttpException(401, "액세스 토큰이 아닙니다.");
+type ServiceName = typeof services[number];
+export default (service: ServiceName | undefined, route: Route) =>
+  async (req: Request, Res: Response, next: NextFunction) => {
+    if (!req.token) {
+      return next();
+    } else if (!route.needAuth) {
+      return next();
     }
-    const identity = await veriToken(token);
-    if (identity) {
-      if (identity.systemId) {
-        req.user = await prisma.user.findFirst({
-          where: { systemId: identity.systemId },
-        });
+    const { token } = req;
+    try {
+      if ((await getTokenType(token)) !== "ACCESS") {
+        throw new HttpException(401, "액세스 토큰이 아닙니다.");
       }
-      if (req.user) {
-        if (req.user.isDisabled) {
-          throw new HttpException(401, "사용 중지된 계정입니다.");
+      const identity = await veriToken(token);
+      if (identity) {
+        if (identity.systemId) {
+          req.user = await prisma.user.findFirst({
+            where: { systemId: identity.systemId },
+          });
         }
-      } else {
-        req.pos = await prisma.posDevice.findFirst({
-          where: { id: identity.id },
-        });
-        if (req.pos) {
-          if (req.pos.disabled) {
-            throw new HttpException(401, "사용 중지된 POS입니다.");
+        if (req.user) {
+          if (req.user.isDisabled) {
+            throw new HttpException(401, "사용 중지된 계정입니다.");
           }
         } else {
-          throw new HttpException(401, "잘못된 AccessToken입니다.");
+          req.pos = await prisma.posDevice.findFirst({
+            where: { id: identity.id },
+          });
+          if (req.pos) {
+            if (req.pos.disabled) {
+              throw new HttpException(401, "사용 중지된 POS입니다.");
+            }
+          } else {
+            throw new HttpException(401, "잘못된 AccessToken입니다.");
+          }
         }
       }
+      return next();
+    } catch (e) {
+      return next(e);
     }
-    return next();
-  } catch (e) {
-    return next(e);
-  }
-};
-
-export default attachIdentity;
+  };

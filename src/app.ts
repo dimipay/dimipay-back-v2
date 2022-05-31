@@ -35,7 +35,6 @@ class App {
         reqKey: "token",
       })
     );
-    this.app.use(attachIdentity);
   }
   private initializeMorgan() {
     const morganFormat = `HTTP/:http-version :method :remote-addr 

@@ -10,7 +10,7 @@ import {
 import j2s from "joi-to-swagger";
 import { join as pathJoin } from "path";
 import { HTTPMethod, ApiAuthType } from "../types";
-import { checkPermissions, validator } from "../middlewares";
+import { checkPermissions, validator, attachIdentity } from "../middlewares";
 import swaggerUi from "swagger-ui-express";
 import defaultSwagger from "@src/resources/swagger/default-swagger.json";
 
@@ -64,6 +64,7 @@ const createRouter = (services: Service[]) => {
       router[route.method](
         pathJoin(service.baseURL, route.path),
         ...(route.middlewares ? route.middlewares.map(wrapper) : []),
+        wrapper(attachIdentity(service.code, route)),
         wrapper(checkPermissions(service.code, route)),
         ...(route.validateSchema
           ? [validator(Joi.object(route.validateSchema))]
