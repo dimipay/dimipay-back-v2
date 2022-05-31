@@ -3,7 +3,7 @@ import { prisma, loadRedis, key } from "@src/resources";
 import {
   TransactionPaymentMethod,
   ApprovalUserIdentity,
-  UseualPurchase,
+  GeneralPurchase,
   SpecialPurchase,
 } from "@src/interfaces";
 import { TransactionException, HttpException } from "@src/exceptions";
@@ -170,10 +170,10 @@ const couponProcess = async (
   }
 };
 
-export const useualPurchaseTransaction = async (
+export const generalPurchaseTransaction = async (
   userIdentity: ApprovalUserIdentity,
   totalPrice: any,
-  products: UseualPurchase,
+  products: GeneralPurchase,
   hasCoupons = true
 ) => {
   const user = await prisma.user.findFirst({
@@ -194,6 +194,13 @@ export const useualPurchaseTransaction = async (
 
   const productIds = products.orderedProducts.map((product) => {
     return { id: product.product.id };
+  });
+
+  const purchaseDetail = products.orderedProducts.map((product) => {
+    return {
+      systemId: product.productId,
+      amount: product.amount,
+    };
   });
 
   const redis = await loadRedis();
@@ -264,6 +271,8 @@ export const useualPurchaseTransaction = async (
           products: {
             connect: productIds,
           },
+          purchaseDetail: purchaseDetail,
+          purchaseType: "GENERAL",
         },
       });
       return receipt;
@@ -392,8 +401,8 @@ export const specialPurchaseTransaction = async (
           coupon: {
             connect: usedCouponIds,
           },
-          specialPurchase: JSON.stringify(products.purchaseId),
-          specialPurchaseType: products.purchaseType,
+          purchaseDetail: products.purchaseId,
+          purchaseType: products.purchaseType,
         },
       });
       await redis.publish(
@@ -428,8 +437,8 @@ export const specialPurchaseTransaction = async (
               id: paymentMethod.id,
             },
           },
-          specialPurchase: JSON.stringify(products.purchaseId),
-          specialPurchaseType: products.purchaseType,
+          purchaseDetail: products.purchaseId,
+          purchaseType: products.purchaseType,
         },
       });
       await redis.publish(
