@@ -23,7 +23,7 @@ export default createService({
       },
     },
     {
-      method: "post",
+      method: "get",
       path: "/refresh",
       handler: controllers.refreshAccessToken,
       description:
