@@ -279,7 +279,10 @@ export const generalPurchaseTransaction = async (
     });
     await redis.publish(
       redisKey,
-      JSON.stringify({ status: receipt.status, transactionId: receipt.id })
+      JSON.stringify({
+        status: receipt.status,
+        transactionId: receipt.systemId,
+      })
     );
     return receipt;
   } catch (e) {
@@ -311,7 +314,10 @@ export const generalPurchaseTransaction = async (
     });
     await redis.publish(
       redisKey,
-      JSON.stringify({ status: receipt.status, transactionId: receipt.id })
+      JSON.stringify({
+        status: receipt.status,
+        transactionId: receipt.systemId,
+      })
     );
     if (e instanceof TransactionException) {
       throw new HttpException(402, `${e.status} ${e.message}`);
@@ -407,7 +413,10 @@ export const specialPurchaseTransaction = async (
       });
       await redis.publish(
         redisKey,
-        JSON.stringify({ status: receipt.status, transactionId: receipt.id })
+        JSON.stringify({
+          status: receipt.status,
+          transactionId: receipt.systemId,
+        })
       );
       return receipt;
     });
@@ -443,7 +452,10 @@ export const specialPurchaseTransaction = async (
       });
       await redis.publish(
         redisKey,
-        JSON.stringify({ status: receipt.status, transactionId: receipt.id })
+        JSON.stringify({
+          status: receipt.status,
+          transactionId: receipt.systemId,
+        })
       );
       throw new HttpException(402, `${e.status} ${e.message}`);
     } else {
