@@ -37,11 +37,24 @@ class App {
     );
   }
   private initializeMorgan() {
-    const morganFormat = `HTTP/:http-version :method :remote-addr 
-      :url :remote-user :status :res[content-length] 
-      :referrer :user-agent :response-time ms`;
-
-    this.app.use(morgan(morganFormat, { stream: httpLogStream }));
+    this.app.use(
+      morgan(
+        (tokens, req, res) => {
+          return [
+            `HTTP/${tokens["http-version"](req, res)}`,
+            tokens.method(req, res),
+            req.headers["x-forwarded-for"] || req.ip,
+            tokens.url(req, res),
+            tokens["remote-user"](req, res),
+            tokens.status(req, res),
+            `USER/${req.user ? req.user.id : "null"}`,
+            tokens["user-agent"](req, res),
+            `${tokens["response-time"](req, res)} ms`,
+          ].join(" ");
+        },
+        { stream: httpLogStream }
+      )
+    );
   }
 }
 export default App;
