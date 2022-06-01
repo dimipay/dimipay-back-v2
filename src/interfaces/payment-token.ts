@@ -1,4 +1,4 @@
-import { SpecialPurchaseType } from "@prisma/client";
+import { PurchaseType } from "@prisma/client";
 
 export interface GeneralPaymentToken {
   paymentMethod: string;
@@ -9,7 +9,7 @@ export interface GeneralPaymentToken {
 }
 
 export interface SpecialPaymentToken {
-  purchaseType: SpecialPurchaseType;
+  purchaseType: PurchaseType;
   paymentMethod: string;
   pin?: string;
   bioKey?: string;
