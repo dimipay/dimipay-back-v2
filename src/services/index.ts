@@ -63,9 +63,9 @@ const createRouter = (services: Service[]) => {
     service.routes.forEach((route) => {
       router[route.method](
         pathJoin(service.baseURL, route.path),
-        ...(route.middlewares ? route.middlewares.map(wrapper) : []),
         wrapper(attachIdentity(service.code, route)),
         wrapper(checkPermissions(service.code, route)),
+        ...(route.middlewares ? route.middlewares.map(wrapper) : []),
         ...(route.validateSchema
           ? [validator(Joi.object(route.validateSchema))]
           : []),
