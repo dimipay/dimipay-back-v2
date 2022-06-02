@@ -9,7 +9,6 @@ import {
 
 export interface ApprovalProduct {
   productId: string;
-  amount: number;
   product?: Product & {
     category: Category & {
       discountPolicy: DiscountPolicy[];
@@ -17,6 +16,9 @@ export interface ApprovalProduct {
     excludedDiscountPolicy: DiscountPolicy[];
     targettedDiscountPolicy: DiscountPolicy[];
   };
+  amount: number;
+  unit?: number; // 해당 거래의 상품 단가
+  total?: number; // 해당 거래의 상품 총 가격
 }
 
 export interface ApprovalUserIdentity {
@@ -37,7 +39,14 @@ export interface GeneralPurchase {
 }
 
 export interface SpecialPurchase {
-  purchaseId: string[];
+  purchaseIds: string[];
   purchaseType: PurchaseType;
   pos?: PosDevice;
+}
+
+export interface GeneralPurchaseDetail {
+  systemId: string;
+  amount: number;
+  unit: number;
+  total: number;
 }

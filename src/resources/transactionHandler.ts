@@ -174,7 +174,7 @@ export const generalPurchaseTransaction = async (
   userIdentity: ApprovalUserIdentity,
   totalPrice: any,
   products: GeneralPurchase,
-  hasCoupons = true
+  canHaveCoupons = true
 ) => {
   const user = await prisma.user.findFirst({
     where: {
@@ -200,6 +200,8 @@ export const generalPurchaseTransaction = async (
     return {
       systemId: product.productId,
       amount: product.amount,
+      unit: product.unit,
+      total: product.total,
     };
   });
 
@@ -221,14 +223,14 @@ export const generalPurchaseTransaction = async (
         // 쿠폰을 적용하고, 카드로 승인할 금액과 적용된 쿠폰을 반환합니다.
         userIdentity.coupons,
         totalPrice,
-        hasCoupons
+        canHaveCoupons
       );
 
       const { status: approvalStatus, isCouponOnly } = await approveTransaction(
         // 카드 거래를 승인합니다.
         approvalAmount,
         paymentMethod,
-        hasCoupons
+        canHaveCoupons
       );
 
       // 상품 재고 차감
@@ -275,6 +277,7 @@ export const generalPurchaseTransaction = async (
           purchaseType: "GENERAL",
         },
       });
+      delete receipt.id;
       return receipt;
     });
     await redis.publish(
@@ -407,10 +410,11 @@ export const specialPurchaseTransaction = async (
           coupon: {
             connect: usedCouponIds,
           },
-          purchaseDetail: products.purchaseId,
+          purchaseDetail: products.purchaseIds,
           purchaseType: products.purchaseType,
         },
       });
+      delete receipt.id;
       await redis.publish(
         redisKey,
         JSON.stringify({
@@ -446,7 +450,7 @@ export const specialPurchaseTransaction = async (
               id: paymentMethod.id,
             },
           },
-          purchaseDetail: products.purchaseId,
+          purchaseDetail: products.purchaseIds,
           purchaseType: products.purchaseType,
         },
       });
