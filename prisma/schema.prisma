@@ -8,6 +8,12 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model UserPassword {
+  id           Int    @id @default(autoincrement())
+  accountName  String @unique
+  passwordHash String
+}
+
 model User {
   id                  Int             @id @default(autoincrement())
   systemId            String          @unique @default(uuid())

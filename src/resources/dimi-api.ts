@@ -1,9 +1,9 @@
 import axios from "axios";
 import config from "@src/config";
 import { LoginInfo, UserIdentity } from "@src/interfaces";
+import { prisma } from "@src/resources";
 import { HttpException } from "@src/exceptions";
-import { v4 as uuidv4 } from "uuid";
-import { DimiUserType, Gender } from "@src/types";
+import bcrypt from "bcrypt";
 
 const apiRouter = {
   getIdentity: "/users/identify",
@@ -19,57 +19,40 @@ const api = axios.create({
   },
 });
 
-export const _getIdentity = async (
-  account: LoginInfo
-): Promise<{ apiData: UserIdentity; status: number }> => {
-  try {
-    const { username, password } = account;
-    const { data: apiData, status } = await api.get(apiRouter.getIdentity, {
-      params: { username, password },
-    });
-    if (apiData.user_type === "S") {
-      const { data: studentInfo, status: studentInfoStatus } = await api.get(
-        `${apiRouter.getStudentInfo}/${apiData.username}`
-      );
-      apiData.studentNumber = studentInfo.serial;
-    } else {
-      apiData.studentNumber = null;
-    }
-    return { apiData, status };
-  } catch (e) {
-    if (e.response.status === 404)
-      throw new HttpException(403, "아이디 또는 비밀번호가 일치하지 않습니다.");
-    throw new HttpException(e.response.status, e.message);
-  }
-};
-
 export const getIdentity = async (
   account: LoginInfo
-): Promise<{ apiData: UserIdentity; status: number }> => {
-  try {
-    const apiData = {
-      id: 3,
+): Promise<Partial<UserIdentity>> => {
+  const userPassword = await prisma.userPassword.findFirst({
+    where: { accountName: account.username },
+  });
+  if (userPassword) {
+    const userValidation = bcrypt.compareSync(
+      account.password,
+      userPassword.passwordHash
+    )
+      ? true
+      : false;
+    if (userValidation) {
+      const userIdentity = {
+        username: account.username,
+      };
+      return userIdentity;
+    } else {
+      throw new HttpException(401, "패스워드가 일치하지 않습니다.");
+    }
+  } else {
+    const userPassword = await prisma.userPassword.create({
+      data: {
+        accountName: account.username,
+        passwordHash: bcrypt.hashSync(account.password, 10),
+      },
+    });
+    const userIdentity = {
       username: account.username,
-      email: `${account.username}@dimipay.io`,
       name: "최재현",
-      nick: "최재현",
-      gender: "M" as Gender,
-      user_type: "S" as DimiUserType,
-      studentNumber: null as any, // 학번
-      birthdate: null as any,
-      phone: null as any,
-      status: 200,
-      photofile1: null as any,
-      photofile2: null as any,
-      created_at: new Date().toDateString(),
-      updated_at: new Date().toDateString(),
-      password_hash: null as any,
-      sso_token: null as any,
+      photofile1: "",
+      user_type: "S" as UserIdentity["user_type"],
     };
-    return { apiData, status: 200 };
-  } catch (e) {
-    if (e.response.status === 404)
-      throw new HttpException(403, "아이디 또는 비밀번호가 일치하지 않습니다.");
-    throw new HttpException(e.response.status, e.message);
+    return userIdentity;
   }
 };

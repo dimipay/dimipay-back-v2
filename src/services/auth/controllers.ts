@@ -19,9 +19,9 @@ const createTokensFromUser = async (user: Partial<User>) => {
   };
 };
 
-const registerOrLogin = async (apiData: Partial<UserIdentity>) => {
+const registerOrLogin = async (userIdentity: Partial<UserIdentity>) => {
   const queriedUser = await prisma.user.findFirst({
-    where: { accountName: apiData.username },
+    where: { accountName: userIdentity.username },
     select: {
       systemId: true,
       accountName: true,
@@ -45,13 +45,13 @@ const registerOrLogin = async (apiData: Partial<UserIdentity>) => {
   }
 
   const mappedUser: Prisma.UserCreateInput = {
-    accountName: apiData.username,
-    name: apiData.name,
-    profileImage: apiData.photofile2 || apiData.photofile1,
-    isTeacher: ["D", "T"].includes(apiData.user_type),
-    phoneNumber: apiData.phone
-      ? apiData.phone.startsWith("01")
-        ? "+82 " + apiData.phone.slice(1)
+    accountName: userIdentity.username,
+    name: userIdentity.name,
+    profileImage: userIdentity.photofile2 || userIdentity.photofile1,
+    isTeacher: ["D", "T"].includes(userIdentity.user_type),
+    phoneNumber: userIdentity.phone
+      ? userIdentity.phone.startsWith("01")
+        ? "+82 " + userIdentity.phone.slice(1)
         : null
       : null,
   };
@@ -67,11 +67,11 @@ const registerOrLogin = async (apiData: Partial<UserIdentity>) => {
 export const identifyUser = async (req: Request, res: Response) => {
   const body: LoginInfo = req.body;
   try {
-    const { apiData, status } = await getIdentity(body);
+    const userIdentity = await getIdentity(body);
     // if (body.username == body.password) {
     //   throw new HttpException(400, "아이디와 비밀번호가 동일합니다.");
     // }
-    const { user, isFirstVisit } = await registerOrLogin(apiData);
+    const { user, isFirstVisit } = await registerOrLogin(userIdentity);
     if (isFirstVisit) {
       if (body.pin && body.deviceUid) {
         await prisma.user.update({
