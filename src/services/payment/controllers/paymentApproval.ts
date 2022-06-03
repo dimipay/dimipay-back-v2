@@ -131,24 +131,17 @@ const getProducts = async (productIds: string[]) => {
   });
 };
 
-const calculatedPrice = (
-  amount: number,
-  originalPrice: number,
-  policy: DiscountPolicy
-) => {
+const calculatedPrice = (originalPrice: number, policy: DiscountPolicy) => {
   if (policy.fixedPrice) {
-    return amount * policy.fixedPrice;
+    return policy.fixedPrice;
   } else if (policy.percentRate) {
     return (
-      amount *
-      Math.floor((originalPrice * (1 - policy.percentRate / 100)) / 10) *
-      10
+      Math.floor((originalPrice * (1 - policy.percentRate / 100)) / 10) * 10
     ); //단위 금액 원단위 절사
   }
 };
 
-const calculateProductTotalPrice = (
-  amount: number,
+const calculateProductUnitPrice = (
   product: Product & {
     category: Category & {
       discountPolicy: DiscountPolicy[];
@@ -159,21 +152,13 @@ const calculateProductTotalPrice = (
 ) => {
   // 할인정책 우선순위. product target policy > product exception policy > category target policy
   if (product.targettedDiscountPolicy.length > 0) {
-    return calculatedPrice(
-      amount,
-      product.price,
-      product.targettedDiscountPolicy[0]
-    );
+    return calculatedPrice(product.price, product.targettedDiscountPolicy[0]);
   } else if (product.excludedDiscountPolicy.length > 0) {
-    return amount * product.price;
+    return product.price;
   } else if (product.category.discountPolicy.length > 0) {
-    return calculatedPrice(
-      amount,
-      product.price,
-      product.category.discountPolicy[0]
-    );
+    return calculatedPrice(product.price, product.category.discountPolicy[0]);
   } else {
-    return amount * product.price;
+    return product.price;
   }
 };
 
@@ -191,17 +176,16 @@ export const paymentApproval = async (
       const productInfo = productsInfo.find(
         (p) => p.systemId === product.productId
       );
-      const calculatedPrice = calculateProductTotalPrice(
-        product.amount,
-        productInfo
-      );
+      const calculatedUnitPrice = calculateProductUnitPrice(productInfo);
+
       return {
         ...product,
         product: productInfo,
-        price: calculatedPrice,
+        unit: calculatedUnitPrice,
+        total: calculatedUnitPrice * product.amount,
       };
     });
-    const totalPrice = orderedProducts.reduce((acc, cur) => acc + cur.price, 0);
+    const totalPrice = orderedProducts.reduce((acc, cur) => acc + cur.total, 0);
     const receipt = await generalPurchaseTransaction(userIdentity, totalPrice, {
       orderedProducts,
       pos: req.pos,

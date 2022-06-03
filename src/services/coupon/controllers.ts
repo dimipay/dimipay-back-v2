@@ -122,7 +122,7 @@ export const purchaseCoupon = async (req: Request, res: Response) => {
       issuerId: req.user.systemId,
     }));
 
-    const purchaseId = coupons.map((coupon) => coupon.id);
+    const purchaseIds = coupons.map((coupon) => coupon.id);
 
     await prisma.coupon.createMany({ data: coupons });
 
@@ -130,7 +130,7 @@ export const purchaseCoupon = async (req: Request, res: Response) => {
       userIdentity,
       totalPrice,
       {
-        purchaseId,
+        purchaseIds,
         purchaseType,
       },
       false
