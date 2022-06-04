@@ -129,6 +129,7 @@ model Category {
   color            String
   discountPolicyId String?
   id               Int              @id @default(autoincrement())
+  IS_DELETED       Boolean          @default(false)
   products         Product[]
   discountPolicy   DiscountPolicy[]
 }
@@ -143,6 +144,7 @@ model Product {
   id                      Int               @id @default(autoincrement())
   categoryId              Int
   systemId                String            @unique @default(uuid())
+  IS_DELETED              Boolean           @default(false)
   category                Category          @relation(fields: [categoryId], references: [id])
   productInOutLog         ProductInOutLog[]
   transaction             Transaction[]
@@ -179,6 +181,7 @@ model PosDevice {
   updatedAt   DateTime      @default(now())
   name        String
   disabled    Boolean       @default(false)
+  IS_DELETED  Boolean       @default(false)
   transaction Transaction[]
 }
 
