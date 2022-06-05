@@ -41,7 +41,7 @@ export const getIdentity = async (
       throw new HttpException(401, "패스워드가 일치하지 않습니다.");
     }
   } else {
-    const userPassword = await prisma.userPassword.create({
+    await prisma.userPassword.create({
       data: {
         accountName: account.username,
         passwordHash: bcrypt.hashSync(account.password, 10),
