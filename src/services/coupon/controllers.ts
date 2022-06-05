@@ -12,7 +12,7 @@ export const getVaildReceivedCoupons = async (req: Request, res: Response) => {
         where: {
           AND: [
             {
-              receiverId: req.user.systemId,
+              receiverId: req.user.id,
             },
             {
               OR: [
@@ -53,7 +53,7 @@ export const getAllReceivedCoupons = async (req: Request, res: Response) => {
     return res.json(
       await prisma.coupon.findMany({
         where: {
-          receiverId: req.user.systemId,
+          receiverId: req.user.id,
         },
         orderBy: {
           usedTransactionId: "asc",
@@ -79,7 +79,7 @@ export const getIssuedCoupons = async (req: Request, res: Response) => {
     return res.json(
       await prisma.coupon.findMany({
         where: {
-          issuerId: req.user.systemId,
+          issuerId: req.user.id,
         },
         include: {
           receiver: {
@@ -110,17 +110,25 @@ export const purchaseCoupon = async (req: Request, res: Response) => {
     transactionMethod: "INAPP" as TransactionMethod,
   };
 
+  const destinationUsers = await prisma.user.findMany({
+    where: {
+      systemId: { in: to },
+    },
+  });
+
   const totalPrice = amount * to.length;
 
   await prisma.$transaction(async (prisma) => {
-    const coupons: Prisma.CouponCreateManyInput[] = to.map((systemId) => ({
-      id: uuidv4(),
-      name: title,
-      amount,
-      expiresAt,
-      receiverId: systemId,
-      issuerId: req.user.systemId,
-    }));
+    const coupons: Prisma.CouponCreateManyInput[] = destinationUsers.map(
+      (destination) => ({
+        id: uuidv4(),
+        name: title,
+        amount,
+        expiresAt,
+        receiverId: destination.id,
+        issuerId: req.user.id,
+      })
+    );
 
     const purchaseIds = coupons.map((coupon) => coupon.id);
 
