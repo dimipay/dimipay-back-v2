@@ -15,25 +15,25 @@ model UserPassword {
 }
 
 model User {
-  id                  Int             @id @default(autoincrement())
-  systemId            String          @unique @default(uuid())
-  createdAt           DateTime        @default(now())
-  updatedAt           DateTime        @default(now()) @updatedAt
-  isDisabled          Boolean         @default(false)
-  accountName         String          @unique
-  name                String
-  isTeacher           Boolean?        @default(false)
-  profileImage        String?
-  paymentPin          String?
-  deviceUid           String?
-  bioKey              String?
-  phoneNumber         String?
-  relatedAdminAccount AdminAccount?
-  issuedCoupons       Coupon[]        @relation("issue")
-  receivedCoupons     Coupon[]        @relation("receive")
-  notice              Notice[]
-  paymentMethods      PaymentMethod[]
-  transactions        Transaction[]
+  id              Int             @id @default(autoincrement())
+  systemId        String          @unique @default(uuid())
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @default(now()) @updatedAt
+  isDisabled      Boolean         @default(false)
+  accountName     String          @unique
+  name            String
+  isTeacher       Boolean?        @default(false)
+  profileImage    String?
+  paymentPin      String?
+  deviceUid       String?
+  bioKey          String?
+  phoneNumber     String?
+  AdminAccount    AdminAccount?
+  issuedCoupons   Coupon[]        @relation("issue")
+  receivedCoupons Coupon[]        @relation("receive")
+  notice          Notice[]
+  paymentMethods  PaymentMethod[]
+  transactions    Transaction[]
 }
 
 model PaymentMethod {
@@ -211,14 +211,14 @@ model Notice {
 }
 
 model AdminAccount {
-  id                   String   @id @default(uuid())
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @default(now())
-  username             String
-  hashedPassword       String
-  description          String?
-  relatedUserSystemUid Int?     @unique
-  relatedUser          User?    @relation(fields: [relatedUserSystemUid], references: [id])
+  id             String   @id @default(uuid())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @default(now())
+  username       String
+  hashedPassword String
+  description    String?
+  relatedUserId  Int?     @unique
+  User           User?    @relation(fields: [relatedUserId], references: [id])
 }
 
 enum PaymentMethodType {

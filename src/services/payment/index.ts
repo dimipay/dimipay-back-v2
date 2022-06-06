@@ -11,6 +11,7 @@ import {
 import { createPrepaidCard } from "./controllers/createPrepaidCard";
 import { registerPaymentPin, resetPaymentPin } from "./controllers/paymentPin";
 import { paymentToken } from "@src/middlewares";
+import { TransactionMethod } from "@prisma/client";
 
 export default createService({
   name: "결제 서비스",
@@ -73,6 +74,21 @@ export default createService({
       path: "/approval",
       description: "실 결제 승인을 요청합니다.",
       permission: ["Pos"],
+      validateSchema: {
+        products: Joi.array()
+          .items(
+            Joi.object({
+              productId: Joi.string().required(),
+              amount: Joi.number().required(),
+            })
+          )
+          .required(),
+        userIdentity: Joi.object({
+          systemId: Joi.string().required(),
+          paymentMethod: Joi.string().required(),
+          transactionMethod: Joi.string().required(),
+        }),
+      },
     },
     {
       method: "post",
