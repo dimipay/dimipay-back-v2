@@ -139,7 +139,8 @@ model Product {
   updatedAt               DateTime          @default(now()) @updatedAt
   name                    String
   barcode                 String?
-  price                   Int
+  purchaseCost            Int
+  sellingPrice            Int
   sellingStopped          Boolean           @default(false)
   id                      Int               @id @default(autoincrement())
   categoryId              Int
