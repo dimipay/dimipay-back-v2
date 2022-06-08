@@ -152,11 +152,17 @@ const calculateProductUnitPrice = (
 ) => {
   // 할인정책 우선순위. product target policy > product exception policy > category target policy
   if (product.targettedDiscountPolicy.length > 0) {
-    return calculatedPrice(product.sellingPrice, product.targettedDiscountPolicy[0]);
+    return calculatedPrice(
+      product.sellingPrice,
+      product.targettedDiscountPolicy[0]
+    );
   } else if (product.excludedDiscountPolicy.length > 0) {
     return product.sellingPrice;
   } else if (product.category.discountPolicy.length > 0) {
-    return calculatedPrice(product.sellingPrice, product.category.discountPolicy[0]);
+    return calculatedPrice(
+      product.sellingPrice,
+      product.category.discountPolicy[0]
+    );
   } else {
     return product.sellingPrice;
   }
