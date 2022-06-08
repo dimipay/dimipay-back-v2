@@ -10,14 +10,6 @@ const config = {
 
   notionToken: process.env.NOTION_TOKEN!,
   notionPageId: process.env.NOTION_PAGE_ID!,
-  cryptoAccessKey: process.env.DIMIPAY_CRYPTO_ACCESS_KEY!,
-  dimipayCrypto: process.env.DIMIPAY_CRYPTO_URL!,
-
-  dimi: {
-    baseUrl: process.env.DIMIAPI_BASEURL!,
-    apiId: process.env.DIMIAPI_ID!,
-    apiPw: process.env.DIMIAPI_PW!,
-  },
 
   navercloud: {
     smsServiceId: process.env.NAVER_SMS_API_SERVICE_ID!,

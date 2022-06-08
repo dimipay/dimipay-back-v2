@@ -1,23 +1,7 @@
-import axios from "axios";
-import config from "@src/config";
 import { LoginInfo, UserIdentity } from "@src/interfaces";
 import { prisma } from "@src/resources";
 import { HttpException } from "@src/exceptions";
 import bcrypt from "bcrypt";
-
-const apiRouter = {
-  getIdentity: "/users/identify",
-  getStudentInfo: "/user-students",
-};
-
-const api = axios.create({
-  baseURL: config.dimi.baseUrl,
-  headers: {
-    Authorization: `Basic ${Buffer.from(
-      `${config.dimi.apiId}:${config.dimi.apiPw}`
-    ).toString("base64")}`,
-  },
-});
 
 export const getIdentity = async (
   account: LoginInfo
