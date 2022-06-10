@@ -10,14 +10,14 @@ export default createService({
       path: "/barcodeless",
       handler: getBarcodelessProducts,
       needAuth: true,
-      permission: ["Pos"],
+      // permission: ["Pos"],
     },
     {
       method: "get",
       path: "/:barcode",
       handler: getProductByBarcode,
       needAuth: true,
-      permission: ["Pos"],
+      // permission: ["Pos"],
     },
   ],
 });

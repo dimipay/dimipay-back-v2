@@ -240,6 +240,8 @@ export const generalPurchaseTransaction = async (
             delta: product.amount,
             message: "",
             productId: product.product.id,
+            type: "OUTCOME",
+            unitCost: product.unit,
           };
         });
 
