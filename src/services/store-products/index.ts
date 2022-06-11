@@ -3,7 +3,7 @@ import * as controllers from "./controllers";
 
 export default createService({
   name: "store-products",
-  baseURL: "/store-products",
+  baseURL: "/product/store",
   routes: [
     {
       method: "post",

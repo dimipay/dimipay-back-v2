@@ -177,25 +177,43 @@ export const getProductStoring = async (req: Request, res: Response) => {
     where: { systemId },
     select: { id: true },
   });
-  const outcome = await prisma.productInOutLog.aggregate({
-    _sum: {
-      delta: true,
-    },
-    where: {
-      productId: id,
-      type: "OUTCOME",
-    },
-  });
 
-  const income = await prisma.productInOutLog.aggregate({
-    _sum: {
-      delta: true,
-    },
-    where: {
-      productId: id,
-      type: "INCOME",
-    },
+  const [income, outcome] = await Promise.all([
+    prisma.productInOutLog.groupBy({
+      by: ["productId"],
+      where: {
+        type: "INCOME",
+      },
+      _sum: {
+        delta: true,
+      },
+    }),
+    prisma.productInOutLog.groupBy({
+      by: ["productId"],
+      where: {
+        type: "OUTCOME",
+      },
+      _sum: {
+        delta: true,
+      },
+    }),
+  ]);
+  const stock = income.map((income) => {
+    const out = outcome.find(
+      (outcome) => income.productId === outcome.productId
+    );
+    if (out && out._sum) {
+      return {
+        productId: income.productId,
+        stock: income._sum.delta - out._sum.delta,
+      };
+    } else {
+      return {
+        productId: income.productId,
+        stock: income._sum.delta,
+      };
+    }
   });
-  const stock = income._sum.delta - outcome._sum.delta;
+  // const stock = income._sum.delta - outcome._sum.delta;
   return res.json(stock);
 };
