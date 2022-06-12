@@ -326,6 +326,7 @@ export const paymentApproval = async (
         `data: ${JSON.stringify({
           status: "SUCCESS",
           memo: deposit.memo,
+          transactionId: receipt.systemId,
         })}` + "\n\n"
       );
       client.quit();
