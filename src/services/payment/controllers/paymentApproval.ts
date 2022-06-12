@@ -275,7 +275,7 @@ export const paymentApproval = async (
       chargePrepaidCard(
         config.defaultApproval.paymentMethod,
         deposit.amount,
-        "현금 입금"
+        "CASH_DEPOSIT"
       );
       if (deposit.amount <= totalPrice) {
         const receipt = await prisma.transaction.create({
