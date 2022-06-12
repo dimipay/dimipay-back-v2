@@ -133,7 +133,7 @@ export default createService({
     {
       method: "post",
       handler: depositHook,
-      needAuth: true,
+      needAuth: false,
       path: "/deposit",
       description: "입금 여부를 확인받는 webhook입니다.",
     },
