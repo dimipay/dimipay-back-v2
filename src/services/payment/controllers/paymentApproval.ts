@@ -177,7 +177,7 @@ export const paymentApproval = async (
   const TIMEOUT = 60000;
   if (!req.body.userIdentity) {
     req.body.userIdentity = {
-      systemId: config.defaultApproval.paymentMethod,
+      systemId: config.defaultApproval.user,
       paymentMethod: config.defaultApproval.paymentMethod,
       transactionMethod: "APP_QR",
     };
