@@ -179,6 +179,9 @@ export const paymentApproval = async (req: Request, res: Response) => {
   const client = await loadRedis();
   const redisKey = "approval-products";
   const products = JSON.parse(await client.get(redisKey));
+  if (!products) {
+    throw new HttpException(400, "잘못된 요청입니다.");
+  }
   await client.del(redisKey);
   const TIMEOUT = 60000;
   const userIdentity = {
@@ -259,7 +262,7 @@ export const paymentApproval = async (req: Request, res: Response) => {
           },
           paymentMethod: {
             connect: {
-              systemId: req.body.userIdentity.paymentMethod,
+              systemId: userIdentity.paymentMethod,
             },
           },
           products: {
@@ -302,7 +305,7 @@ export const paymentApproval = async (req: Request, res: Response) => {
             },
             paymentMethod: {
               connect: {
-                systemId: req.body.userIdentity.paymentMethod,
+                systemId: userIdentity.paymentMethod,
               },
             },
             products: {
