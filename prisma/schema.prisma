@@ -154,13 +154,16 @@ model Product {
 }
 
 model ProductInOutLog {
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-  delta     Int
-  message   String?
-  id        Int      @id @default(autoincrement())
-  productId Int
-  product   Product  @relation(fields: [productId], references: [id])
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @default(now()) @updatedAt
+  delta         Int
+  message       String?
+  id            Int              @id @default(autoincrement())
+  productId     Int
+  type          ProductInOutType
+  unitCost      Int
+  product       Product          @relation(fields: [productId], references: [id])
+  StoreProducts StoreProducts[]  @relation("storing")
 }
 
 model DiscountPolicy {
@@ -212,14 +215,28 @@ model Notice {
 }
 
 model AdminAccount {
-  id             String   @id @default(uuid())
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @default(now())
+  id             String          @id @default(uuid())
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @default(now())
   username       String
   hashedPassword String
   description    String?
-  relatedUserId  Int?     @unique
-  User           User?    @relation(fields: [relatedUserId], references: [id])
+  relatedUserId  Int?            @unique
+  User           User?           @relation(fields: [relatedUserId], references: [id])
+  Storeing       StoreProducts[]
+}
+
+model StoreProducts {
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @default(now()) @updatedAt
+  id           Int               @id @default(autoincrement())
+  systemId     String            @unique @default(uuid())
+  workerId     String
+  totalCost    Int
+  storeDate    DateTime          @default(now())
+  title        String            @unique
+  worker       AdminAccount      @relation(fields: [workerId], references: [id])
+  productInLog ProductInOutLog[] @relation("storing")
 }
 
 enum PaymentMethodType {
@@ -252,4 +269,9 @@ enum Transaction_status {
   CANCELED
   PENDING
   ERROR
+}
+
+enum ProductInOutType {
+  INCOME
+  OUTCOME
 }

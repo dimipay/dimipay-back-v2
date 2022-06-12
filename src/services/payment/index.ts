@@ -4,6 +4,7 @@ import { createService } from "..";
 import {
   addGeneralPaymentmethod,
   approvalResponse,
+  depositHook,
   getApprovalCode,
   getPaymentMethods,
   paymentApproval,
@@ -11,7 +12,6 @@ import {
 import { createPrepaidCard } from "./controllers/createPrepaidCard";
 import { registerPaymentPin, resetPaymentPin } from "./controllers/paymentPin";
 import { paymentToken } from "@src/middlewares";
-import { TransactionMethod } from "@prisma/client";
 
 export default createService({
   name: "결제 서비스",
@@ -128,6 +128,13 @@ export default createService({
       needAuth: true,
       path: "/response",
       description: "결제 승인 여부를 응답합니다.",
+    },
+    {
+      method: "post",
+      handler: depositHook,
+      needAuth: true,
+      path: "/deposit",
+      description: "입금 여부를 확인하는 webhook입니다.",
     },
   ],
 });

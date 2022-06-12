@@ -1,4 +1,4 @@
-import { TransactionStatus, Coupon, Prisma, Transaction } from "@prisma/client";
+import { TransactionStatus, Coupon, Prisma } from "@prisma/client";
 import { prisma, loadRedis, key } from "@src/resources";
 import {
   TransactionPaymentMethod,
@@ -43,14 +43,20 @@ export const approveGeneralCard = (
 };
 
 export const chargePrepaidCard = async (
-  paymentMethod: TransactionPaymentMethod,
+  paymentMethodId: string,
   chargeAmount: number,
   method: string
 ) => {
+  const paymentMethod = await prisma.paymentMethod.findFirst({
+    where: { systemId: paymentMethodId },
+    select: {
+      type: true,
+      prepaidCard: true,
+    },
+  });
   if (paymentMethod.type !== "PREPAID") {
     throw new Error("선불카드가 아닙니다.");
   }
-
   const balance = paymentMethod.prepaidCard.balance + chargeAmount;
   await prisma.prepaidCard.update({
     where: {
@@ -109,7 +115,7 @@ const approveTransaction = async (
   } else if (approvalAmount < 0 && hasCoupons) {
     // 쿠폰 금액 페이머니로 적립
     chargePrepaidCard(
-      paymentMethod,
+      paymentMethod.systemId,
       Math.abs(approvalAmount),
       "쿠폰 잔액 적립"
     );
@@ -237,9 +243,11 @@ export const generalPurchaseTransaction = async (
       const productReleases: Prisma.ProductInOutLogCreateManyInput[] =
         products.orderedProducts.map((product) => {
           return {
-            delta: product.amount,
+            delta: product.amount * -1,
             message: "",
             productId: product.product.id,
+            type: "OUTCOME",
+            unitCost: product.unit,
           };
         });
 
