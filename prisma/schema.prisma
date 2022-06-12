@@ -163,7 +163,7 @@ model ProductInOutLog {
   type          ProductInOutType
   unitCost      Int
   product       Product          @relation(fields: [productId], references: [id])
-  StoreProducts StoreProducts[]  @relation("wearing")
+  StoreProducts StoreProducts[]  @relation("storing")
 }
 
 model DiscountPolicy {
@@ -223,7 +223,7 @@ model AdminAccount {
   description    String?
   relatedUserId  Int?            @unique
   User           User?           @relation(fields: [relatedUserId], references: [id])
-  Wearing        StoreProducts[]
+  Storeing       StoreProducts[]
 }
 
 model StoreProducts {
@@ -236,7 +236,7 @@ model StoreProducts {
   storeDate    DateTime          @default(now())
   title        String            @unique
   worker       AdminAccount      @relation(fields: [workerId], references: [id])
-  productInLog ProductInOutLog[] @relation("wearing")
+  productInLog ProductInOutLog[] @relation("storing")
 }
 
 enum PaymentMethodType {
