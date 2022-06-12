@@ -19,9 +19,9 @@ export const depositHook = async (
   res: Response
 ) => {
   const origin = req.get("origin");
-  // if (!origin || origin.split(":")[0] !== config.depositOrigin) {
-  //   throw new HttpException(403, "Invalid origin");
-  // }
+  if (!origin || origin.split(":")[0] !== config.depositOrigin) {
+    throw new HttpException(403, "Invalid origin");
+  }
   try {
     const redis = await loadRedis();
     const redisKey = "deposit-hook";
