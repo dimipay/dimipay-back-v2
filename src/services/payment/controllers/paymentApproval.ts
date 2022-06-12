@@ -1,8 +1,13 @@
 import { HttpException } from "@src/exceptions";
 import { prisma, generalPurchaseTransaction } from "@src/resources";
-import { Response } from "express";
+import { Response, Request } from "express";
 import { ReqWithBody } from "@src/types";
-import { Product, Category, DiscountPolicy } from "@prisma/client";
+import {
+  Product,
+  Category,
+  DiscountPolicy,
+  TransactionMethod,
+} from "@prisma/client";
 import { ApprovalOrder } from "@src/interfaces";
 import { loadRedis, chargePrepaidCard } from "@src/resources";
 import config from "@src/config";
@@ -170,25 +175,24 @@ const calculateProductUnitPrice = (
   }
 };
 
-export const paymentApproval = async (
-  req: ReqWithBody<Partial<ApprovalOrder>>,
-  res: Response
-) => {
+export const paymentApproval = async (req: Request, res: Response) => {
+  const client = await loadRedis();
+  const redisKey = "approval-products";
+  const products = JSON.parse(await client.get(redisKey));
+  await client.del(redisKey);
   const TIMEOUT = 60000;
-  if (!req.body.userIdentity) {
-    req.body.userIdentity = {
-      systemId: config.defaultApproval.user,
-      paymentMethod: config.defaultApproval.paymentMethod,
-      transactionMethod: "APP_QR",
-    };
-  }
+  const userIdentity = {
+    systemId: config.defaultApproval.user,
+    paymentMethod: config.defaultApproval.paymentMethod,
+    transactionMethod: "APP_QR" as TransactionMethod,
+  };
   try {
     //여기서 실 승인
-    const { products, userIdentity } = req.body;
-    const productIds = products.map((product) => product.productId);
+    // const { products, userIdentity } = req.body;
+    const productIds = products.map((product: any) => product.productId);
     const productsInfo = await getProducts(productIds);
 
-    const orderedProducts = products.map((product) => {
+    const orderedProducts = products.map((product: any) => {
       const productInfo = productsInfo.find(
         (p) => p.systemId === product.productId
       );
@@ -201,7 +205,10 @@ export const paymentApproval = async (
         total: calculatedUnitPrice * product.amount,
       };
     });
-    const totalPrice = orderedProducts.reduce((acc, cur) => acc + cur.total, 0);
+    const totalPrice = orderedProducts.reduce(
+      (acc: number, cur: any) => acc + cur.total,
+      0
+    );
 
     // const receipt = await generalPurchaseTransaction(
     //   userIdentity,
@@ -226,7 +233,7 @@ export const paymentApproval = async (
     await client.connect();
     const redisKey = "deposit-hook";
 
-    const productId = orderedProducts.map((product) => {
+    const productId = orderedProducts.map((product: any) => {
       return { id: product.product.id };
     });
 
@@ -241,7 +248,7 @@ export const paymentApproval = async (
           transactionMethod: userIdentity.transactionMethod,
           user: {
             connect: {
-              id: req.user.id,
+              systemId: userIdentity.systemId,
             },
           },
           statusText: "TIMEOUT: 입금시간 초과",
@@ -264,7 +271,6 @@ export const paymentApproval = async (
       res.write(
         `data: ${JSON.stringify({
           status: "TIMEOUT",
-          memo: null,
         })}` + "\n\n"
       );
       return res.end();
@@ -338,5 +344,20 @@ export const paymentApproval = async (
     });
   } catch (e) {
     throw new HttpException(e.status, e.message);
+  }
+};
+
+export const getApprovalProducts = async (
+  req: ReqWithBody<Partial<ApprovalOrder>>,
+  res: Response
+) => {
+  try {
+    const { products } = req.body;
+    const client = await loadRedis();
+    const redisKey = "approval-products";
+    client.set(redisKey, JSON.stringify(products));
+    return res.sendStatus(200);
+  } catch (e) {
+    throw new HttpException(400, "겔제에 실패했습니다.");
   }
 };
