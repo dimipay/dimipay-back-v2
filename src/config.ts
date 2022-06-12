@@ -18,6 +18,12 @@ const config = {
     accessKey: process.env.NAVER_API_ACCESS_KEY!,
     smsSendingNumber: process.env.NAVER_SMS_SENDING_NUMBER!,
   },
+
+  defaultApproval: {
+    user: process.env.DEFAULT_APPROVAL_USER!,
+    paymentMethod: process.env.DEFAULT_APPROVAL_PAYMENTMETHOD!,
+  },
+  depositOrigin: process.env.DEPOSIT_ORIGIN!,
 };
 
 type Config = {

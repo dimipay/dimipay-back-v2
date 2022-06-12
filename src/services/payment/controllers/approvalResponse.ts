@@ -1,16 +1,12 @@
 //Redis Pub/Sub, SSE
 import { HttpException } from "@src/exceptions";
-import { key } from "@src/resources";
-import { createClient } from "redis";
-import config from "@src/config";
+import { key, loadRedis } from "@src/resources";
 import { Request, Response } from "express";
 
 export const approvalResponse = async (req: Request, res: Response) => {
   try {
     const { id } = req.user;
-    const client = createClient({
-      url: config.redisUri,
-    });
+    const client = (await loadRedis()).duplicate();
     await client.connect();
     const redisKey = key.approvalResponse(id);
 
