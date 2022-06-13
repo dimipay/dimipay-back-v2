@@ -286,7 +286,6 @@ export const paymentApproval = async (req: Request, res: Response) => {
         deposit.amount,
         "CASH_DEPOSIT"
       );
-      console.log(deposit.amount, totalPrice);
       if (deposit.amount < totalPrice) {
         const receipt = await prisma.transaction.create({
           data: {
