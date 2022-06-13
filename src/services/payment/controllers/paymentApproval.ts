@@ -274,6 +274,7 @@ export const paymentApproval = async (req: Request, res: Response) => {
       res.write(
         `data: ${JSON.stringify({
           status: "TIMEOUT",
+          transactionId: receipt.systemId,
         })}` + "\n\n"
       );
       return res.end();
@@ -317,6 +318,7 @@ export const paymentApproval = async (req: Request, res: Response) => {
           `data: ${JSON.stringify({
             status: "NOT_ENOUGH_AMOUNT",
             memo: null,
+            transactionId: receipt.systemId,
           })}` + "\n\n"
         );
         client.quit();
