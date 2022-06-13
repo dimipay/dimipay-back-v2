@@ -209,7 +209,7 @@ export const paymentApproval = async (req: Request, res: Response) => {
       };
     });
     const totalPrice = orderedProducts.reduce(
-      (acc: number, cur: any) => acc + cur.total,
+      (acc: number, cur: { total: number }) => acc + cur.total,
       0
     );
 
@@ -286,7 +286,8 @@ export const paymentApproval = async (req: Request, res: Response) => {
         deposit.amount,
         "CASH_DEPOSIT"
       );
-      if (deposit.amount <= totalPrice) {
+      console.log(deposit.amount, totalPrice);
+      if (deposit.amount < totalPrice) {
         const receipt = await prisma.transaction.create({
           data: {
             totalPrice: totalPrice,
@@ -321,25 +322,26 @@ export const paymentApproval = async (req: Request, res: Response) => {
         );
         client.quit();
         return res.end();
-      }
-      const receipt = await generalPurchaseTransaction(
-        userIdentity,
-        totalPrice,
-        {
-          orderedProducts,
-          pos: req.pos,
-        }
-      );
+      } else {
+        const receipt = await generalPurchaseTransaction(
+          userIdentity,
+          totalPrice,
+          {
+            orderedProducts,
+            pos: req.pos,
+          }
+        );
 
-      res.write(
-        `data: ${JSON.stringify({
-          status: "SUCCESS",
-          memo: deposit.memo,
-          transactionId: receipt.systemId,
-        })}` + "\n\n"
-      );
-      client.quit();
-      return res.end();
+        res.write(
+          `data: ${JSON.stringify({
+            status: "SUCCESS",
+            memo: deposit.memo,
+            transactionId: receipt.systemId,
+          })}` + "\n\n"
+        );
+        client.quit();
+        return res.end();
+      }
     });
 
     req.on("close", () => {
