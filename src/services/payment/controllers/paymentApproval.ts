@@ -230,8 +230,12 @@ export const paymentApproval = async (req: Request, res: Response) => {
       "Content-Type": "text/event-stream",
       "Connection": "keep-alive",
       "Cache-Control": "no-cache",
+      "Access-Control-Allow-Headers": "*",
     };
+
     res.writeHead(200, headers);
+    res.write(`event: "PAYMENT"\n\n`);
+
     const client = (await loadRedis()).duplicate();
     await client.connect();
     const redisKey = "deposit-hook";
@@ -279,6 +283,7 @@ export const paymentApproval = async (req: Request, res: Response) => {
       );
       return res.end();
     }, TIMEOUT);
+
     client.subscribe(redisKey, async (message) => {
       clearTimeout(timeout);
       const deposit = JSON.parse(message);
@@ -346,6 +351,7 @@ export const paymentApproval = async (req: Request, res: Response) => {
     });
 
     req.on("close", () => {
+      client.unsubscribe(redisKey);
       return res.end();
     });
   } catch (e) {

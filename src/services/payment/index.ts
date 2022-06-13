@@ -140,7 +140,7 @@ export default createService({
     {
       method: "get",
       handler: paymentApproval,
-      needAuth: false,
+      needAuth: true,
       path: "/deposit",
       description: "승인 여부를 확인하는 SSE입니다.",
     },
