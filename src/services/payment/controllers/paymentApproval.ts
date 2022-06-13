@@ -183,7 +183,7 @@ export const paymentApproval = async (req: Request, res: Response) => {
     throw new HttpException(400, "잘못된 요청입니다.");
   }
   await client.del(redisKey);
-  const TIMEOUT = 60000;
+  const TIMEOUT = 100000;
   const userIdentity = {
     systemId: config.defaultApproval.user,
     paymentMethod: config.defaultApproval.paymentMethod,
