@@ -33,7 +33,7 @@ export const getVaildReceivedCoupons = async (req: Request, res: Response) => {
           createdAt: "desc",
         },
         include: {
-          receiver: {
+          issuer: {
             select: {
               name: true,
               isTeacher: true,
