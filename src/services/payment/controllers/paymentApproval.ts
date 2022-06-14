@@ -1,9 +1,19 @@
 import { HttpException } from "@src/exceptions";
-import { prisma, generalPurchaseTransaction } from "@src/resources";
+import {
+  prisma,
+  generalPurchaseTransaction,
+  chargePrepaidCard,
+} from "@src/resources";
 import { Response } from "express";
 import { ReqWithBody } from "@src/types";
-import { Product, Category, DiscountPolicy } from "@prisma/client";
-import { ApprovalOrder } from "@src/interfaces";
+import {
+  Product,
+  Category,
+  DiscountPolicy,
+  TransactionMethod,
+} from "@prisma/client";
+import { ApprovalOrder, ApprovalUserIdentity } from "@src/interfaces";
+import config from "@src/config";
 
 const getProducts = async (productIds: string[]) => {
   const current = new Date();
@@ -174,7 +184,14 @@ export const paymentApproval = async (
 ) => {
   try {
     //여기서 실 승인
-    const { products, userIdentity } = req.body;
+    const { products } = req.body;
+    const userIdentity = req.body.userIdentity
+      ? req.body.userIdentity
+      : ({
+          systemId: config.defaultApproval.paymentMethod,
+          paymentMethod: config.defaultApproval.paymentMethod,
+          transactionMethod: "APP_QR" as TransactionMethod,
+        } as ApprovalUserIdentity);
     const productIds = products.map((product) => product.productId);
     const productsInfo = await getProducts(productIds);
 
@@ -192,6 +209,11 @@ export const paymentApproval = async (
       };
     });
     const totalPrice = orderedProducts.reduce((acc, cur) => acc + cur.total, 0);
+    const chargeCard = await chargePrepaidCard(
+      userIdentity.paymentMethod,
+      totalPrice,
+      "CASH_DEPOSIT"
+    );
     const receipt = await generalPurchaseTransaction(userIdentity, totalPrice, {
       orderedProducts,
       pos: req.pos,
