@@ -1,16 +1,9 @@
 import { HttpException } from "@src/exceptions";
 import { prisma, generalPurchaseTransaction } from "@src/resources";
-import { Response, Request } from "express";
+import { Response } from "express";
 import { ReqWithBody } from "@src/types";
-import {
-  Product,
-  Category,
-  DiscountPolicy,
-  TransactionMethod,
-} from "@prisma/client";
+import { Product, Category, DiscountPolicy } from "@prisma/client";
 import { ApprovalOrder } from "@src/interfaces";
-import { loadRedis, chargePrepaidCard } from "@src/resources";
-import config from "@src/config";
 
 const getProducts = async (productIds: string[]) => {
   const current = new Date();
@@ -175,27 +168,17 @@ const calculateProductUnitPrice = (
   }
 };
 
-export const paymentApproval = async (req: Request, res: Response) => {
-  const client = await loadRedis();
-  const redisKey = "approval-products";
-  const products = JSON.parse(await client.get(redisKey));
-  if (!products) {
-    throw new HttpException(400, "잘못된 요청입니다.");
-  }
-  await client.del(redisKey);
-  const TIMEOUT = 100000;
-  const userIdentity = {
-    systemId: config.defaultApproval.user,
-    paymentMethod: config.defaultApproval.paymentMethod,
-    transactionMethod: "APP_QR" as TransactionMethod,
-  };
+export const paymentApproval = async (
+  req: ReqWithBody<ApprovalOrder>,
+  res: Response
+) => {
   try {
     //여기서 실 승인
-    // const { products, userIdentity } = req.body;
-    const productIds = products.map((product: any) => product.productId);
+    const { products, userIdentity } = req.body;
+    const productIds = products.map((product) => product.productId);
     const productsInfo = await getProducts(productIds);
 
-    const orderedProducts = products.map((product: any) => {
+    const orderedProducts = products.map((product) => {
       const productInfo = productsInfo.find(
         (p) => p.systemId === product.productId
       );
@@ -208,168 +191,13 @@ export const paymentApproval = async (req: Request, res: Response) => {
         total: calculatedUnitPrice * product.amount,
       };
     });
-    const totalPrice = orderedProducts.reduce(
-      (acc: number, cur: { total: number }) => acc + cur.total,
-      0
-    );
-
-    // const receipt = await generalPurchaseTransaction(
-    //   userIdentity,
-    //   totalPrice,
-    //   {
-    //     orderedProducts,
-    //     pos: req.pos,
-    //   }
-    // );
-
-    // return res.json(receipt);
-
-    //여기서부터 싹 날리세요
-    const headers = {
-      //headers for SSE
-      "Content-Type": "text/event-stream",
-      "Connection": "keep-alive",
-      "Cache-Control": "no-cache",
-      "Access-Control-Allow-Headers": "*",
-    };
-
-    res.writeHead(200, headers);
-    res.write(`event: "PAYMENT"\n\n`);
-
-    const client = (await loadRedis()).duplicate();
-    await client.connect();
-    const redisKey = "deposit-hook";
-
-    const productId = orderedProducts.map((product: any) => {
-      return { id: product.product.id };
+    const totalPrice = orderedProducts.reduce((acc, cur) => acc + cur.total, 0);
+    const receipt = await generalPurchaseTransaction(userIdentity, totalPrice, {
+      orderedProducts,
+      pos: req.pos,
     });
-
-    const timeout = setTimeout(async () => {
-      client.unsubscribe(redisKey);
-      client.quit();
-
-      const receipt = await prisma.transaction.create({
-        data: {
-          totalPrice: totalPrice,
-          status: "CANCELED",
-          transactionMethod: userIdentity.transactionMethod,
-          user: {
-            connect: {
-              systemId: userIdentity.systemId,
-            },
-          },
-          statusText: "TIMEOUT: 입금시간 초과",
-          posDevice: {
-            connect: {
-              id: req.pos.id,
-            },
-          },
-          paymentMethod: {
-            connect: {
-              systemId: userIdentity.paymentMethod,
-            },
-          },
-          products: {
-            connect: productId,
-          },
-        },
-      });
-
-      res.write(
-        `data: ${JSON.stringify({
-          status: "TIMEOUT",
-          transactionId: receipt.systemId,
-        })}` + "\n\n"
-      );
-      return res.end();
-    }, TIMEOUT);
-
-    client.subscribe(redisKey, async (message) => {
-      clearTimeout(timeout);
-      const deposit = JSON.parse(message);
-      chargePrepaidCard(
-        config.defaultApproval.paymentMethod,
-        deposit.amount,
-        "CASH_DEPOSIT"
-      );
-      if (deposit.amount < totalPrice) {
-        const receipt = await prisma.transaction.create({
-          data: {
-            totalPrice: totalPrice,
-            status: "CANCELED",
-            transactionMethod: userIdentity.transactionMethod,
-            user: {
-              connect: {
-                systemId: config.defaultApproval.user,
-              },
-            },
-            statusText: "입금금액 부족",
-            posDevice: {
-              connect: {
-                id: req.pos.id,
-              },
-            },
-            paymentMethod: {
-              connect: {
-                systemId: userIdentity.paymentMethod,
-              },
-            },
-            products: {
-              connect: productId,
-            },
-          },
-        });
-        res.write(
-          `data: ${JSON.stringify({
-            status: "NOT_ENOUGH_AMOUNT",
-            memo: null,
-            transactionId: receipt.systemId,
-          })}` + "\n\n"
-        );
-        client.quit();
-        return res.end();
-      } else {
-        const receipt = await generalPurchaseTransaction(
-          userIdentity,
-          totalPrice,
-          {
-            orderedProducts,
-            pos: req.pos,
-          }
-        );
-
-        res.write(
-          `data: ${JSON.stringify({
-            status: "SUCCESS",
-            memo: deposit.memo,
-            transactionId: receipt.systemId,
-          })}` + "\n\n"
-        );
-        client.quit();
-        return res.end();
-      }
-    });
-
-    req.on("close", () => {
-      client.unsubscribe(redisKey);
-      return res.end();
-    });
+    return res.json(receipt);
   } catch (e) {
     throw new HttpException(e.status, e.message);
-  }
-};
-
-export const getApprovalProducts = async (
-  req: ReqWithBody<Partial<ApprovalOrder>>,
-  res: Response
-) => {
-  try {
-    const { products } = req.body;
-    const client = await loadRedis();
-    const redisKey = "approval-products";
-    client.set(redisKey, JSON.stringify(products));
-    return res.sendStatus(200);
-  } catch (e) {
-    throw new HttpException(400, "겔제에 실패했습니다.");
   }
 };

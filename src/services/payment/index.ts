@@ -6,7 +6,6 @@ import {
   approvalResponse,
   depositHook,
   getApprovalCode,
-  getApprovalProducts,
   getPaymentMethods,
   paymentApproval,
 } from "./controllers";
@@ -70,7 +69,7 @@ export default createService({
     },
     {
       method: "post",
-      handler: getApprovalProducts,
+      handler: paymentApproval,
       needAuth: true,
       path: "/approval",
       description: "실 결제 승인을 요청합니다.",
@@ -136,13 +135,6 @@ export default createService({
       needAuth: false,
       path: "/deposit",
       description: "입금 여부를 확인받는 webhook입니다.",
-    },
-    {
-      method: "get",
-      handler: paymentApproval,
-      needAuth: true,
-      path: "/deposit",
-      description: "승인 여부를 확인하는 SSE입니다.",
     },
   ],
 });
