@@ -123,6 +123,10 @@ export const refreshAccessToken = async (req: Request, res: Response) => {
     throw new HttpException(400, "리프레시 토큰이 아닙니다.");
 
   const payload = await verify(refreshToken);
-  const identity = await prisma.user.findFirst({ where: { id: payload.id } });
+  console.log(payload.systemId);
+  const identity = await prisma.user.findFirst({
+    where: { systemId: payload.systemId },
+  });
+  console.log(identity);
   return res.json(await createTokensFromUser(identity));
 };
