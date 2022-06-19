@@ -2,14 +2,18 @@ import Joi from "joi";
 import createJoiError from "@src/resources/createJoiError";
 import { createService } from "..";
 import {
-  addGeneralPaymentmethod,
   approvalResponse,
   depositHook,
   getApprovalCode,
-  getPaymentMethods,
   paymentApproval,
 } from "./controllers";
-import { createPrepaidCard } from "./controllers/createPrepaidCard";
+import {
+  addGeneralPaymentmethod,
+  createPrepaidCard,
+  getPaymentMethods,
+  deletePaymentMethod,
+  updatePaymentMethod,
+} from "./controllers/paymentMethod";
 import { registerPaymentPin, resetPaymentPin } from "./controllers/paymentPin";
 import { paymentToken } from "@src/middlewares";
 
@@ -28,7 +32,7 @@ export default createService({
       method: "post",
       handler: addGeneralPaymentmethod,
       needAuth: true,
-      path: "/method",
+      path: "/method/general",
       description: "카드 결제수단을 추가합니다",
       validateSchema: {
         cardNumber: Joi.string().required(),
@@ -40,8 +44,30 @@ export default createService({
       method: "post",
       handler: createPrepaidCard,
       needAuth: true,
-      path: "/create-prepaid",
+      path: "/method/prepaid",
       description: "선불카드를 생성합니다",
+      validateSchema: {
+        name: Joi.string().required(),
+        color: Joi.string().optional(),
+      },
+    },
+    {
+      method: "put",
+      handler: updatePaymentMethod,
+      needAuth: true,
+      path: "/method/:id",
+      description: "결제수단의 정보를 수정합니다",
+      validateSchema: {
+        name: Joi.string().optional(),
+        color: Joi.string().optional(),
+      },
+    },
+    {
+      method: "delete",
+      handler: deletePaymentMethod,
+      needAuth: true,
+      path: "/method/:id",
+      description: "결제수단을 삭제합니다",
     },
     {
       method: "post",
