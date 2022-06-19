@@ -12,7 +12,7 @@ export const getVaildReceivedCoupons = async (req: Request, res: Response) => {
         where: {
           AND: [
             {
-              receiverId: req.user.id,
+              receiverSid: req.user.systemId,
             },
             {
               OR: [
@@ -25,7 +25,7 @@ export const getVaildReceivedCoupons = async (req: Request, res: Response) => {
               ],
             },
             {
-              usedTransactionId: null,
+              usedTransactionSid: null,
             },
           ],
         },
@@ -53,10 +53,10 @@ export const getAllReceivedCoupons = async (req: Request, res: Response) => {
     return res.json(
       await prisma.coupon.findMany({
         where: {
-          receiverId: req.user.id,
+          receiverSid: req.user.systemId,
         },
         orderBy: {
-          usedTransactionId: "asc",
+          usedTransactionSid: "asc",
         },
         include: {
           receiver: {
@@ -79,7 +79,7 @@ export const getIssuedCoupons = async (req: Request, res: Response) => {
     return res.json(
       await prisma.coupon.findMany({
         where: {
-          issuerId: req.user.id,
+          issuerSid: req.user.systemId,
         },
         include: {
           receiver: {
@@ -125,8 +125,8 @@ export const purchaseCoupon = async (req: Request, res: Response) => {
         name: title,
         amount,
         expiresAt,
-        receiverId: destination.id,
-        issuerId: req.user.id,
+        receiverSid: destination.systemId,
+        issuerSid: req.user.systemId,
       })
     );
 

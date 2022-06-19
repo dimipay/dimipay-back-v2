@@ -16,7 +16,7 @@ model UserPassword {
 
 model User {
   id              Int             @id @default(autoincrement())
-  systemId        String          @unique @default(uuid())
+  systemId        String          @unique @default(dbgenerated("gen_random_uuid()"))
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @default(now()) @updatedAt
   isDisabled      Boolean         @default(false)
@@ -44,9 +44,9 @@ model PaymentMethod {
   name        String?
   systemId    String            @unique @default(uuid())
   id          Int               @id @default(autoincrement())
-  ownerId     Int
   IS_DELETED  Boolean           @default(false)
-  owner       User              @relation(fields: [ownerId], references: [id])
+  ownerSid    String
+  owner       User              @relation(fields: [ownerSid], references: [systemId])
   generalCard GeneralCard?      @relation("generalCard")
   prepaidCard PrepaidCard?      @relation("prepaidCard")
   transaction Transaction[]
@@ -57,48 +57,52 @@ model PrepaidCard {
   updatedAt                DateTime                   @default(now()) @updatedAt
   balance                  Int                        @default(0)
   id                       Int                        @id @default(autoincrement())
-  paymentMethodId          Int                        @unique
-  paymentMethod            PaymentMethod              @relation("prepaidCard", fields: [paymentMethodId], references: [id])
+  systemId                 String                     @unique @default(dbgenerated("gen_random_uuid()"))
+  paymentMethodSid         String                     @unique
+  paymentMethod            PaymentMethod              @relation("prepaidCard", fields: [paymentMethodSid], references: [systemId])
   prepaidCardChargeHistory PrepaidCardChargeHistory[]
 }
 
 model PrepaidCardChargeHistory {
-  createdAt           DateTime          @default(now())
-  updatedAt           DateTime          @default(now()) @updatedAt
-  delta               Int
-  status              TransactionStatus
-  method              String
-  detailInfo          String
-  id                  Int               @id @default(autoincrement())
-  targetPrepaidCardId Int
-  prepaidCard         PrepaidCard       @relation(fields: [targetPrepaidCardId], references: [id])
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @default(now()) @updatedAt
+  delta                Int
+  status               TransactionStatus
+  method               String
+  detailInfo           String
+  id                   Int               @id @default(autoincrement())
+  systemId             String            @unique @default(dbgenerated("gen_random_uuid()"))
+  targetPrepaidCardSid String
+  prepaidCard          PrepaidCard       @relation(fields: [targetPrepaidCardSid], references: [systemId])
 }
 
 model GeneralCard {
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @default(now()) @updatedAt
-  cardNumber      String
-  validMonth      Int
-  validYear       Int
-  billingKey      String
-  id              Int           @id @default(autoincrement())
-  paymentMethodId Int           @unique
-  paymentMethod   PaymentMethod @relation("generalCard", fields: [paymentMethodId], references: [id])
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @default(now()) @updatedAt
+  cardNumber       String
+  validMonth       Int
+  validYear        Int
+  billingKey       String
+  id               Int           @id @default(autoincrement())
+  systemId         String        @unique @default(dbgenerated("gen_random_uuid()"))
+  paymentMethodSid String        @unique
+  paymentMethod    PaymentMethod @relation("generalCard", fields: [paymentMethodSid], references: [systemId])
 }
 
 model Coupon {
-  id                String       @id @default(uuid())
-  createdAt         DateTime     @default(now())
-  updatedAt         DateTime     @default(now()) @updatedAt
-  name              String
-  expiresAt         DateTime?
-  amount            Int
-  usedTransactionId Int?
-  issuerId          Int
-  receiverId        Int
-  issuer            User         @relation("issue", fields: [issuerId], references: [id])
-  receiver          User         @relation("receive", fields: [receiverId], references: [id])
-  Transaction       Transaction? @relation(fields: [usedTransactionId], references: [id])
+  id                 String       @id @default(uuid())
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @default(now()) @updatedAt
+  name               String
+  expiresAt          DateTime?
+  amount             Int
+  systemId           String       @unique @default(uuid())
+  issuerSid          String
+  receiverSid        String
+  usedTransactionSid String?
+  issuer             User         @relation("issue", fields: [issuerSid], references: [systemId])
+  receiver           User         @relation("receive", fields: [receiverSid], references: [systemId])
+  Transaction        Transaction? @relation(fields: [usedTransactionSid], references: [systemId])
 }
 
 model Transaction {
@@ -109,30 +113,31 @@ model Transaction {
   status            Transaction_status
   statusText        String?
   transactionMethod TransactionMethod
-  posDeviceId       String?
   systemId          String             @unique @default(uuid())
   id                Int                @id @default(autoincrement())
   purchaseType      PurchaseType?
   purchaseDetail    Json?
-  usedCardId        Int
-  userId            Int
-  posDevice         PosDevice?         @relation(fields: [posDeviceId], references: [id])
-  paymentMethod     PaymentMethod      @relation(fields: [usedCardId], references: [id])
-  user              User               @relation(fields: [userId], references: [id])
+  posDeviceSid      String?
+  usedCardSid       String
+  userSid           String
+  posDevice         PosDevice?         @relation(fields: [posDeviceSid], references: [systemId])
+  paymentMethod     PaymentMethod      @relation(fields: [usedCardSid], references: [systemId])
+  user              User               @relation(fields: [userSid], references: [systemId])
   coupon            Coupon[]
+  productOutLog     ProductInOutLog[]
   products          Product[]
 }
 
 model Category {
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @default(now()) @updatedAt
-  name             String
-  color            String
-  discountPolicyId String?
-  id               Int              @id @default(autoincrement())
-  IS_DELETED       Boolean          @default(false)
-  products         Product[]
-  discountPolicy   DiscountPolicy[]
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @default(now()) @updatedAt
+  name           String
+  color          String
+  id             Int              @id @default(autoincrement())
+  IS_DELETED     Boolean          @default(false)
+  systemId       String           @unique @default(dbgenerated("gen_random_uuid()"))
+  products       Product[]
+  discountPolicy DiscountPolicy[]
 }
 
 model Product {
@@ -144,11 +149,11 @@ model Product {
   sellingPrice            Int
   sellingStopped          Boolean           @default(false)
   id                      Int               @id @default(autoincrement())
-  categoryId              Int
-  systemId                String            @unique @default(uuid())
+  systemId                String            @unique @default(dbgenerated("gen_random_uuid()"))
   IS_DELETED              Boolean           @default(false)
   alias                   String?
-  category                Category          @relation(fields: [categoryId], references: [id])
+  categorySid             String
+  category                Category          @relation(fields: [categorySid], references: [systemId])
   productInOutLog         ProductInOutLog[]
   transaction             Transaction[]
   excludedDiscountPolicy  DiscountPolicy[]  @relation("discountExcludedProduct")
@@ -156,16 +161,20 @@ model Product {
 }
 
 model ProductInOutLog {
-  createdAt     DateTime         @default(now())
-  updatedAt     DateTime         @default(now()) @updatedAt
-  delta         Int
-  message       String?
-  id            Int              @id @default(autoincrement())
-  productId     Int
-  type          ProductInOutType
-  unitCost      Int
-  product       Product          @relation(fields: [productId], references: [id])
-  StoreProducts StoreProducts[]  @relation("storing")
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @default(now()) @updatedAt
+  delta          Int
+  message        String?
+  id             Int              @id @default(autoincrement())
+  type           ProductInOutType
+  unitCost       Int
+  systemId       String           @unique @default(dbgenerated("gen_random_uuid()"))
+  productSid     String
+  storeingSid    String?
+  transactionSid String?
+  product        Product          @relation(fields: [productSid], references: [systemId])
+  StoreProducts  StoreProducts?   @relation("storing", fields: [storeingSid], references: [systemId])
+  Transaction    Transaction?     @relation(fields: [transactionSid], references: [systemId])
 }
 
 model DiscountPolicy {
@@ -173,26 +182,27 @@ model DiscountPolicy {
   updatedAt       DateTime   @default(now())
   fixedPrice      Int?
   percentRate     Int?
-  eventId         String?
   id              Int        @id @default(autoincrement())
-  relatedEvent    Event?     @relation(fields: [eventId], references: [id])
+  systemId        String     @unique @default(dbgenerated("gen_random_uuid()"))
+  eventSid        String?
+  relatedEvent    Event?     @relation(fields: [eventSid], references: [systemId])
   targetCategory  Category[]
   excludedProduct Product[]  @relation("discountExcludedProduct")
   targetProduct   Product[]  @relation("discountTargetProduct")
 }
 
 model PosDevice {
-  id          String        @id @default(uuid())
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @default(now())
   name        String
   disabled    Boolean       @default(false)
   IS_DELETED  Boolean       @default(false)
+  systemId    String        @unique @default(dbgenerated("gen_random_uuid()"))
+  id          Int           @id @default(autoincrement())
   transaction Transaction[]
 }
 
 model Event {
-  id               String           @id @default(uuid())
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @default(now())
   startsAt         DateTime?
@@ -200,11 +210,12 @@ model Event {
   title            String
   description      String
   url              String
+  systemId         String           @unique @default(dbgenerated("gen_random_uuid()"))
+  id               Int              @id @default(autoincrement())
   discountPolicies DiscountPolicy[]
 }
 
 model Notice {
-  id          String    @id @default(uuid())
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @default(now())
   startsAt    DateTime  @default(now())
@@ -212,19 +223,22 @@ model Notice {
   title       String
   description String?
   url         String?
-  authorId    Int
-  author      User      @relation(fields: [authorId], references: [id])
+  systemId    String    @unique @default(dbgenerated("gen_random_uuid()"))
+  id          Int       @id @default(autoincrement())
+  authorSid   String
+  author      User      @relation(fields: [authorSid], references: [systemId])
 }
 
 model AdminAccount {
-  id             String          @id @default(uuid())
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @default(now())
   username       String
   hashedPassword String
   description    String?
-  relatedUserId  Int?            @unique
-  User           User?           @relation(fields: [relatedUserId], references: [id])
+  systemId       String          @unique @default(dbgenerated("gen_random_uuid()"))
+  id             Int             @id @default(autoincrement())
+  relatedUserSid String?         @unique
+  User           User?           @relation(fields: [relatedUserSid], references: [systemId])
   Storeing       StoreProducts[]
 }
 
@@ -232,12 +246,12 @@ model StoreProducts {
   createdAt    DateTime          @default(now())
   updatedAt    DateTime          @default(now()) @updatedAt
   id           Int               @id @default(autoincrement())
-  systemId     String            @unique @default(uuid())
-  workerId     String
+  systemId     String            @unique @default(dbgenerated("gen_random_uuid()"))
   totalCost    Int
   storeDate    DateTime          @default(now())
   title        String            @unique
-  worker       AdminAccount      @relation(fields: [workerId], references: [id])
+  workerSid    String
+  worker       AdminAccount      @relation(fields: [workerSid], references: [systemId])
   productInLog ProductInOutLog[] @relation("storing")
 }
 

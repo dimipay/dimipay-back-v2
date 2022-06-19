@@ -23,7 +23,7 @@ export const getMyInfo = async (req: Request, res: Response) => {
           type: true,
           color: true,
           name: true,
-          ownerId: true,
+          ownerSid: true,
           systemId: true,
           id: false,
         },
