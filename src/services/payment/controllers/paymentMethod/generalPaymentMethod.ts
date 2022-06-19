@@ -2,7 +2,7 @@ import { HttpException } from "@src/exceptions";
 import { prisma } from "@src/resources";
 import { CardInfo, ReqWithBody } from "@src/types";
 import { Response } from "express";
-import { getBillingkey } from "../utils/getBillingkey";
+import { getBillingkey } from "../../utils/getBillingkey";
 
 export const addGeneralPaymentmethod = async (
   req: ReqWithBody<CardInfo>,

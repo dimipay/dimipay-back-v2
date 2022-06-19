@@ -45,6 +45,7 @@ model PaymentMethod {
   systemId    String            @unique @default(uuid())
   id          Int               @id @default(autoincrement())
   ownerId     Int
+  IS_DELETED  Boolean           @default(false)
   owner       User              @relation(fields: [ownerId], references: [id])
   generalCard GeneralCard?      @relation("generalCard")
   prepaidCard PrepaidCard?      @relation("prepaidCard")
@@ -146,6 +147,7 @@ model Product {
   categoryId              Int
   systemId                String            @unique @default(uuid())
   IS_DELETED              Boolean           @default(false)
+  alias                   String?
   category                Category          @relation(fields: [categoryId], references: [id])
   productInOutLog         ProductInOutLog[]
   transaction             Transaction[]

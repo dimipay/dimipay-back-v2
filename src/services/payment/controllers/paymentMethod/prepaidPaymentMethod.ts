@@ -7,15 +7,24 @@ export const createPrepaidCard = async (req: Request, res: Response) => {
     where: {
       type: "PREPAID",
       ownerId: req.user.id,
+      IS_DELETED: false,
     },
   });
 
-  if (prepaidCard) throw new HttpException(400, "이미 가입이 완료되었어요");
+  if (prepaidCard)
+    throw new HttpException(
+      400,
+      `새 카드를 등록하려면 기존에 등록된 카드를 삭제해주세요 (${prepaidCard.name})`
+    );
+
+  const { name, color } = req.body;
 
   const created = await prisma.paymentMethod.create({
     data: {
       type: "PREPAID",
       ownerId: req.user.id,
+      name,
+      color: color ? color : null,
       prepaidCard: {
         create: {
           balance: 0,
