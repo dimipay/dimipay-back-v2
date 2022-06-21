@@ -12,10 +12,10 @@ import bcrypt from "bcrypt";
 import { PosDevice } from "@prisma/client";
 
 const createTokens = async (pos: Partial<PosDevice>) => {
-  const { id } = pos;
+  const { systemId } = pos;
   return {
-    accessToken: await issueToken({ id }, false),
-    refreshToken: await issueToken({ id }, true),
+    accessToken: await issueToken({ systemId }, false),
+    refreshToken: await issueToken({ systemId }, true),
   };
 };
 
