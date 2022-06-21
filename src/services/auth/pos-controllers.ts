@@ -174,7 +174,7 @@ export const validateSmsVerification = async (req: Request, res: Response) => {
     if (isValid) {
       const { id: paymentMethod } = await prisma.paymentMethod.findFirst({
         where: {
-          ownerId: user.id,
+          ownerSid: user.systemId,
           type: "PREPAID",
         },
       });

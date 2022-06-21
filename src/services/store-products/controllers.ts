@@ -35,7 +35,7 @@ const importProducts = async (products: StoringProduct[], cost = 0) => {
               });
             }
             return {
-              productId: productData.id,
+              productSid: productData.systemId,
               delta: product.amount,
               type: "INCOME",
               unitCost: product.unitCost
@@ -68,7 +68,7 @@ export const storeProducts = async (
   try {
     const adminAccount = await prisma.adminAccount.findFirst({
       where: {
-        relatedUserId: req.user.id,
+        relatedUserSid: req.user.systemId,
       },
     });
     if (!adminAccount) {
@@ -124,7 +124,7 @@ export const updateStoreProducts = async (
   try {
     const adminAccount = await prisma.adminAccount.findFirst({
       where: {
-        relatedUserId: req.user.id,
+        relatedUserSid: req.user.systemId,
       },
     });
 
@@ -179,14 +179,14 @@ export const getProductStoring = async (req: Request, res: Response) => {
   });
 
   const sum = await prisma.productInOutLog.groupBy({
-    by: ["productId"],
+    by: ["productSid"],
     _sum: {
       delta: true,
     },
   });
   const stock = sum.map((sum) => {
     return {
-      productId: sum.productId,
+      productSid: sum.productSid,
       stock: sum._sum.delta,
     };
   });

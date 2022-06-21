@@ -62,7 +62,7 @@ export const getPaymentMethods = async (req: Request, res: Response) => {
 
   const paymentMethod = await prisma.paymentMethod.findMany({
     where: {
-      ownerId: user.id,
+      ownerSid: user.systemId,
       type: isCreditOnly !== undefined ? "GENERAL" : undefined,
       IS_DELETED: false,
     },
@@ -72,7 +72,7 @@ export const getPaymentMethods = async (req: Request, res: Response) => {
       type: true,
       color: true,
       name: true,
-      ownerId: true,
+      ownerSid: true,
       systemId: true,
       prepaidCard: {
         select: {

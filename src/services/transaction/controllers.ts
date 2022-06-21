@@ -6,7 +6,7 @@ import { Request, Response } from "express";
 export const getTransactionHistories = async (req: Request, res: Response) => {
   const transactions = await prisma.transaction.findMany({
     where: {
-      userId: req.user.id,
+      userSid: req.user.systemId,
     },
     take: 10,
     orderBy: {
@@ -52,7 +52,7 @@ export const getMonthlyTransaction = async (req: Request, res: Response) => {
         gte: queryStartRange,
         lt: queryEndRange,
       },
-      userId: req.user.id,
+      userSid: req.user.systemId,
     },
     select: {
       systemId: true,

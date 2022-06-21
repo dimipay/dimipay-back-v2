@@ -13,7 +13,7 @@ export const addGeneralPaymentmethod = async (
   const registeredGeneralCard = await prisma.paymentMethod.findFirst({
     where: {
       type: "GENERAL",
-      ownerId: user.id,
+      ownerSid: user.systemId,
     },
   });
 
@@ -31,7 +31,7 @@ export const addGeneralPaymentmethod = async (
   const paymentMethod = await prisma.paymentMethod.create({
     data: {
       type: "GENERAL",
-      ownerId: user.id,
+      ownerSid: user.systemId,
       name: payableInfo.name,
       generalCard: {
         create: {
