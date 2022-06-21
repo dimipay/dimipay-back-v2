@@ -6,7 +6,7 @@ export const createPrepaidCard = async (req: Request, res: Response) => {
   const prepaidCard = await prisma.paymentMethod.findFirst({
     where: {
       type: "PREPAID",
-      ownerSid: req.user.systemId,
+      ownerId: req.user.id,
       IS_DELETED: false,
     },
   });
@@ -22,7 +22,7 @@ export const createPrepaidCard = async (req: Request, res: Response) => {
   const created = await prisma.paymentMethod.create({
     data: {
       type: "PREPAID",
-      ownerSid: req.user.systemId,
+      ownerId: req.user.id,
       name,
       color: color ? color : null,
       prepaidCard: {

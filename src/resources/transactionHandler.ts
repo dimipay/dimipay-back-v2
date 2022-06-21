@@ -143,7 +143,7 @@ const couponProcess = async (
         AND: [
           {
             id: { in: couponIds },
-            usedTransactionSid: null,
+            usedTransactionId: null,
           },
           {
             OR: [
@@ -245,7 +245,7 @@ export const generalPurchaseTransaction = async (
           return {
             delta: product.amount * -1,
             message: "",
-            productSid: product.product.systemId,
+            productId: product.product.id,
             type: "OUTCOME",
             unitCost: product.unit,
           };
