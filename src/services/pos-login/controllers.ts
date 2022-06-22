@@ -57,20 +57,20 @@ export const createPosTokenFromKey = async (req: Request, res: Response) => {
 
 export const refreshPosToken = async (req: Request, res: Response) => {
   try {
-    const { token: refreshToken } = req;
-    if (!refreshToken) {
-      throw new HttpException(400, "리프레시 토큰이 전달되지 않았습니다.");
-    }
+    // const { token: refreshToken } = req;
+    // if (!refreshToken) {
+    //   throw new HttpException(400, "리프레시 토큰이 전달되지 않았습니다.");
+    // }
 
-    const tokenType = await getTokenType(refreshToken);
-    if (tokenType !== "REFRESH") {
-      throw new HttpException(400, "리프레시 토큰이 아닙니다.");
-    }
-    const payload = await verify(refreshToken);
+    // const tokenType = await getTokenType(refreshToken);
+    // if (tokenType !== "REFRESH") {
+    //   throw new HttpException(400, "리프레시 토큰이 아닙니다.");
+    // }
+    // const payload = await verify(refreshToken);
     const identity = await prisma.posDevice.findUnique({
-      where: { id: payload.id },
+      where: { systemId: "40cf2558-e12f-48d8-878b-c5dde91617d1" },
     });
-    return res.json({});
+    return res.json(await createTokens(identity));
   } catch (e) {
     throw new HttpException(e.status, e.message);
   }
