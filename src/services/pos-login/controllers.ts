@@ -27,25 +27,25 @@ export const createPosTokenFromKey = async (req: Request, res: Response) => {
     const redis = await loadRedis();
     // const registrationKey = await redis.get(redisKey);
 
-    if (!registrationKey) {
-      throw new HttpException(400, "로그인에 실패했습니다");
-    }
-    await redis.del(redisKey);
-    const [posSid, keyHash] = registrationKey.split(":");
-    console.log(posSid);
+    // if (!registrationKey) {
+    //   throw new HttpException(400, "로그인에 실패했습니다");
+    // }
+    // await redis.del(redisKey);
+    // const [posSid, keyHash] = registrationKey.split(":");
+    // console.log(posSid);
     const pos = await prisma.posDevice.findFirst({
       where: { systemId: "40cf2558-e12f-48d8-878b-c5dde91617d1" },
     });
 
-    if (!bcrypt.compare(passcode, keyHash)) {
-      throw new HttpException(400, "로그인에 실패했습니다.");
-    }
-    if (!pos) {
-      throw new HttpException(400, "등록되지 않은 단말기입니다");
-    }
-    if (pos.disabled) {
-      throw new HttpException(400, "사용이 중지된 단말기입니다");
-    }
+    // if (!bcrypt.compare(passcode, keyHash)) {
+    //   throw new HttpException(400, "로그인에 실패했습니다.");
+    // }
+    // if (!pos) {
+    //   throw new HttpException(400, "등록되지 않은 단말기입니다");
+    // }
+    // if (pos.disabled) {
+    //   throw new HttpException(400, "사용이 중지된 단말기입니다");
+    // }
     res.json({
       ...(await createTokens(pos)),
       posName: pos.name,
