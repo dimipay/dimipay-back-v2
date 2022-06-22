@@ -7,7 +7,7 @@ export const createPrepaidCard = async (req: Request, res: Response) => {
     where: {
       type: "PREPAID",
       ownerSid: req.user.systemId,
-      IS_DELETED: false,
+      is_deleted: false,
     },
   });
 

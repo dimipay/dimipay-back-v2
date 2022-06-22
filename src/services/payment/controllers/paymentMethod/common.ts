@@ -39,7 +39,7 @@ export const deletePaymentMethod = async (req: Request, res: Response) => {
         systemId: systemId,
       },
       data: {
-        IS_DELETED: true,
+        is_deleted: true,
       },
     });
     return res.json({
@@ -64,7 +64,7 @@ export const getPaymentMethods = async (req: Request, res: Response) => {
     where: {
       ownerSid: user.systemId,
       type: isCreditOnly !== undefined ? "GENERAL" : undefined,
-      IS_DELETED: false,
+      is_deleted: false,
     },
     select: {
       createdAt: true,

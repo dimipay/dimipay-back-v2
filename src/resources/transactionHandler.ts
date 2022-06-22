@@ -7,6 +7,7 @@ import {
   SpecialPurchase,
 } from "@src/interfaces";
 import { TransactionException, HttpException } from "@src/exceptions";
+import { v4 } from "uuid";
 
 export const approvePrepaidCard = async (
   paymentMethod: TransactionPaymentMethod,
@@ -202,15 +203,6 @@ export const generalPurchaseTransaction = async (
     return { id: product.product.id };
   });
 
-  const purchaseDetail = products.orderedProducts.map((product) => {
-    return {
-      systemId: product.productId,
-      amount: product.amount,
-      unit: product.unit,
-      total: product.total,
-    };
-  });
-
   const redis = await loadRedis();
   const redisKey = key.approvalResponse(user.id);
 
@@ -243,6 +235,7 @@ export const generalPurchaseTransaction = async (
       const productReleases: Prisma.ProductInOutLogCreateManyInput[] =
         products.orderedProducts.map((product) => {
           return {
+            systemId: v4(),
             delta: product.amount * -1,
             message: "",
             productSid: product.product.systemId,
@@ -250,6 +243,11 @@ export const generalPurchaseTransaction = async (
             unitCost: product.unit,
           };
         });
+
+      const productInOutLogSids = productReleases.map((productRelease) => {
+        return { systemId: productRelease.systemId };
+      });
+      console.log(productReleases);
 
       await prisma.productInOutLog.createMany({
         data: productReleases,
@@ -281,7 +279,9 @@ export const generalPurchaseTransaction = async (
           products: {
             connect: productIds,
           },
-          purchaseDetail: purchaseDetail,
+          productOutLog: {
+            connect: productInOutLogSids,
+          },
           purchaseType: "GENERAL",
         },
       });

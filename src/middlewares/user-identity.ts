@@ -30,7 +30,7 @@ export default (service: ServiceName | undefined, route: Route) =>
           }
         } else {
           req.pos = await prisma.posDevice.findFirst({
-            where: { id: identity.id },
+            where: { systemId: identity.systemId },
           });
           if (req.pos) {
             if (req.pos.disabled) {

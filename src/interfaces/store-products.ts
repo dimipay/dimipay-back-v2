@@ -1,3 +1,4 @@
+import { Product } from "@prisma/client";
 export interface Storing {
   storeDate?: Date;
   title?: string;
@@ -8,8 +9,6 @@ export interface UpdateStoring extends Partial<Storing> {
   systemId: string;
 }
 
-export interface StoringProduct {
-  productId: string;
+export interface StoringProduct extends Partial<Product> {
   amount: number;
-  unitCost?: number;
 }
