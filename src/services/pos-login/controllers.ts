@@ -70,7 +70,7 @@ export const refreshPosToken = async (req: Request, res: Response) => {
     const identity = await prisma.posDevice.findUnique({
       where: { id: payload.id },
     });
-    return res.json(await createTokens(identity));
+    return res.json({});
   } catch (e) {
     throw new HttpException(e.status, e.message);
   }
