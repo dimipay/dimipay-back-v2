@@ -5,3 +5,4 @@ logs
 .env
 dist
 .dockerignore
+.env.prod
