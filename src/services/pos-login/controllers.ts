@@ -25,27 +25,26 @@ export const createPosTokenFromKey = async (req: Request, res: Response) => {
     const redisKey = "reg_pos";
 
     const redis = await loadRedis();
-    // const registrationKey = await redis.get(redisKey);
+    const registrationKey = await redis.get(redisKey);
 
-    // if (!registrationKey) {
-    //   throw new HttpException(400, "로그인에 실패했습니다");
-    // }
-    // await redis.del(redisKey);
-    // const [posSid, keyHash] = registrationKey.split(":");
-    // console.log(posSid);
+    if (!registrationKey) {
+      throw new HttpException(400, "로그인에 실패했습니다");
+    }
+    await redis.del(redisKey);
+    const [posSid, keyHash] = registrationKey.split(":");
     const pos = await prisma.posDevice.findFirst({
-      where: { systemId: "40cf2558-e12f-48d8-878b-c5dde91617d1" },
+      where: { systemId: posSid },
     });
 
-    // if (!bcrypt.compare(passcode, keyHash)) {
-    //   throw new HttpException(400, "로그인에 실패했습니다.");
-    // }
-    // if (!pos) {
-    //   throw new HttpException(400, "등록되지 않은 단말기입니다");
-    // }
-    // if (pos.disabled) {
-    //   throw new HttpException(400, "사용이 중지된 단말기입니다");
-    // }
+    if (!bcrypt.compare(passcode, keyHash)) {
+      throw new HttpException(400, "로그인에 실패했습니다.");
+    }
+    if (!pos) {
+      throw new HttpException(400, "등록되지 않은 단말기입니다");
+    }
+    if (pos.disabled) {
+      throw new HttpException(400, "사용이 중지된 단말기입니다");
+    }
     res.json({
       ...(await createTokens(pos)),
       posName: pos.name,
@@ -57,21 +56,25 @@ export const createPosTokenFromKey = async (req: Request, res: Response) => {
 
 export const refreshPosToken = async (req: Request, res: Response) => {
   try {
-    // const { token: refreshToken } = req;
-    // if (!refreshToken) {
-    //   throw new HttpException(400, "리프레시 토큰이 전달되지 않았습니다.");
-    // }
+    const { token: refreshToken } = req;
+    if (!refreshToken) {
+      throw new HttpException(400, "리프레시 토큰이 전달되지 않았습니다.");
+    }
 
-    // const tokenType = await getTokenType(refreshToken);
-    // if (tokenType !== "REFRESH") {
-    //   throw new HttpException(400, "리프레시 토큰이 아닙니다.");
-    // }
-    // const payload = await verify(refreshToken);
+    const tokenType = await getTokenType(refreshToken);
+    if (tokenType !== "REFRESH") {
+      throw new HttpException(400, "리프레시 토큰이 아닙니다.");
+    }
+    const payload = await verify(refreshToken);
     const identity = await prisma.posDevice.findUnique({
-      where: { systemId: "40cf2558-e12f-48d8-878b-c5dde91617d1" },
+      where: { systemId: payload.systemId },
     });
     return res.json(await createTokens(identity));
   } catch (e) {
     throw new HttpException(e.status, e.message);
   }
+};
+
+export const healthCheck = async (req: Request, res: Response) => {
+  return res.json(req.pos);
 };
