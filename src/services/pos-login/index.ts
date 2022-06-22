@@ -23,5 +23,12 @@ export default createService({
       handler: controllers.refreshPosToken,
       needAuth: false,
     },
+    {
+      method: "get",
+      path: "/health",
+      description: "",
+      handler: controllers.healthCheck,
+      needAuth: true,
+    },
   ],
 });
