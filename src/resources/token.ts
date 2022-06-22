@@ -60,7 +60,7 @@ export const issueCustomToken = (
 };
 
 export const issue = async (
-  identity: { systemId?: string; id?: number | string },
+  identity: { systemId: string },
   refresh: boolean
 ) => {
   const token = await jwt.sign(
