@@ -48,7 +48,7 @@ class App {
             tokens["remote-user"](req, res),
             tokens.status(req, res),
             req.user ? `USER/${req.user.systemId}` : "",
-            req.pos ? `USER/${req.pos.systemId}` : "",
+            req.pos ? `POS/${req.pos.systemId}` : "",
             tokens["user-agent"](req, res),
             `${tokens["response-time"](req, res)} ms`,
           ].join(" ");
