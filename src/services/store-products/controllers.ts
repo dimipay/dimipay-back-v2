@@ -4,33 +4,64 @@ import { ReqWithBody } from "@src/types";
 import { Storing, StoringProduct, UpdateStoring } from "@src/interfaces";
 import { HttpException } from "@src/exceptions";
 import { Prisma } from "@prisma/client";
+import { v4 } from "uuid";
+
+const importNewProduct = (product: StoringProduct) => {
+  console.log(product.barcode);
+  const productData = prisma.product.create({
+    data: {
+      systemId: v4(),
+      barcode: product.barcode,
+      name: product.name,
+      purchaseCost: product.purchaseCost,
+      sellingPrice: Math.floor((product.purchaseCost * 1.3) / 10) * 10,
+      category: {
+        connect: {
+          systemId: "3fd1e40d-6457-4b9d-9b91-39c7ba2cecba",
+        },
+      },
+    },
+  });
+  return productData;
+};
 
 const importProducts = async (products: StoringProduct[], cost = 0) => {
+  // 기존 입고에 추가하는 경우 이전 total cost 값을 넣어줌.
   const productsData = await prisma.product.findMany({
     where: {
-      systemId: {
-        in: products.map((product) => product.productId),
+      barcode: {
+        in: products.map((product) => product.barcode),
       },
     },
   });
 
+  const products2 = await Promise.all(
+    products.map(async (product) => {
+      const productData =
+        productsData.find((data) => data.barcode === product.barcode) ||
+        (await importNewProduct(product));
+      return {
+        product,
+        productData,
+      };
+    })
+  );
+
   const storingProducts = products
     ? (() => {
         const storingProducts: Prisma.ProductInOutLogCreateManyInput[] =
-          products.map((product) => {
-            const productData = productsData.find(
-              (data) => data.systemId === product.productId
-            );
+          products2.map(({ product, productData }) => {
+            // 새로운 매입가가 기존 매입가와 다른 경우 상품 정보에 최신 매입가 반영
             if (
-              product.unitCost &&
-              product.unitCost !== productData.purchaseCost
+              product.purchaseCost &&
+              product.purchaseCost !== productData.purchaseCost
             ) {
               prisma.product.update({
                 where: {
-                  systemId: product.productId,
+                  systemId: productData.systemId,
                 },
                 data: {
-                  purchaseCost: product.unitCost,
+                  purchaseCost: product.purchaseCost,
                 },
               });
             }
@@ -38,8 +69,8 @@ const importProducts = async (products: StoringProduct[], cost = 0) => {
               productSid: productData.systemId,
               delta: product.amount,
               type: "INCOME",
-              unitCost: product.unitCost
-                ? product.unitCost
+              unitCost: product.purchaseCost
+                ? product.purchaseCost
                 : productData.purchaseCost,
             };
           });
@@ -49,12 +80,9 @@ const importProducts = async (products: StoringProduct[], cost = 0) => {
 
   const totalCost = products
     ? (() =>
-        products.reduce((acc, cur) => {
-          const unitCost = cur.unitCost
-            ? cur.unitCost
-            : productsData.find((data) => data.systemId === cur.productId)
-                .purchaseCost;
-          return acc + unitCost * cur.amount;
+        storingProducts.reduce((acc, cur) => {
+          const unitCost = cur.unitCost;
+          return acc + unitCost * cur.delta;
         }, cost))()
     : 0;
 
