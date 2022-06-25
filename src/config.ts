@@ -23,7 +23,6 @@ const config = {
     user: process.env.DEFAULT_APPROVAL_USER!,
     paymentMethod: process.env.DEFAULT_APPROVAL_PAYMENTMETHOD!,
   },
-  depositOrigin: process.env.DEPOSIT_ORIGIN!,
 };
 
 type Config = {

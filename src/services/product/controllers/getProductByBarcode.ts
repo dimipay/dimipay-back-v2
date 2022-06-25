@@ -45,6 +45,7 @@ export const getProductByBarcode = async (req: Request, res: Response) => {
       select: {
         systemId: true,
         name: true,
+        alias: true,
         sellingPrice: true,
         barcode: true,
         sellingStopped: true,
@@ -66,7 +67,7 @@ export const getProductByBarcode = async (req: Request, res: Response) => {
     res.json({
       product: {
         systemId: product.systemId,
-        name: product.name,
+        name: product.alias || product.name,
         sellingPrice: product.sellingPrice,
         barcode: product.barcode,
         sellingStopped: product.sellingPrice,
