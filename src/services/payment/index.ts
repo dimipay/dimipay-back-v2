@@ -3,7 +3,6 @@ import createJoiError from "@src/resources/createJoiError";
 import { createService } from "..";
 import {
   approvalResponse,
-  depositHook,
   getApprovalCode,
   paymentApproval,
 } from "./controllers";
@@ -154,13 +153,6 @@ export default createService({
       needAuth: true,
       path: "/response",
       description: "결제 승인 여부를 응답합니다.",
-    },
-    {
-      method: "post",
-      handler: depositHook,
-      needAuth: false,
-      path: "/deposit",
-      description: "입금 여부를 확인받는 webhook입니다.",
     },
   ],
 });
