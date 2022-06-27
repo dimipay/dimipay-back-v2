@@ -23,6 +23,11 @@ const config = {
     user: process.env.DEFAULT_APPROVAL_USER!,
     paymentMethod: process.env.DEFAULT_APPROVAL_PAYMENTMETHOD!,
   },
+
+  jwtLifeTime: {
+    accessToken: process.env.JWT_ACCESSTOKEN_LIFE!,
+    refreshToken: process.env.JWT_REFRESHTOKEN_LIFE!,
+  },
 };
 
 type Config = {
