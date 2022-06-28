@@ -33,6 +33,7 @@ const selectValidDiscountPolicy = (
 
 export const getProductByBarcode = async (req: Request, res: Response) => {
   const { barcode } = req.params;
+  const current = new Date();
 
   try {
     const product = await prisma.product.findFirst({
@@ -42,20 +43,122 @@ export const getProductByBarcode = async (req: Request, res: Response) => {
           is_deleted: false,
         },
       },
-      select: {
-        systemId: true,
-        name: true,
-        alias: true,
-        sellingPrice: true,
-        barcode: true,
-        sellingStopped: true,
+      include: {
         category: {
-          select: {
-            discountPolicy: true,
+          include: {
+            discountPolicy: {
+              where: {
+                relatedEvent: {
+                  OR: [
+                    {
+                      startsAt: {
+                        lte: current,
+                      },
+                      endsAt: {
+                        gte: current,
+                      },
+                    },
+                    {
+                      startsAt: {
+                        lte: current,
+                      },
+                      endsAt: null,
+                    },
+                    {
+                      startsAt: null,
+                      endsAt: {
+                        gte: current,
+                      },
+                    },
+                    {
+                      startsAt: null,
+                      endsAt: null,
+                    },
+                  ],
+                },
+              },
+              orderBy: [
+                {
+                  createdAt: "desc",
+                },
+              ],
+            },
           },
         },
-        excludedDiscountPolicy: true,
-        targettedDiscountPolicy: true,
+        excludedDiscountPolicy: {
+          where: {
+            relatedEvent: {
+              OR: [
+                {
+                  startsAt: {
+                    lte: current,
+                  },
+                  endsAt: {
+                    gte: current,
+                  },
+                },
+                {
+                  startsAt: {
+                    lte: current,
+                  },
+                  endsAt: null,
+                },
+                {
+                  startsAt: null,
+                  endsAt: {
+                    gte: current,
+                  },
+                },
+                {
+                  startsAt: null,
+                  endsAt: null,
+                },
+              ],
+            },
+          },
+          orderBy: [
+            {
+              createdAt: "desc",
+            },
+          ],
+        },
+        targettedDiscountPolicy: {
+          where: {
+            relatedEvent: {
+              OR: [
+                {
+                  startsAt: {
+                    lte: current,
+                  },
+                  endsAt: {
+                    gte: current,
+                  },
+                },
+                {
+                  startsAt: {
+                    lte: current,
+                  },
+                  endsAt: null,
+                },
+                {
+                  startsAt: null,
+                  endsAt: {
+                    gte: current,
+                  },
+                },
+                {
+                  startsAt: null,
+                  endsAt: null,
+                },
+              ],
+            },
+          },
+          orderBy: [
+            {
+              createdAt: "desc",
+            },
+          ],
+        },
       },
     });
 

@@ -1,8 +1,6 @@
 import winston from "winston";
-import WinstonDaily from "winston-daily-rotate-file";
 import { notionLogger } from "./notion";
 
-const logDir = "logs";
 const { combine, timestamp, printf } = winston.format;
 
 const logFormat = printf(
@@ -16,24 +14,6 @@ const logger = winston.createLogger({
     }),
     logFormat
   ),
-  transports: [
-    new WinstonDaily({
-      level: "http",
-      datePattern: "YYYY-MM-DD",
-      dirname: logDir,
-      filename: "%DATE%.log",
-      maxFiles: 30,
-      zippedArchive: true,
-    }),
-    new WinstonDaily({
-      level: "error",
-      datePattern: "YYYY-MM-DD",
-      dirname: `${logDir}/error`,
-      filename: "%DATE%.error.log",
-      maxFiles: 30,
-      zippedArchive: true,
-    }),
-  ],
 });
 
 logger.add(

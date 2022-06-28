@@ -42,8 +42,8 @@ class App {
         (tokens, req, res) => {
           return [
             `HTTP/${tokens["http-version"](req, res)}`,
-            tokens.method(req, res),
             req.headers["x-forwarded-for"] || req.ip,
+            tokens.method(req, res),
             tokens.url(req, res),
             tokens["remote-user"](req, res),
             tokens.status(req, res),
