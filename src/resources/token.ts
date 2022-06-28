@@ -73,7 +73,7 @@ export const issue = async (
       algorithm: "HS512",
       expiresIn: refresh
         ? config.jwtLifeTime.refreshToken
-        : config.jwtLifeTime.refreshToken,
+        : config.jwtLifeTime.accessToken,
     }
   );
   return token;
