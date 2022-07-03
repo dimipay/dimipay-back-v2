@@ -1,5 +1,5 @@
 import { HttpException } from "@src/exceptions";
-import { prisma } from "@src/resources";
+import { prisma, getProducts } from "@src/resources";
 import { Request, Response } from "express";
 import { Product, DiscountPolicy } from "@prisma/client";
 
@@ -36,131 +36,7 @@ export const getProductByBarcode = async (req: Request, res: Response) => {
   const current = new Date();
 
   try {
-    const product = await prisma.product.findFirst({
-      where: {
-        AND: {
-          barcode,
-          is_deleted: false,
-        },
-      },
-      include: {
-        category: {
-          include: {
-            discountPolicy: {
-              where: {
-                relatedEvent: {
-                  OR: [
-                    {
-                      startsAt: {
-                        lte: current,
-                      },
-                      endsAt: {
-                        gte: current,
-                      },
-                    },
-                    {
-                      startsAt: {
-                        lte: current,
-                      },
-                      endsAt: null,
-                    },
-                    {
-                      startsAt: null,
-                      endsAt: {
-                        gte: current,
-                      },
-                    },
-                    {
-                      startsAt: null,
-                      endsAt: null,
-                    },
-                  ],
-                },
-              },
-              orderBy: [
-                {
-                  createdAt: "desc",
-                },
-              ],
-            },
-          },
-        },
-        excludedDiscountPolicy: {
-          where: {
-            relatedEvent: {
-              OR: [
-                {
-                  startsAt: {
-                    lte: current,
-                  },
-                  endsAt: {
-                    gte: current,
-                  },
-                },
-                {
-                  startsAt: {
-                    lte: current,
-                  },
-                  endsAt: null,
-                },
-                {
-                  startsAt: null,
-                  endsAt: {
-                    gte: current,
-                  },
-                },
-                {
-                  startsAt: null,
-                  endsAt: null,
-                },
-              ],
-            },
-          },
-          orderBy: [
-            {
-              createdAt: "desc",
-            },
-          ],
-        },
-        targettedDiscountPolicy: {
-          where: {
-            relatedEvent: {
-              OR: [
-                {
-                  startsAt: {
-                    lte: current,
-                  },
-                  endsAt: {
-                    gte: current,
-                  },
-                },
-                {
-                  startsAt: {
-                    lte: current,
-                  },
-                  endsAt: null,
-                },
-                {
-                  startsAt: null,
-                  endsAt: {
-                    gte: current,
-                  },
-                },
-                {
-                  startsAt: null,
-                  endsAt: null,
-                },
-              ],
-            },
-          },
-          orderBy: [
-            {
-              createdAt: "desc",
-            },
-          ],
-        },
-      },
-    });
+    const product = (await getProducts([], barcode))[0];
 
     if (product.sellingStopped)
       throw new HttpException(401, "판매가 중단된 상품이예요");
