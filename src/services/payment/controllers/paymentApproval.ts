@@ -1,8 +1,8 @@
 import { HttpException } from "@src/exceptions";
 import {
-  prisma,
   generalPurchaseTransaction,
   chargePrepaidCard,
+  getProducts,
 } from "@src/resources";
 import { Response } from "express";
 import { ReqWithBody } from "@src/types";
@@ -14,132 +14,6 @@ import {
 } from "@prisma/client";
 import { ApprovalOrder, ApprovalUserIdentity } from "@src/interfaces";
 import config from "@src/config";
-
-const getProducts = async (productIds: string[]) => {
-  const current = new Date();
-  return await prisma.product.findMany({
-    where: {
-      systemId: { in: productIds },
-    },
-    include: {
-      category: {
-        include: {
-          discountPolicy: {
-            where: {
-              relatedEvent: {
-                OR: [
-                  {
-                    startsAt: {
-                      lte: current,
-                    },
-                    endsAt: {
-                      gte: current,
-                    },
-                  },
-                  {
-                    startsAt: {
-                      lte: current,
-                    },
-                    endsAt: null,
-                  },
-                  {
-                    startsAt: null,
-                    endsAt: {
-                      gte: current,
-                    },
-                  },
-                  {
-                    startsAt: null,
-                    endsAt: null,
-                  },
-                ],
-              },
-            },
-            orderBy: [
-              {
-                createdAt: "desc",
-              },
-            ],
-          },
-        },
-      },
-      excludedDiscountPolicy: {
-        where: {
-          relatedEvent: {
-            OR: [
-              {
-                startsAt: {
-                  lte: current,
-                },
-                endsAt: {
-                  gte: current,
-                },
-              },
-              {
-                startsAt: {
-                  lte: current,
-                },
-                endsAt: null,
-              },
-              {
-                startsAt: null,
-                endsAt: {
-                  gte: current,
-                },
-              },
-              {
-                startsAt: null,
-                endsAt: null,
-              },
-            ],
-          },
-        },
-        orderBy: [
-          {
-            createdAt: "desc",
-          },
-        ],
-      },
-      targettedDiscountPolicy: {
-        where: {
-          relatedEvent: {
-            OR: [
-              {
-                startsAt: {
-                  lte: current,
-                },
-                endsAt: {
-                  gte: current,
-                },
-              },
-              {
-                startsAt: {
-                  lte: current,
-                },
-                endsAt: null,
-              },
-              {
-                startsAt: null,
-                endsAt: {
-                  gte: current,
-                },
-              },
-              {
-                startsAt: null,
-                endsAt: null,
-              },
-            ],
-          },
-        },
-        orderBy: [
-          {
-            createdAt: "desc",
-          },
-        ],
-      },
-    },
-  });
-};
 
 const calculatedPrice = (originalPrice: number, policy: DiscountPolicy) => {
   if (policy.fixedPrice) {
