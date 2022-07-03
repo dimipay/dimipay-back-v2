@@ -80,7 +80,6 @@ export const generalPurchaseTransaction = async (
       const productInOutLogSids = productReleases.map((productRelease) => {
         return { systemId: productRelease.systemId };
       });
-      console.log(productReleases);
 
       await prisma.productInOutLog.createMany({
         data: productReleases,
