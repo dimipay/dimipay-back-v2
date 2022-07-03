@@ -67,7 +67,7 @@ export const paymentApproval = async (
           transactionMethod: "APP_QR" as TransactionMethod,
         } as ApprovalUserIdentity);
     const productIds = products.map((product) => product.productId);
-    const productsInfo = await getProducts(productIds);
+    const productsInfo = await getProducts({ productIds });
 
     const orderedProducts = products.map((product) => {
       const productInfo = productsInfo.find(
