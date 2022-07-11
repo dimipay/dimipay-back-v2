@@ -5,6 +5,7 @@ import {
   approvalResponse,
   getApprovalCode,
   paymentApproval,
+  stageProducts,
 } from "./controllers";
 import {
   addGeneralPaymentmethod,
@@ -94,7 +95,7 @@ export default createService({
     },
     {
       method: "post",
-      handler: paymentApproval,
+      handler: stageProducts,
       needAuth: true,
       path: "/approval",
       description: "실 결제 승인을 요청합니다.",
@@ -113,6 +114,18 @@ export default createService({
           paymentMethod: Joi.string().required(),
           transactionMethod: Joi.string().required(),
         }),
+      },
+    },
+    {
+      method: "post",
+      handler: paymentApproval,
+      needAuth: true,
+      path: "/checktransfer",
+      description: "입금을 확인합니다.",
+      permission: ["Pos"],
+      validateSchema: {
+        origin: Joi.string().required(),
+        cancel: Joi.boolean(),
       },
     },
     {

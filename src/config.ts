@@ -28,6 +28,13 @@ const config = {
     accessToken: process.env.JWT_ACCESSTOKEN_LIFE!,
     refreshToken: process.env.JWT_REFRESHTOKEN_LIFE!,
   },
+
+  bankKey: process.env.BANK_KEY,
+  bankOrigin: {
+    origin1: process.env.BANK_ORIGIN1,
+    origin2: process.env.BANK_ORIGIN2,
+    dev: "http://localhost:6000",
+  },
 };
 
 type Config = {

@@ -13,6 +13,7 @@ import { couponProcess, approveTransaction } from "./common";
 export const generalPurchaseTransaction = async (
   userIdentity: ApprovalUserIdentity,
   totalPrice: any,
+  billingId: string,
   products: GeneralPurchase,
   isCouponPurchase = true
 ) => {
@@ -100,6 +101,7 @@ export const generalPurchaseTransaction = async (
               id: products.pos.id,
             },
           },
+          billingId: billingId ? billingId : null,
           paymentMethod: {
             connect: {
               id: isCouponOnly ? null : paymentMethod.id,

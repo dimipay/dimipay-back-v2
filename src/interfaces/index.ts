@@ -5,3 +5,4 @@ export * from "./card-transaction";
 export * from "./purchase";
 export * from "./payment-token";
 export * from "./store-products";
+export * from "./bank-transaction";

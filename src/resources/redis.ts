@@ -19,4 +19,5 @@ export const key = {
   smsCode: (systemId: string) => `sms:${systemId}`,
   approvalCode: (hashedCode: string) => `approval:${hashedCode}`,
   approvalResponse: (id: number) => `approvalResponse:${id}`,
+  stageProducts: (systemId: string) => `stageProducts:${systemId}`,
 };
