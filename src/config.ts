@@ -31,8 +31,8 @@ const config = {
 
   bankKey: process.env.BANK_KEY,
   bankOrigin: {
-    origin1: process.env.BANK_ORIGIN1,
-    origin2: process.env.BANK_ORIGIN2,
+    account1: process.env.BANK_ORIGIN1,
+    account2: process.env.BANK_ORIGIN2,
     dev: "http://localhost:6000",
   },
 };

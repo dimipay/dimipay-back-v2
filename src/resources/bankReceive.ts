@@ -3,7 +3,7 @@ import config from "@src/config";
 import { BankTransaction } from "@src/interfaces";
 import { HttpException } from "@src/exceptions";
 
-type origin = "origin1" | "origin2" | "dev";
+type origin = "account1" | "account2" | "dev";
 const getTransactions = async (origin: origin) => {
   const url = config.bankOrigin[origin];
   const { data } = await axios({
