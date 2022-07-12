@@ -1,12 +1,15 @@
 import { prisma } from "@src/resources";
 
-export const getProducts = async (productIds?: string[], barcode?: string) => {
+export const getProducts = async (key: {
+  productIds?: string[];
+  barcode?: string;
+}) => {
   const current = new Date();
   return await prisma.product.findMany({
     where: {
       OR: {
-        systemId: { in: productIds },
-        barcode,
+        systemId: { in: key.productIds },
+        barcode: key.barcode,
       },
     },
     include: {

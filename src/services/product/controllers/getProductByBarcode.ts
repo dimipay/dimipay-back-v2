@@ -33,10 +33,9 @@ const selectValidDiscountPolicy = (
 
 export const getProductByBarcode = async (req: Request, res: Response) => {
   const { barcode } = req.params;
-  const current = new Date();
 
   try {
-    const product = (await getProducts([], barcode))[0];
+    const product = (await getProducts({ barcode }))[0];
 
     if (product.sellingStopped)
       throw new HttpException(401, "판매가 중단된 상품이예요");

@@ -7,7 +7,6 @@ import { Prisma } from "@prisma/client";
 import { v4 } from "uuid";
 
 const importNewProduct = (product: StoringProduct) => {
-  console.log(product.barcode);
   const productData = prisma.product.create({
     data: {
       systemId: v4(),
@@ -137,7 +136,6 @@ export const storeProducts = async (
     if (e instanceof HttpException) {
       throw new HttpException(e.status, e.message);
     }
-    console.log(e);
     throw new HttpException(400, "상품을 입고하는 중 오류가 발생했습니다.");
   }
 };
