@@ -70,14 +70,13 @@ export const paymentApproval = async (req: Request, res: Response) => {
     const { origin, cancel } = req.body;
     const redis = await loadRedis();
     const redisKey = key.stageProducts(req.pos.systemId);
+    if (cancel) {
+      redis.del(redisKey);
+      return res.status(200).send();
+    }
     const { products, userIdentity } = JSON.parse(
       await redis.get(redisKey)
     ) as ApprovalOrder;
-
-    if (cancel) {
-      redis.del(redisKey);
-      return res.status(200);
-    }
 
     const productIds = products.map((product) => product.productId);
     const productsInfo = await getProducts({ productIds });
