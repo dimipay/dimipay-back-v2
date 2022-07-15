@@ -11,7 +11,7 @@ import { LoginInfo, UserIdentity } from "@src/interfaces";
 import { Prisma, User } from "@prisma/client";
 import bcrypt from "bcrypt";
 
-const createTokensFromUser = async (user: Partial<User>) => {
+export const createTokensFromUser = async (user: Partial<User>) => {
   const { systemId } = user;
   return {
     accessToken: await issueToken({ systemId }, false),

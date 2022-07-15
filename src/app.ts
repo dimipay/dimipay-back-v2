@@ -1,5 +1,6 @@
 import express, { NextFunction, Request, Response } from "express";
 import bearerToken from "express-bearer-token";
+import cookieParser from "cookie-parser";
 import morgan from "morgan";
 import helmet from "helmet";
 import cors from "cors";
@@ -26,6 +27,7 @@ class App {
     this.app.use(errorProcessingMiddleware);
   }
   private initializeMiddlewares() {
+    this.app.use(cookieParser());
     this.app.use(helmet());
     this.app.use(cors());
     this.app.use(express.json()); // for parsing application/json

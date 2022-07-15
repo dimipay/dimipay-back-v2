@@ -1,6 +1,7 @@
 import Joi from "joi";
 import * as controllers from "./controllers";
 import * as posControllers from "./pos-controllers";
+import * as GoogleAuthController from "./google-auth";
 import { createService } from "../index";
 
 export default createService({
@@ -17,6 +18,20 @@ export default createService({
       validateSchema: {
         username: Joi.string().required(),
         password: Joi.string().required(),
+        pin: Joi.string().required(),
+        bioKey: Joi.string().required(),
+        deviceUid: Joi.string().required(),
+      },
+    },
+    {
+      method: "post",
+      path: "/login/google",
+      handler: GoogleAuthController.googleIdentifyUser,
+      needAuth: false,
+      description: "Google OAuth로 Access Token과 Refresh Token을 발급합니다.",
+      validateSchema: {
+        credential: Joi.string().required(),
+        g_csrf_token: Joi.string().required(),
         pin: Joi.string().required(),
         bioKey: Joi.string().required(),
         deviceUid: Joi.string().required(),
