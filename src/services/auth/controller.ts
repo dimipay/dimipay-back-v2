@@ -19,7 +19,8 @@ type Code =
   | "ERR_REGISTERED"
   | "ERR_NO_PIN"
   | "ERR_NO_UID"
-  | "ERR_NO_BIOKEY";
+  | "ERR_NO_BIOKEY"
+  | "ERR_NOT_ALLOWED_EMAIL";
 
 export default async (
   req: Request,
@@ -108,6 +109,12 @@ const loginOrRegister = async (
     return {
       code: "OK",
       token: createTokenFromId(user.systemId),
+    };
+  }
+
+  if (payload.hd !== "dimigo.hs.kr") {
+    return {
+      code: "ERR_NOT_ALLOWED_EMAIL",
     };
   }
 
