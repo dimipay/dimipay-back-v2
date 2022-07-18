@@ -1,80 +1,93 @@
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 import config from "@src/config";
 import { HttpException } from "@src/exceptions";
 import { TokenType } from "../types";
 
-export const getTokenType = async (token: string): Promise<TokenType> => {
-  try {
-    const payload: any = await jwt.verify(token, config.jwtSecret as string);
-    return payload.refresh ? "REFRESH" : "ACCESS";
-  } catch (error) {
-    if (error.name === "TokenExpiredError") {
-      throw new HttpException(418, "토큰이 만료되었습니다.");
-    } else if (["jwt malformed", "invalid signature"].includes(error.message)) {
-      throw new HttpException(401, "토큰이 변조되었습니다.");
-    } else throw new HttpException(401, "토큰에 문제가 있습니다.");
-  }
-};
+interface TokenPayload extends jwt.JwtPayload {
+  identity: { systemId: string };
+  refresh: boolean;
+}
 
-export const verify = async (
-  token: string,
-  jwtKey = config.jwtSecret as string
-) => {
-  try {
-    const { identity }: any = await jwt.verify(token, jwtKey);
-    return identity;
-  } catch (error) {
-    if (error.name === "TokenExpiredError") {
-      throw new HttpException(401, "토큰이 만료되었습니다.");
-    } else if (["jwt malformed", "invalid signature"].includes(error.message)) {
-      throw new HttpException(401, "토큰이 변조되었습니다.");
-    } else throw new HttpException(401, "토큰에 문제가 있습니다.");
-  }
-};
-
-export const verifyCustomToken = async (
-  token: string,
-  jwtKey = config.jwtSecret as string
-) => {
-  try {
-    const payload: any = await jwt.verify(token, jwtKey);
-    return payload;
-  } catch (error) {
-    if (error.name === "TokenExpiredError") {
-      throw new HttpException(401, "토큰이 만료되었습니다.");
-    } else if (["jwt malformed", "invalid signature"].includes(error.message)) {
-      throw new HttpException(401, "토큰이 변조되었습니다.");
-    } else throw new HttpException(401, "토큰에 문제가 있습니다.");
-  }
+export const issue = (
+  identity: TokenPayload["identity"],
+  refresh: boolean
+): string => {
+  return jwt.sign({ identity, refresh }, config.jwtSecret, {
+    algorithm: "HS512",
+    expiresIn: config.jwtLifeTime[refresh ? "refreshToken" : "accessToken"],
+  });
 };
 
 export const issueCustomToken = (
-  payload: string | object | Buffer,
-  expires?: string,
-  jwtKey = config.jwtSecret as string
-) => {
+  payload: Parameters<typeof jwt.sign>[0],
+  expires?: jwt.SignOptions["expiresIn"],
+  jwtKey = config.jwtSecret
+): string => {
   return jwt.sign(payload, jwtKey, {
     algorithm: "HS512",
     expiresIn: expires,
   });
 };
 
-export const issue = async (
-  identity: { systemId: string },
-  refresh: boolean
-) => {
-  const token = await jwt.sign(
-    {
-      identity,
-      refresh,
-    },
-    config.jwtSecret as string,
-    {
-      algorithm: "HS512",
-      expiresIn: refresh
-        ? config.jwtLifeTime.refreshToken
-        : config.jwtLifeTime.accessToken,
-    }
-  );
-  return token;
+export const verify = (
+  token: string,
+  jwtKey = config.jwtSecret
+): TokenPayload["identity"] => {
+  try {
+    const payload = jwt.verify(token, jwtKey) as TokenPayload;
+    return payload.identity;
+  } catch (error) {
+    tokenErrorHandler(error, true);
+  }
 };
+
+export const verifyCustomToken = <TPayload = any>(
+  token: string,
+  jwtKey = config.jwtSecret
+): TPayload => {
+  try {
+    return jwt.verify(token, jwtKey) as TPayload;
+  } catch (error) {
+    tokenErrorHandler(error, true);
+  }
+};
+
+export const getTokenType = (token: string): TokenType => {
+  try {
+    const { refresh } = jwt.verify(token, config.jwtSecret) as TokenPayload;
+    return refresh ? "REFRESH" : "ACCESS";
+  } catch (error) {
+    tokenErrorHandler(error, true);
+  }
+};
+
+export const tokenErrorHandler = (error: Error, useDefault = false): void => {
+  switch (error.name) {
+    case "TokenExpiredError":
+      throw new HttpException(401, "토큰이 만료되었습니다.");
+
+    case "JsonWebTokenError":
+      throw new HttpException(401, "유효하지 않은 토큰입니다.");
+  }
+
+  if (useDefault) {
+    throw new HttpException(500, "서버 오류입니다.");
+  }
+};
+
+export const createTokenFromId = (
+  systemId: string
+): { [key: string]: string } => {
+  return {
+    accessToken: issue({ systemId }, false),
+    refreshToken: issue({ systemId }, true),
+  };
+};
+
+// this creates a token that can be used to change:
+// - payment pin
+// - device uid
+// - bio key
+export type TempTokenPayload = { tempId: string };
+export const createTempToken = (systemId: string): string =>
+  jwt.sign({ tempId: systemId }, config.jwtSecret, { expiresIn: "1h" });

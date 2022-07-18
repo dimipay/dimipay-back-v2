@@ -1,12 +1,17 @@
 import { DimiUserType, Gender } from "@src/types";
 
-type Body<T extends string> = Record<T, string>;
+export type StringBody<T extends string> = Record<T, string>;
 
-type LoginInfoBase = Body<"pin" | "deviceUid" | "bioKey">;
-
-export type LoginInfo = LoginInfoBase & Body<"username" | "password">;
-export type GoogleLoginIngo = LoginInfoBase &
-  Body<"credential" | "g_csrf_token">;
+export type GoogleLoginInfo = Record<"idToken", string>;
+export type LoginInfo = Record<
+  "pin" | "deviceUid" | "bioKey" | "username" | "password",
+  string
+>;
+export type ChangePayInfo = Partial<
+  StringBody<"token" | "paymentPin" | "deviceUid" | "bioKey"> & {
+    newToken: boolean;
+  }
+>;
 
 export interface UserIdentity {
   id: number;
