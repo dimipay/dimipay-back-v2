@@ -8,7 +8,7 @@ import {
   NextFunction,
 } from "express";
 import j2s from "joi-to-swagger";
-import { join as pathJoin } from "path";
+import { join as pathJoin } from "path/posix";
 import { HTTPMethod, ApiAuthType } from "../types";
 import { checkPermissions, validator, attachIdentity } from "../middlewares";
 import swaggerUi from "swagger-ui-express";
