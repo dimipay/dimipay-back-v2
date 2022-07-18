@@ -41,7 +41,10 @@ export default async (req: ReqWithBody<ChangePayInfo>, res: Response) => {
       "bioKey",
     ] as (keyof ChangePayInfo)[]) {
       if (body[key] && existingInfo[key]) {
-        throw new HttpException(400, `이미 존재하는 값입니다: ${key}`);
+        return res.status(400).json({
+          code: "ERR_ALREADY_EXISTS",
+          message: "이미 존재하는 값입니다",
+        });
       }
     }
 
