@@ -27,7 +27,7 @@ export default async (
   res: Response<{
     code: Code;
     message?: string;
-    token: string | ReturnType<typeof createTokenFromId>;
+    token?: string | ReturnType<typeof createTokenFromId>;
   }>
 ) => {
   const body: GoogleLoginInfo = req.body;
@@ -45,8 +45,13 @@ export default async (
       case "OK":
         return res.json({ code, token });
 
+      case "ERR_NOT_ALLOWED_EMAIL":
+        return res
+          .status(400)
+          .json({ code, message: "우리학교 이메일로만 가입할 수 있어요." });
+
       case "ERR_REGISTERED":
-        return res.json({
+        return res.status(201).json({
           code,
           message: "사용자가 추가되었습니다. PIN을 등록해주세요.",
           token: createTempToken(payload.sub),
