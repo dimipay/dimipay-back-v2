@@ -19,7 +19,10 @@ export default async (req: ReqWithBody<ChangePayInfo>, res: Response) => {
 
   try {
     if (!body.token) {
-      throw new HttpException(400, "토큰이 없습니다.");
+      return res.status(400).json({
+        code: "ERR_NO_TOKEN",
+        message: "토큰이 없습니다.",
+      });
     }
     const systemId = verifyCustomToken<TempTokenPayload>(body.token).tempId;
 
