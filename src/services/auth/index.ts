@@ -1,8 +1,11 @@
 import Joi from "joi";
-import * as controllers from "./controllers";
-import * as posControllers from "./pos-controllers";
-import * as GoogleAuthController from "./google-auth";
 import { createService } from "../index";
+import createJoiError from "@src/resources/createJoiError";
+
+import login from "./controller";
+import changePaymentInfo from "./firstPayInfo";
+import * as posControllers from "./pos-controllers";
+import refreshAccessToken from "./refreshAccessToken";
 
 export default createService({
   name: "인증 서비스",
@@ -11,36 +14,33 @@ export default createService({
     {
       method: "post",
       path: "/login",
-      handler: controllers.identifyUser,
+      handler: login,
       needAuth: false,
-      description:
-        "username과 password로 Access Token과 Refresh Token을 발급합니다.",
+      description: "Google OAuth로 Access Token과 Refresh Token을 발급합니다.",
       validateSchema: {
-        username: Joi.string().required(),
-        password: Joi.string().required(),
-        pin: Joi.string().required(),
-        bioKey: Joi.string().required(),
-        deviceUid: Joi.string().required(),
+        idToken: Joi.string().required(),
       },
     },
     {
       method: "post",
-      path: "/login/google",
-      handler: GoogleAuthController.googleIdentifyUser,
+      path: "/first-payment-info",
+      handler: changePaymentInfo,
       needAuth: false,
-      description: "Google OAuth로 Access Token과 Refresh Token을 발급합니다.",
+      description: "사용자의 결제정보를 변경합니다.",
       validateSchema: {
-        credential: Joi.string().required(),
-        g_csrf_token: Joi.string().required(),
-        pin: Joi.string().required(),
-        bioKey: Joi.string().required(),
-        deviceUid: Joi.string().required(),
+        token: Joi.string(),
+        deviceUid: Joi.string(),
+        bioKey: Joi.string(),
+        newToken: Joi.boolean(),
+        paymentPin: Joi.string()
+          .regex(/^\d{6}$/)
+          .error(createJoiError(400, "결제정보는 6자리 숫자로 입력해주세요.")),
       },
     },
     {
       method: "get",
       path: "/refresh",
-      handler: controllers.refreshAccessToken,
+      handler: refreshAccessToken,
       description:
         "Refresh Token으로 Access Token을 재발급합니다. Refresh Token을 Bearer Header에 넣어서 보내주세요.",
       needAuth: false,
