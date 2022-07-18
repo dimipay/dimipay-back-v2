@@ -113,7 +113,7 @@ const loginOrRegister = async (
 
   await prisma.user.create({
     data: {
-      accountName: payload.name + " - " + randomBytes(2).toString("hex"),
+      accountName: payload.email,
       name: payload.name,
       systemId: payload.sub,
       profileImage: payload.picture,
