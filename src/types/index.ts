@@ -1,4 +1,5 @@
 import { Request } from "express";
+import * as core from "express-serve-static-core";
 
 export type HTTPMethod = "get" | "post" | "put" | "patch" | "delete";
 
@@ -11,7 +12,7 @@ export type Gender = typeof GenderValues[number];
 export const TokenTypeValues = ["REFRESH", "ACCESS"];
 export type TokenType = typeof TokenTypeValues[number];
 
-export type ReqWithBody<T> = Request<unknown, unknown, T>;
+export type ReqWithBody<T> = Request<core.ParamsDictionary, any, T>;
 
 export interface CardInfo {
   cardNumber: string;
