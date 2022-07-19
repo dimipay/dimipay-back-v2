@@ -4,7 +4,7 @@ import { HttpException } from "@src/exceptions";
 import { TokenType } from "../types";
 
 interface TokenPayload extends jwt.JwtPayload {
-  identity: { systemId: string };
+  identity: { systemId: string; isOnBoarding?: string };
   refresh: boolean;
 }
 
@@ -75,12 +75,20 @@ export const tokenErrorHandler = (error: Error, useDefault = false): void => {
   }
 };
 
-export const createTokenFromId = (
-  systemId: string
-): { [key: string]: string } => {
+export type JWTType = Record<"accessToken" | "refreshToken", string>;
+export const createToken = (
+  systemId: string,
+  isOnBoarding?: string
+): JWTType => {
   return {
-    accessToken: issue({ systemId }, false),
-    refreshToken: issue({ systemId }, true),
+    accessToken: issue(
+      { systemId, ...(isOnBoarding && { isOnBoarding }) },
+      false
+    ),
+    refreshToken: issue(
+      { systemId, ...(isOnBoarding && { isOnBoarding }) },
+      true
+    ),
   };
 };
 
