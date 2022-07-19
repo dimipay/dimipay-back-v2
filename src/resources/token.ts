@@ -4,7 +4,7 @@ import { HttpException } from "@src/exceptions";
 import { TokenType } from "../types";
 
 interface TokenPayload extends jwt.JwtPayload {
-  identity: { systemId: string; onBoarding?: string };
+  identity: { systemId: string; isOnBoarding?: boolean };
   refresh: boolean;
 }
 
@@ -76,17 +76,18 @@ export const tokenErrorHandler = (error: Error, useDefault = false): void => {
 };
 
 export type JWTType = Record<"accessToken" | "refreshToken", string>;
-export const createToken = (systemId: string, onBoarding?: string): JWTType => {
+export const createToken = (
+  systemId: string,
+  isOnBoarding?: boolean
+): JWTType => {
   return {
-    accessToken: issue({ systemId, ...(onBoarding && { onBoarding }) }, false),
-    refreshToken: issue({ systemId, ...(onBoarding && { onBoarding }) }, true),
+    accessToken: issue(
+      { systemId, ...(isOnBoarding && { isOnBoarding }) },
+      false
+    ),
+    refreshToken: issue(
+      { systemId, ...(isOnBoarding && { isOnBoarding }) },
+      true
+    ),
   };
 };
-
-// this creates a token that can be used to change:
-// - payment pin
-// - device uid
-// - bio key
-export type TempTokenPayload = { tempId: string };
-export const createTempToken = (systemId: string): string =>
-  jwt.sign({ tempId: systemId }, config.jwtSecret, { expiresIn: "1h" });
