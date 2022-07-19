@@ -3,7 +3,6 @@ import { createService } from "../index";
 import createJoiError from "@src/resources/createJoiError";
 
 import login from "./controller";
-import changePaymentInfo from "./firstPayInfo";
 import * as posControllers from "./pos-controllers";
 import refreshAccessToken from "./refreshAccessToken";
 
@@ -19,20 +18,6 @@ export default createService({
       description: "Google OAuth로 Access Token과 Refresh Token을 발급합니다.",
       validateSchema: {
         idToken: Joi.string().required(),
-      },
-    },
-    {
-      method: "post",
-      path: "/first-payment-info",
-      handler: changePaymentInfo,
-      needAuth: true,
-      description: "사용자의 결제정보를 변경합니다.",
-      validateSchema: {
-        deviceUid: Joi.string(),
-        bioKey: Joi.string(),
-        paymentPin: Joi.string()
-          .regex(/^\d{4}$/)
-          .error(createJoiError(400, "결제정보는 자리 숫자로 입력해주세요.")),
       },
     },
     {
