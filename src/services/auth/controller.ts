@@ -70,13 +70,13 @@ const loginOrRegister = async ({
 
     if (!paymentPin) {
       return {
-        token: createToken(systemId, "ERR_NO_PIN"),
+        token: createToken(systemId, "pin"),
       };
     }
 
     if (!deviceUid || !bioKey) {
       return {
-        token: createToken(systemId, "ERR_NO_USER_KEY"),
+        token: createToken(systemId, "userKey"),
       };
     }
 
@@ -96,5 +96,5 @@ const loginOrRegister = async ({
     },
   });
 
-  return { token: createToken(systemId, "ERR_REGISTERED") };
+  return { token: createToken(systemId, "registered") };
 };
