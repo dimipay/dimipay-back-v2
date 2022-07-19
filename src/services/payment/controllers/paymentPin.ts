@@ -6,12 +6,16 @@ import bcrypt from "bcrypt";
 export const registerPaymentPin = async (req: Request, res: Response) => {
   try {
     const { paymentPin } = req.body;
-    if (req.user.paymentPin)
+
+    if (req.user.paymentPin) {
       throw new HttpException(400, "이미 결제 비밀번호가 등록되었어요.");
+    }
+
     await prisma.user.update({
       where: { systemId: req.user.systemId },
       data: { paymentPin: bcrypt.hashSync(paymentPin, 10) },
     });
+
     return res.sendStatus(201);
   } catch (e) {
     throw new HttpException(e.status, e.message);
