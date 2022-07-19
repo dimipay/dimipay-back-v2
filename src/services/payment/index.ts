@@ -13,7 +13,7 @@ import {
   deletePaymentMethod,
   updatePaymentMethod,
 } from "./controllers/paymentMethod";
-import { registerPaymentPin, resetPaymentPin } from "./controllers/paymentPin";
+import resetPaymentPin from "./controllers/resetPaymentPin";
 import { paymentToken } from "@src/middlewares";
 
 export default createService({
@@ -113,23 +113,6 @@ export default createService({
           paymentMethod: Joi.string().required(),
           transactionMethod: Joi.string().required(),
         }),
-      },
-    },
-    {
-      method: "post",
-      handler: registerPaymentPin,
-      needAuth: true,
-      path: "/pin",
-      description:
-        "deviceUid와 bioKey를 함께 받으며 pin을 생성하거나 비교합니다.",
-      permission: ["Student"],
-      validateSchema: {
-        bioKey: Joi.string().required(),
-        deviceUid: Joi.string().required(),
-        paymentPin: Joi.string()
-          .regex(/^\d{4}$/)
-          .required()
-          .error(createJoiError(400, "비밀번호 규칙에 맞춰 입력해주세요")),
       },
     },
     {

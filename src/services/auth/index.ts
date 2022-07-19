@@ -3,6 +3,7 @@ import { createService } from "../index";
 import createJoiError from "@src/resources/createJoiError";
 
 import login from "./controller";
+import onBoarding from "./onBoarding";
 import * as posControllers from "./pos-controllers";
 import refreshAccessToken from "./refreshAccessToken";
 
@@ -18,6 +19,23 @@ export default createService({
       description: "Google OAuth로 Access Token과 Refresh Token을 발급합니다.",
       validateSchema: {
         idToken: Joi.string().required(),
+      },
+    },
+    {
+      method: "post",
+      handler: onBoarding,
+      needAuth: true,
+      path: "/onBoarding",
+      description:
+        "deviceUid와 bioKey를 함께 받으며 pin을 생성하거나 비교합니다.",
+      permission: ["Student"],
+      validateSchema: {
+        bioKey: Joi.string().required(),
+        deviceUid: Joi.string().required(),
+        paymentPin: Joi.string()
+          .regex(/^\d{4}$/)
+          .required()
+          .error(createJoiError(400, "비밀번호 규칙에 맞춰 입력해주세요")),
       },
     },
     {

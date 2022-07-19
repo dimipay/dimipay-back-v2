@@ -1,4 +1,4 @@
 export * from "./getApprovalCode";
 export * from "./paymentApproval";
-export * from "./paymentPin";
+export * from "./resetPaymentPin";
 export * from "./approvalResponse";
