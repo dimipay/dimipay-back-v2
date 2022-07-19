@@ -1,6 +1,6 @@
+import { prisma, logger } from "@src/resources";
 import { HttpException } from "@src/exceptions";
 import { Response, Request } from "express";
-import { prisma } from "@src/resources";
 import bcrypt from "bcrypt";
 
 export const registerPaymentPin = async (req: Request, res: Response) => {
@@ -15,6 +15,8 @@ export const registerPaymentPin = async (req: Request, res: Response) => {
       where: { systemId: req.user.systemId },
       data: { paymentPin: bcrypt.hashSync(paymentPin, 10) },
     });
+
+    logger.info(`${req.user.systemId}님의 결제 비밀번호가 등록되었어요.`);
 
     return res.sendStatus(201);
   } catch (e) {
