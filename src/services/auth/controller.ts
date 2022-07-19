@@ -76,7 +76,7 @@ const loginOrRegister = async ({
 
     if (!deviceUid || !bioKey) {
       return {
-        token: createToken(systemId, "ERR_USER_NO_KEYS"),
+        token: createToken(systemId, "ERR_NO_USER_KEY"),
       };
     }
 
