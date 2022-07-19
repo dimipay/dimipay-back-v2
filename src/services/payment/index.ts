@@ -120,9 +120,12 @@ export default createService({
       handler: registerPaymentPin,
       needAuth: true,
       path: "/pin",
-      description: "결제 비밀번호를 설정합니다.",
+      description:
+        "deviceUid와 bioKey를 함께 받으며 pin을 생성하거나 비교합니다.",
       permission: ["Student"],
       validateSchema: {
+        bioKey: Joi.string().required(),
+        deviceUid: Joi.string().required(),
         paymentPin: Joi.string()
           .regex(/^\d{4}$/)
           .required()
