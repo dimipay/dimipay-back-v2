@@ -1,100 +1,93 @@
 import config from "@src/config";
-import { Prisma } from "@prisma/client";
 import { logger } from "@src/resources/logger";
 import { HttpException } from "@src/exceptions";
 import { OAuth2Client } from "google-auth-library";
 import { createToken, prisma } from "@src/resources";
 
-import type { User } from "@prisma/client";
+import type { Response } from "express";
+import type { ReqWithBody } from "@src/types";
 import type { JWTType } from "@src/resources";
-import type { Request, Response } from "express";
 import type { GoogleLoginInfo } from "@src/interfaces";
-import type { TokenPayload, LoginTicket } from "google-auth-library";
+import type { TokenPayload } from "google-auth-library";
 
 const googleOAuth2Client: OAuth2Client = new OAuth2Client();
 
-export default async (
-  req: Request,
-  res: Response<{
-    code?: string;
-    token?: JWTType;
-    message?: string;
-  }>
-) => {
-  const body: GoogleLoginInfo = req.body;
-
+export default async (req: ReqWithBody<GoogleLoginInfo>, res: Response) => {
   try {
-    const ticket: LoginTicket = await googleOAuth2Client.verifyIdToken({
-      idToken: body.idToken,
-      audience: config.googleClientIds,
-    });
-    const payload: TokenPayload = ticket.getPayload();
+    const payload = await getPayload(req.body.idToken);
+    const { code, response } = await loginOrRegister(payload);
 
-    const { code, token } = await loginOrRegister(payload);
-
-    switch (code) {
-      case "ERR_NOT_ALLOWED_EMAIL":
-        return res
-          .status(400)
-          .json({ code, message: "우리학교 이메일로만 가입할 수 있어요." });
-
-      default:
-        return res.json({ token });
+    if (code === "ERR_NOT_ALLOWED_EMAIL") {
+      return res.status(400).json({
+        code,
+        message: "우리학교 이메일로만 가입할 수 있습니다.",
+      });
     }
+
+    return res.json(response);
   } catch (e) {
-    if (e instanceof Prisma.PrismaClientKnownRequestError) {
-      logger.error("PrismaClientKnownRequestError:", e);
-      throw new HttpException(500, "서버 오류입니다.");
-    }
-
-    throw new HttpException(e.status, e.message);
+    logger.error("[login] unpredicted error: ", e);
+    throw new HttpException(500, "서버 오류입니다.");
   }
 };
 
-const loginOrRegister = async ({
-  hd,
-  name,
-  email,
-  picture,
-  sub: systemId,
-}: TokenPayload): Promise<{
-  code?: string;
-  token?: JWTType;
-}> => {
-  const user: User = await prisma.user.findUnique({
-    where: { systemId },
+const getPayload = async (idToken: string): Promise<TokenPayload> => {
+  return (
+    await googleOAuth2Client.verifyIdToken({
+      idToken,
+      audience: config.googleClientIds,
+    })
+  ).getPayload();
+};
+
+const loginOrRegister = async (
+  payload: TokenPayload
+): Promise<{ code?: string; response?: object }> => {
+  const user = await prisma.user.findUnique({
+    where: { systemId: payload.sub },
+    select: { paymentPin: true, systemId: true },
   });
 
   if (user) {
-    const { paymentPin, systemId, deviceUid, bioKey } = user;
+    const { paymentPin, systemId } = user;
 
+    // isOnBoarding: true, isFirstVisit: false
     if (!paymentPin) {
       return {
-        token: createToken(systemId, "pin"),
+        response: {
+          isFirstVisit: true,
+          ...createToken(systemId, true),
+        },
       };
     }
 
-    if (!deviceUid || !bioKey) {
-      return {
-        token: createToken(systemId, "userKey"),
-      };
-    }
-
-    return { token: createToken(systemId) };
+    // isOnBoarding: false, isFirstVisit: false
+    return {
+      response: {
+        isFirstVisit: false,
+        ...createToken(systemId, true),
+      },
+    };
   }
 
-  if (hd !== "dimigo.hs.kr") {
+  if (payload.hd !== "dimigo.hs.kr") {
     return { code: "ERR_NOT_ALLOWED_EMAIL" };
   }
 
   await prisma.user.create({
     data: {
-      systemId,
-      name: name,
-      accountName: email,
-      profileImage: picture,
+      name: payload.name,
+      systemId: payload.sub,
+      accountName: payload.email,
+      profileImage: payload.picture,
     },
   });
 
-  return { token: createToken(systemId, "registered") };
+  // isOnBoarding: true, isFirstVisit: true
+  return {
+    response: {
+      isFirstVisit: true,
+      ...createToken(payload.sub, true),
+    },
+  };
 };
