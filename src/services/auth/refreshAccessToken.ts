@@ -4,8 +4,8 @@ import {
   prisma,
   verify,
   logger,
+  createToken,
   getTokenType,
-  createTokenFromId,
 } from "@src/resources";
 
 import type { Request, Response } from "express";
@@ -29,7 +29,7 @@ export default async (req: Request, res: Response) => {
       select: { systemId: true },
     });
 
-    return res.json(createTokenFromId(identity.systemId));
+    return res.json(createToken(identity.systemId));
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
       logger.warn("[refresh token] PrismaClientError", e);

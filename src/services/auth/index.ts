@@ -25,13 +25,11 @@ export default createService({
       method: "post",
       path: "/first-payment-info",
       handler: changePaymentInfo,
-      needAuth: false,
+      needAuth: true,
       description: "사용자의 결제정보를 변경합니다.",
       validateSchema: {
-        token: Joi.string(),
         deviceUid: Joi.string(),
         bioKey: Joi.string(),
-        newToken: Joi.boolean(),
         paymentPin: Joi.string()
           .regex(/^\d{6}$/)
           .error(createJoiError(400, "결제정보는 6자리 숫자로 입력해주세요.")),

@@ -1,33 +1,24 @@
 import config from "@src/config";
-import { randomBytes } from "crypto";
 import { Prisma } from "@prisma/client";
 import { logger } from "@src/resources/logger";
 import { HttpException } from "@src/exceptions";
 import { OAuth2Client } from "google-auth-library";
-import { createTokenFromId } from "@src/resources";
-import { prisma, createTempToken } from "@src/resources";
+import { createToken, prisma } from "@src/resources";
 
 import type { User } from "@prisma/client";
+import type { JWTType } from "@src/resources";
 import type { Request, Response } from "express";
 import type { GoogleLoginInfo } from "@src/interfaces";
 import type { TokenPayload, LoginTicket } from "google-auth-library";
 
 const googleOAuth2Client: OAuth2Client = new OAuth2Client();
 
-type Code =
-  | "OK"
-  | "ERR_REGISTERED"
-  | "ERR_NO_PIN"
-  | "ERR_NO_UID"
-  | "ERR_NO_BIOKEY"
-  | "ERR_NOT_ALLOWED_EMAIL";
-
 export default async (
   req: Request,
   res: Response<{
-    code: Code;
+    code?: string;
+    token?: JWTType;
     message?: string;
-    token?: string | ReturnType<typeof createTokenFromId>;
   }>
 ) => {
   const body: GoogleLoginInfo = req.body;
@@ -42,41 +33,13 @@ export default async (
     const { code, token } = await loginOrRegister(payload);
 
     switch (code) {
-      case "OK":
-        return res.json({ code, token });
-
       case "ERR_NOT_ALLOWED_EMAIL":
         return res
           .status(400)
           .json({ code, message: "우리학교 이메일로만 가입할 수 있어요." });
 
-      case "ERR_REGISTERED":
-        return res.status(201).json({
-          code,
-          message: "사용자가 추가되었습니다. PIN을 등록해주세요.",
-          token: createTempToken(payload.sub),
-        });
-
-      case "ERR_NO_PIN":
-        return res.status(403).json({
-          code,
-          message: "결제 PIN을 등록해주세요.",
-          token: createTempToken(payload.sub),
-        });
-
-      case "ERR_NO_UID":
-        return res.status(401).json({
-          code: "ERR_REGISTERED",
-          message: "deviceUid를 등록해주세요.",
-          token: createTempToken(payload.sub),
-        });
-
-      case "ERR_NO_BIOKEY":
-        return res.status(401).json({
-          code: "ERR_REGISTERED",
-          message: "bioKey를 등록해주세요.",
-          token: createTempToken(payload.sub),
-        });
+      default:
+        return res.json({ token });
     }
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
@@ -88,49 +51,50 @@ export default async (
   }
 };
 
-const loginOrRegister = async (
-  payload: TokenPayload
-): Promise<{
-  code: Code;
-  token?: Awaited<ReturnType<typeof createTokenFromId>>;
+const loginOrRegister = async ({
+  hd,
+  name,
+  email,
+  picture,
+  sub: systemId,
+}: TokenPayload): Promise<{
+  code?: string;
+  token?: JWTType;
 }> => {
   const user: User = await prisma.user.findUnique({
-    where: { systemId: payload.sub },
+    where: { systemId },
   });
 
   if (user) {
-    if (!user.paymentPin) {
-      return { code: "ERR_NO_PIN" };
+    const { paymentPin, systemId, deviceUid, bioKey } = user;
+
+    if (!paymentPin) {
+      return {
+        token: createToken(systemId, "ERR_NO_PIN"),
+      };
     }
 
-    if (!user.deviceUid) {
-      return { code: "ERR_NO_UID" };
+    if (!deviceUid || !bioKey) {
+      return {
+        token: createToken(systemId, "ERR_USER_NO_KEYS"),
+      };
     }
 
-    if (!user.bioKey) {
-      return { code: "ERR_NO_BIOKEY" };
-    }
-
-    return {
-      code: "OK",
-      token: createTokenFromId(user.systemId),
-    };
+    return { token: createToken(systemId) };
   }
 
-  if (payload.hd !== "dimigo.hs.kr") {
-    return {
-      code: "ERR_NOT_ALLOWED_EMAIL",
-    };
+  if (hd !== "dimigo.hs.kr") {
+    return { code: "ERR_NOT_ALLOWED_EMAIL" };
   }
 
   await prisma.user.create({
     data: {
-      accountName: payload.email,
-      name: payload.name,
-      systemId: payload.sub,
-      profileImage: payload.picture,
+      systemId,
+      name: name,
+      accountName: email,
+      profileImage: picture,
     },
   });
 
-  return { code: "ERR_REGISTERED" };
+  return { token: createToken(systemId, "ERR_REGISTERED") };
 };

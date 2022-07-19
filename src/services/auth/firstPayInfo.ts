@@ -1,30 +1,18 @@
 import { hashSync } from "bcrypt";
 import { Prisma } from "@prisma/client";
 import { HttpException } from "@src/exceptions";
-import {
-  logger,
-  prisma,
-  createTempToken,
-  verifyCustomToken,
-} from "@src/resources";
+import { logger, prisma, createTempToken, verify } from "@src/resources";
 
 import type { Response } from "express";
 import type { ReqWithBody } from "@src/types";
 import type { ChangePayInfo } from "@src/interfaces";
-import type { TempTokenPayload } from "@src/resources";
 
 export default async (req: ReqWithBody<ChangePayInfo>, res: Response) => {
   const body = req.body;
   const { paymentPin, deviceUid, bioKey } = body;
 
   try {
-    if (!body.token) {
-      return res.status(400).json({
-        code: "ERR_NO_TOKEN",
-        message: "토큰이 없습니다.",
-      });
-    }
-    const systemId = verifyCustomToken<TempTokenPayload>(body.token).tempId;
+    const { systemId } = req.user;
 
     const existingInfo: ChangePayInfo = await prisma.user.findUnique({
       where: { systemId },
