@@ -31,8 +31,8 @@ export default createService({
         deviceUid: Joi.string(),
         bioKey: Joi.string(),
         paymentPin: Joi.string()
-          .regex(/^\d{6}$/)
-          .error(createJoiError(400, "결제정보는 6자리 숫자로 입력해주세요.")),
+          .regex(/^\d{4}$/)
+          .error(createJoiError(400, "결제정보는 자리 숫자로 입력해주세요.")),
       },
     },
     {
