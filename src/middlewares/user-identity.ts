@@ -19,6 +19,9 @@ export default (service: ServiceName | undefined, route: Route) =>
       }
       const identity = await veriToken(token);
       if (identity) {
+        if (identity.isOnBoarding) {
+          throw new HttpException(403, "아직 사용자 인증이 되지 않았습니다.");
+        }
         if (identity.systemId) {
           req.user = await prisma.user.findFirst({
             where: { systemId: identity.systemId },

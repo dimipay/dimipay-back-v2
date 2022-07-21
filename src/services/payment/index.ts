@@ -13,7 +13,7 @@ import {
   deletePaymentMethod,
   updatePaymentMethod,
 } from "./controllers/paymentMethod";
-import { registerPaymentPin, resetPaymentPin } from "./controllers/paymentPin";
+import resetPaymentPin from "./controllers/resetPaymentPin";
 import { paymentToken } from "@src/middlewares";
 
 export default createService({
@@ -113,20 +113,6 @@ export default createService({
           paymentMethod: Joi.string().required(),
           transactionMethod: Joi.string().required(),
         }),
-      },
-    },
-    {
-      method: "post",
-      handler: registerPaymentPin,
-      needAuth: true,
-      path: "/pin",
-      description: "결제 비밀번호를 설정합니다.",
-      permission: ["Student"],
-      validateSchema: {
-        paymentPin: Joi.string()
-          .regex(/^\d{4}$/)
-          .required()
-          .error(createJoiError(400, "비밀번호 규칙에 맞춰 입력해주세요")),
       },
     },
     {

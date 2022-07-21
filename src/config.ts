@@ -11,6 +11,10 @@ const config = {
   notionToken: process.env.NOTION_TOKEN!,
   notionPageId: process.env.NOTION_PAGE_ID!,
 
+  googleClientIds: (process.env.GOOGLE_CLIENT_IDS || "")
+    .split(",")
+    .filter(Boolean),
+
   navercloud: {
     smsServiceId: process.env.NAVER_SMS_API_SERVICE_ID!,
     smsUri: process.env.NAVER_SMS_API_URI!,
@@ -31,7 +35,7 @@ const config = {
 };
 
 type Config = {
-  [key: string]: string | Config;
+  [key: string]: string | string[] | Config;
 };
 
 function checkEnvs(tree: Config) {
