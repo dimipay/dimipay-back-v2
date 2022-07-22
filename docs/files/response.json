@@ -1,0 +1,182 @@
+{
+  "/auth/login": {
+    "post": {
+      "response": {}
+    }
+  },
+  "/auth/onBoarding": {
+    "post": {
+      "response": {}
+    }
+  },
+  "/auth/refresh": {
+    "get": {
+      "response": {}
+    }
+  },
+  "/auth/facesign-result-listener": {
+    "post": {
+      "response": {}
+    }
+  },
+  "/auth/facesign-result": {
+    "post": {
+      "response": {}
+    }
+  },
+  "/auth/user-pin-match": {
+    "post": {
+      "response": {}
+    }
+  },
+  "/auth/request-sms-code": {
+    "post": {
+      "response": {}
+    }
+  },
+  "/auth/validate-sms-code": {
+    "post": {
+      "response": {}
+    }
+  },
+  "/coupons/all": {
+    "get": {
+      "response": {}
+    }
+  },
+  "/coupons/": {
+    "get": {
+      "response": {}
+    }
+  },
+  "/coupons/issued": {
+    "get": {
+      "response": {}
+    }
+  },
+  "/coupons/purchase": {
+    "post": {
+      "response": {}
+    }
+  },
+  "/event/ongoing": {
+    "get": {
+      "response": {}
+    }
+  },
+  "/event/upcomming": {
+    "get": {
+      "response": {}
+    }
+  },
+  "/event/past/{page}": {
+    "get": {
+      "response": {}
+    }
+  },
+  "/notice/current": {
+    "get": {
+      "response": {}
+    }
+  },
+  "/payment/method": {
+    "get": {
+      "response": {}
+    }
+  },
+  "/payment/method/general": {
+    "post": {
+      "response": {}
+    }
+  },
+  "/payment/method/prepaid": {
+    "post": {
+      "response": {}
+    }
+  },
+  "/payment/method/{id}": {
+    "delete": {
+      "response": {}
+    }
+  },
+  "/payment/token": {
+    "post": {
+      "response": {}
+    }
+  },
+  "/payment/token/refresh": {
+    "post": {
+      "response": {}
+    }
+  },
+  "/payment/approval": {
+    "post": {
+      "response": {}
+    }
+  },
+  "/payment/pin": {
+    "put": {
+      "response": {}
+    }
+  },
+  "/payment/response": {
+    "get": {
+      "response": {}
+    }
+  },
+  "/pos-login/": {
+    "post": {
+      "response": {}
+    }
+  },
+  "/pos-login/refresh": {
+    "post": {
+      "response": {}
+    }
+  },
+  "/pos-login/health": {
+    "get": {
+      "response": {}
+    }
+  },
+  "/product/{barcode}": {
+    "get": {
+      "response": {}
+    }
+  },
+  "/product/store/": {
+    "put": {
+      "response": {}
+    }
+  },
+  "/product/store/{systemId}": {
+    "get": {
+      "response": {}
+    }
+  },
+  "/transaction/my": {
+    "get": {
+      "response": {}
+    }
+  },
+  "/transaction/monthly/year/{year}/month/{month}": {
+    "get": {
+      "response": {}
+    }
+  },
+  "/user/me": {
+    "get": {
+      "response": {}
+    }
+  },
+  "/user/search/{search}": {
+    "get": {
+      "response": {}
+    }
+  },
+  "/user/code/{code}": {
+    "get": {
+      "response": {}
+    }
+  }
+}
