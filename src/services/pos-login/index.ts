@@ -1,8 +1,9 @@
 import * as controllers from "./controllers";
-import { createService } from "../index";
 import Joi from "joi";
 
-export default createService({
+import type { ServiceSchema } from "..";
+
+export default <ServiceSchema>{
   name: "키오스크 단말기 로그인",
   baseURL: "/pos-login",
   routes: [
@@ -31,4 +32,4 @@ export default createService({
       needAuth: true,
     },
   ],
-});
+};

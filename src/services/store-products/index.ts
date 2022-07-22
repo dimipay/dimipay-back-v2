@@ -1,7 +1,8 @@
-import { createService } from "..";
 import * as controllers from "./controllers";
 
-export default createService({
+import type { ServiceSchema } from "..";
+
+export default <ServiceSchema>{
   name: "store-products",
   baseURL: "/product/store",
   routes: [
@@ -24,4 +25,4 @@ export default createService({
       needAuth: true,
     },
   ],
-});
+};

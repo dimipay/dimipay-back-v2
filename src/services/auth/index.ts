@@ -1,13 +1,14 @@
 import Joi from "joi";
-import { createService } from "../index";
 import createJoiError from "@src/resources/createJoiError";
+
+import type { ServiceSchema } from "..";
 
 import login from "./controller";
 import onBoarding from "./onBoarding";
 import * as posControllers from "./pos-controllers";
 import refreshAccessToken from "./refreshAccessToken";
 
-export default createService({
+export default <ServiceSchema>{
   name: "인증 서비스",
   baseURL: "/auth",
   routes: [
@@ -94,4 +95,4 @@ export default createService({
       },
     },
   ],
-});
+};

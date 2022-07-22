@@ -1,8 +1,8 @@
 import * as controllers from "./controllers";
-import { createService } from "../index";
-import Joi from "joi";
 
-export default createService({
+import type { ServiceSchema } from "..";
+
+export default <ServiceSchema>{
   name: "사용자 정보 서비스",
   baseURL: "/user",
   routes: [
@@ -29,4 +29,4 @@ export default createService({
       permission: ["Pos"],
     },
   ],
-});
+};

@@ -1,8 +1,9 @@
 import * as controllers from "./controllers";
-import { createService } from "../index";
 import Joi from "joi";
 
-export default createService({
+import type { ServiceSchema } from "..";
+
+export default <ServiceSchema>{
   name: "결제 이력 서비스",
   baseURL: "/transaction",
   routes: [
@@ -23,4 +24,4 @@ export default createService({
       needAuth: true,
     },
   ],
-});
+};
