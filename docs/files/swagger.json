@@ -59,7 +59,14 @@
         },
         "responses": {
           "post": {
-            "response": {}
+            "responses": {
+              "200": {
+                "description": "successful operation",
+                "schema": {
+                  "$ref": "#/definitions/User"
+                }
+              }
+            }
           }
         }
       }
@@ -105,7 +112,7 @@
         ],
         "responses": {
           "post": {
-            "response": {}
+            "responses": {}
           }
         }
       }
@@ -118,7 +125,7 @@
         "parameters": [],
         "responses": {
           "get": {
-            "response": {}
+            "responses": {}
           }
         }
       }
@@ -131,7 +138,7 @@
         "parameters": [],
         "responses": {
           "post": {
-            "response": {}
+            "responses": {}
           }
         }
       }
@@ -149,7 +156,7 @@
         ],
         "responses": {
           "post": {
-            "response": {}
+            "responses": {}
           }
         }
       }
@@ -196,7 +203,7 @@
         ],
         "responses": {
           "post": {
-            "response": {}
+            "responses": {}
           }
         }
       }
@@ -237,7 +244,7 @@
         ],
         "responses": {
           "post": {
-            "response": {}
+            "responses": {}
           }
         }
       }
@@ -278,7 +285,7 @@
         ],
         "responses": {
           "post": {
-            "response": {}
+            "responses": {}
           }
         }
       }
@@ -296,7 +303,7 @@
         ],
         "responses": {
           "get": {
-            "response": {}
+            "responses": {}
           }
         }
       }
@@ -314,7 +321,7 @@
         ],
         "responses": {
           "get": {
-            "response": {}
+            "responses": {}
           }
         }
       }
@@ -332,7 +339,7 @@
         ],
         "responses": {
           "get": {
-            "response": {}
+            "responses": {}
           }
         }
       }
@@ -406,7 +413,7 @@
         ],
         "responses": {
           "post": {
-            "response": {}
+            "responses": {}
           }
         }
       }
@@ -424,7 +431,7 @@
         ],
         "responses": {
           "get": {
-            "response": {}
+            "responses": {}
           }
         }
       }
@@ -442,7 +449,7 @@
         ],
         "responses": {
           "get": {
-            "response": {}
+            "responses": {}
           }
         }
       }
@@ -466,7 +473,7 @@
         ],
         "responses": {
           "get": {
-            "response": {}
+            "responses": {}
           }
         }
       }
@@ -479,7 +486,7 @@
         "parameters": [],
         "responses": {
           "get": {
-            "response": {}
+            "responses": {}
           }
         }
       }
@@ -497,7 +504,7 @@
         ],
         "responses": {
           "get": {
-            "response": {}
+            "responses": {}
           }
         }
       }
@@ -544,7 +551,7 @@
         ],
         "responses": {
           "post": {
-            "response": {}
+            "responses": {}
           }
         }
       }
@@ -584,7 +591,7 @@
         ],
         "responses": {
           "post": {
-            "response": {}
+            "responses": {}
           }
         }
       }
@@ -608,7 +615,7 @@
         ],
         "responses": {
           "delete": {
-            "response": {}
+            "responses": {}
           }
         }
       }
@@ -645,7 +652,7 @@
         ],
         "responses": {
           "post": {
-            "response": {}
+            "responses": {}
           }
         }
       }
@@ -686,7 +693,7 @@
         ],
         "responses": {
           "post": {
-            "response": {}
+            "responses": {}
           }
         }
       }
@@ -760,7 +767,7 @@
         ],
         "responses": {
           "post": {
-            "response": {}
+            "responses": {}
           }
         }
       }
@@ -803,7 +810,7 @@
         ],
         "responses": {
           "put": {
-            "response": {}
+            "responses": {}
           }
         }
       }
@@ -821,7 +828,7 @@
         ],
         "responses": {
           "get": {
-            "response": {}
+            "responses": {}
           }
         }
       }
@@ -855,7 +862,7 @@
         },
         "responses": {
           "post": {
-            "response": {}
+            "responses": {}
           }
         }
       }
@@ -868,7 +875,7 @@
         "parameters": [],
         "responses": {
           "post": {
-            "response": {}
+            "responses": {}
           }
         }
       }
@@ -886,7 +893,7 @@
         ],
         "responses": {
           "get": {
-            "response": {}
+            "responses": {}
           }
         }
       }
@@ -910,7 +917,7 @@
         ],
         "responses": {
           "get": {
-            "response": {}
+            "responses": {}
           }
         }
       }
@@ -928,7 +935,7 @@
         ],
         "responses": {
           "put": {
-            "response": {}
+            "responses": {}
           }
         }
       }
@@ -952,7 +959,7 @@
         ],
         "responses": {
           "get": {
-            "response": {}
+            "responses": {}
           }
         }
       }
@@ -991,7 +998,7 @@
         ],
         "responses": {
           "get": {
-            "response": {}
+            "responses": {}
           }
         }
       }
@@ -1020,7 +1027,7 @@
         ],
         "responses": {
           "get": {
-            "response": {}
+            "responses": {}
           }
         }
       }
@@ -1038,7 +1045,7 @@
         ],
         "responses": {
           "get": {
-            "response": {}
+            "responses": {}
           }
         }
       }
@@ -1062,7 +1069,7 @@
         ],
         "responses": {
           "get": {
-            "response": {}
+            "responses": {}
           }
         }
       }
@@ -1086,7 +1093,7 @@
         ],
         "responses": {
           "get": {
-            "response": {}
+            "responses": {}
           }
         }
       }

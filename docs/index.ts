@@ -4,130 +4,153 @@ import * as path from "path";
 import j2s from "joi-to-swagger";
 import { prompt } from "enquirer";
 
-import responseJson from "./files/response.json";
 import defaultSwaggerConfig from "./files/default-swagger.json";
 
 import type { JsonObject } from "swagger-ui-express";
-import type { ServiceSchema } from "../src/services";
+import type { Route, ServiceSchema } from "../src/services";
 
-const SERIVCE_ROOT: string = path.join(__dirname, "../src/services");
+export default class {
+  #docObject: JsonObject = { ...defaultSwaggerConfig };
+  #SERIVCE_ROOT = path.join(__dirname, "../src/services");
+  #services = fs.readdirSync(this.#SERIVCE_ROOT, {
+    withFileTypes: true,
+  });
 
-const docObject: JsonObject = { ...defaultSwaggerConfig };
-const services: fs.Dirent[] = fs.readdirSync(SERIVCE_ROOT, {
-  withFileTypes: true,
-});
+  #serviceIterator = (fn: (service: ServiceSchema) => any): void => {
+    for (const service of this.#services) {
+      if (!service.isDirectory()) {
+        continue;
+      }
 
-const pathParser = (path: string): { path: string; params: string[] } => {
-  return {
-    path: path.replace(/(:)([^\/]+)/g, "{$2}"),
-    params: path.match(/(?<=:)([^\/]+)/g) || [],
+      const importPath: string = path.join(this.#SERIVCE_ROOT, service.name);
+      const current: ServiceSchema = require(importPath).default;
+
+      fn(current);
+    }
   };
-};
 
-export const generateResponseBase = async () => {
-  if (fs.existsSync(path.join(__dirname, "./files/response.json"))) {
-    const { overwrite } = await prompt<{ overwrite: boolean }>({
-      type: "confirm",
-      name: "overwrite",
-      message: "response.json already exists. Overwrite?",
-    });
-
-    if (!overwrite) {
-      console.log("Aborting...");
-      return;
-    }
-  }
-
-  const responseObject = {};
-
-  for (const service of services) {
-    if (!service.isDirectory()) {
-      continue;
-    }
-
-    const importPath: string = path.join(SERIVCE_ROOT, service.name);
-    const current: ServiceSchema = require(importPath).default;
-
+  #routerIterator = (current: ServiceSchema, fn: (router: Route) => any) => {
     for (const route of current.routes) {
-      const { path: parsedPath } = pathParser(current.baseURL + route.path);
-
-      responseObject[parsedPath] = {
-        [route.method]: {
-          response: {},
-        },
-      };
+      fn(route);
     }
-  }
+  };
 
-  fs.writeFileSync(
-    path.join(__dirname, "files/response.json"),
-    JSON.stringify(responseObject, null, 2)
-  );
-};
+  #pathParser = (path: string) => {
+    return {
+      path: path.replace(/(:)([^\/]+)/g, "{$2}"),
+      params: path.match(/(?<=:)([^\/]+)/g) || [],
+    };
+  };
 
-export const generateSwagger = () => {
-  for (const service of services) {
-    if (!service.isDirectory()) {
-      continue;
+  #readJson = (file: string) => {
+    const filePath = path.join(__dirname, "files", file);
+    if (!fs.existsSync(filePath)) {
+      return { exists: false, data: {} };
     }
+    return {
+      exists: true,
+      data: JSON.parse(fs.readFileSync(filePath, "utf8")),
+    };
+  };
 
-    const importPath: string = path.join(SERIVCE_ROOT, service.name);
-    const current: ServiceSchema = require(importPath).default;
+  #writeJson = (file: string, data: any): void => {
+    const filePath = path.join(__dirname, "files", file);
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+  };
 
-    docObject["tags"].push({
-      name: current.name,
-    });
-
-    for (const route of current.routes) {
-      // path params
-      const parsedURL = pathParser(current.baseURL + route.path);
-      const pathParams = parsedURL.params.map((param) => {
-        return {
-          in: "path",
-          name: param,
-          required: true,
-        };
+  public async generateResponseBase() {
+    if (fs.existsSync(path.join(__dirname, "./files/response.json"))) {
+      const { overwrite } = await prompt<{ overwrite: boolean }>({
+        type: "confirm",
+        name: "overwrite",
+        message: "response.json already exists. Overwrite?",
       });
 
-      // request body
-      let requestBody: JsonObject | undefined;
-      if (route.validateSchema) {
-        requestBody = {
-          required: true,
-          content: {
-            "application/json": {
-              schema: j2s(Joi.object().keys(route.validateSchema)).swagger,
+      if (!overwrite) {
+        console.log("Aborting...");
+        return;
+      }
+    }
+
+    const responseObject = {};
+    const { data: currentResposeObject } = this.#readJson("response.json");
+
+    this.#serviceIterator((service) => {
+      this.#routerIterator(service, (route) => {
+        const { path } = this.#pathParser(service.baseURL + route.path);
+        const existingPathObject = currentResposeObject[path] || {};
+        const existingResponseObject = existingPathObject[route.method] || {};
+
+        responseObject[path] = {
+          [route.method]: {
+            responses: { ...(existingResponseObject["responses"] || {}) },
+          },
+        };
+      });
+    });
+
+    this.#writeJson("response.json", responseObject);
+  }
+
+  public generateSwagger() {
+    this.#serviceIterator((service) => {
+      this.#docObject["tags"].push({
+        name: service.name,
+      });
+
+      this.#routerIterator(service, (route) => {
+        // path params
+        const parsedURL = this.#pathParser(service.baseURL + route.path);
+        const pathParams = parsedURL.params.map((param) => {
+          return {
+            in: "path",
+            name: param,
+            required: true,
+          };
+        });
+
+        // request body
+        let requestBody: JsonObject | undefined;
+        if (route.validateSchema) {
+          requestBody = {
+            required: true,
+            content: {
+              "application/json": {
+                schema: j2s(Joi.object().keys(route.validateSchema)).swagger,
+              },
+            },
+          };
+        }
+
+        // auth
+        let security: [{ bearerAuth: [] }] | undefined;
+        if (route.needAuth) {
+          security = [{ bearerAuth: [] }];
+        }
+
+        // response
+        let responses: JsonObject | undefined;
+        const { data: responseJson } = this.#readJson("response.json");
+        responses = responseJson[parsedURL.path] || {};
+
+        // combine every config
+        this.#docObject["paths"][parsedURL.path] = {
+          ...{
+            [route.method]: {
+              tags: [service.name],
+              parameters: [...pathParams],
+              requestBody,
+              security,
+              responses,
             },
           },
         };
-      }
+      });
+    });
 
-      // auth
-      let security: [{ bearerAuth: [] }] | undefined;
-      if (route.needAuth) {
-        security = [{ bearerAuth: [] }];
-      }
-
-      // response
-      const responses = responseJson[parsedURL.path];
-
-      // combine every config
-      docObject["paths"][parsedURL.path] = {
-        ...{
-          [route.method]: {
-            tags: [current.name],
-            parameters: [...pathParams],
-            requestBody,
-            security,
-            responses,
-          },
-        },
-      };
-    }
+    this.#writeJson("swagger.json", {
+      ...this.#docObject,
+      ...defaultSwaggerConfig,
+    });
   }
-
-  fs.writeFileSync(
-    path.join(__dirname, "files/swagger.json"),
-    JSON.stringify({ ...docObject, ...defaultSwaggerConfig }, null, 2)
-  );
-};
+}

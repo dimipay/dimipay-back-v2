@@ -1,5 +1,6 @@
 {
   "openapi": "3.0.0",
+  "deepLinking": true,
   "servers": [
     {
       "url": "https://dimipay.up.railway.app/",

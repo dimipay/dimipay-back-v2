@@ -1,8 +1,10 @@
-import * as docs from ".";
+import Docs from ".";
 import server from "./server";
 import { Command } from "commander";
 
 const program = new Command();
+const docs = new Docs();
+const app = new server();
 
 program.command("res").action(() => {
   console.log("build response base");
@@ -15,7 +17,6 @@ program.command("swagger").action(() => {
 });
 
 program.command("server").action(() => {
-  const app = new server();
   app.listen();
 });
 

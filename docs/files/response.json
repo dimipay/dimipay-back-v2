@@ -1,182 +1,184 @@
 {
   "/auth/login": {
     "post": {
-      "response": {}
+      "responses": {
+        "200": {}
+      }
     }
   },
   "/auth/onBoarding": {
     "post": {
-      "response": {}
+      "responses": {}
     }
   },
   "/auth/refresh": {
     "get": {
-      "response": {}
+      "responses": {}
     }
   },
   "/auth/facesign-result-listener": {
     "post": {
-      "response": {}
+      "responses": {}
     }
   },
   "/auth/facesign-result": {
     "post": {
-      "response": {}
+      "responses": {}
     }
   },
   "/auth/user-pin-match": {
     "post": {
-      "response": {}
+      "responses": {}
     }
   },
   "/auth/request-sms-code": {
     "post": {
-      "response": {}
+      "responses": {}
     }
   },
   "/auth/validate-sms-code": {
     "post": {
-      "response": {}
+      "responses": {}
     }
   },
   "/coupons/all": {
     "get": {
-      "response": {}
+      "responses": {}
     }
   },
   "/coupons/": {
     "get": {
-      "response": {}
+      "responses": {}
     }
   },
   "/coupons/issued": {
     "get": {
-      "response": {}
+      "responses": {}
     }
   },
   "/coupons/purchase": {
     "post": {
-      "response": {}
+      "responses": {}
     }
   },
   "/event/ongoing": {
     "get": {
-      "response": {}
+      "responses": {}
     }
   },
   "/event/upcomming": {
     "get": {
-      "response": {}
+      "responses": {}
     }
   },
   "/event/past/{page}": {
     "get": {
-      "response": {}
+      "responses": {}
     }
   },
   "/notice/current": {
     "get": {
-      "response": {}
+      "responses": {}
     }
   },
   "/payment/method": {
     "get": {
-      "response": {}
+      "responses": {}
     }
   },
   "/payment/method/general": {
     "post": {
-      "response": {}
+      "responses": {}
     }
   },
   "/payment/method/prepaid": {
     "post": {
-      "response": {}
+      "responses": {}
     }
   },
   "/payment/method/{id}": {
     "delete": {
-      "response": {}
+      "responses": {}
     }
   },
   "/payment/token": {
     "post": {
-      "response": {}
+      "responses": {}
     }
   },
   "/payment/token/refresh": {
     "post": {
-      "response": {}
+      "responses": {}
     }
   },
   "/payment/approval": {
     "post": {
-      "response": {}
+      "responses": {}
     }
   },
   "/payment/pin": {
     "put": {
-      "response": {}
+      "responses": {}
     }
   },
   "/payment/response": {
     "get": {
-      "response": {}
+      "responses": {}
     }
   },
   "/pos-login/": {
     "post": {
-      "response": {}
+      "responses": {}
     }
   },
   "/pos-login/refresh": {
     "post": {
-      "response": {}
+      "responses": {}
     }
   },
   "/pos-login/health": {
     "get": {
-      "response": {}
+      "responses": {}
     }
   },
   "/product/{barcode}": {
     "get": {
-      "response": {}
+      "responses": {}
     }
   },
   "/product/store/": {
     "put": {
-      "response": {}
+      "responses": {}
     }
   },
   "/product/store/{systemId}": {
     "get": {
-      "response": {}
+      "responses": {}
     }
   },
   "/transaction/my": {
     "get": {
-      "response": {}
+      "responses": {}
     }
   },
   "/transaction/monthly/year/{year}/month/{month}": {
     "get": {
-      "response": {}
+      "responses": {}
     }
   },
   "/user/me": {
     "get": {
-      "response": {}
+      "responses": {}
     }
   },
   "/user/search/{search}": {
     "get": {
-      "response": {}
+      "responses": {}
     }
   },
   "/user/code/{code}": {
     "get": {
-      "response": {}
+      "responses": {}
     }
   }
 }
