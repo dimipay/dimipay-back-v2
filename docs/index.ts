@@ -131,7 +131,8 @@ export default class {
         // response
         let responses: JsonObject | undefined;
         const { data: responseJson } = this.#readJson("response.json");
-        responses = responseJson[parsedURL.path] || {};
+        const pathResponse = responseJson[parsedURL.path] || {};
+        responses = pathResponse[route.method] || {};
 
         // combine every config
         this.#docObject["paths"][parsedURL.path] = {
@@ -141,7 +142,7 @@ export default class {
               parameters: [...pathParams],
               requestBody,
               security,
-              responses,
+              ...responses,
             },
           },
         };
