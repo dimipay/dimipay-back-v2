@@ -1,7 +1,8 @@
 import * as controllers from "./controllers";
-import { createService } from "../index";
 
-export default createService({
+import type { ServiceSchema } from "..";
+
+export default <ServiceSchema>{
   name: "공지 정보 서비스",
   baseURL: "/notice",
   routes: [
@@ -12,4 +13,4 @@ export default createService({
       needAuth: false,
     },
   ],
-});
+};

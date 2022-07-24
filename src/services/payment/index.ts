@@ -1,6 +1,5 @@
 import Joi from "joi";
 import createJoiError from "@src/resources/createJoiError";
-import { createService } from "..";
 import {
   approvalResponse,
   getApprovalCode,
@@ -16,7 +15,9 @@ import {
 import resetPaymentPin from "./controllers/resetPaymentPin";
 import { paymentToken } from "@src/middlewares";
 
-export default createService({
+import type { ServiceSchema } from "../index";
+
+export default <ServiceSchema>{
   name: "결제 서비스",
   baseURL: "/payment",
   routes: [
@@ -141,4 +142,4 @@ export default createService({
       description: "결제 승인 여부를 응답합니다.",
     },
   ],
-});
+};

@@ -1,9 +1,10 @@
-import * as controllers from "./controllers";
-import { createService } from "../index";
 import Joi from "joi";
+import * as controllers from "./controllers";
 import { paymentToken } from "@src/middlewares";
 
-export default createService({
+import type { ServiceSchema } from "..";
+
+export default <ServiceSchema>{
   name: "쿠폰 구매/조회 서비스",
   baseURL: "/coupons",
   routes: [
@@ -52,4 +53,4 @@ export default createService({
       },
     },
   ],
-});
+};

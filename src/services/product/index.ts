@@ -1,7 +1,8 @@
-import { createService } from "..";
 import { getProductByBarcode } from "./controllers";
 
-export default createService({
+import type { ServiceSchema } from "..";
+
+export default <ServiceSchema>{
   name: "product",
   baseURL: "/product",
   routes: [
@@ -12,4 +13,4 @@ export default createService({
       needAuth: true,
     },
   ],
-});
+};

@@ -1,0 +1,268 @@
+{
+  "/auth/login": {
+    "post": {
+      "responses": {
+        "200": {
+          "description": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "isFirstVisit": {
+                    "type": "boolean",
+                    "description": "Is first visit"
+                  },
+                  "accessToken": {
+                    "type": "string",
+                    "description": "Access token"
+                  },
+                  "refreshToken": {
+                    "type": "string",
+                    "description": "Refresh token"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "400": {
+          "description": "Bad request - wrong domain",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "default": "ERR_NOT_ALLOWED_EMAIL"
+                  },
+                  "message": {
+                    "type": "string",
+                    "default": "우리학교 이메일로만 가입할 수 있습니다."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "/auth/onBoarding": {
+    "post": {
+      "responses": {
+        "200": {
+          "description": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "accessToken": {
+                    "type": "string",
+                    "description": "Access token"
+                  },
+                  "refreshToken": {
+                    "type": "string",
+                    "description": "Refresh token"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "400": {
+          "description": "Bad request - wrong PIN",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "default": "ERR_WRONG_PAYMENT_PIN"
+                  },
+                  "message": {
+                    "type": "string",
+                    "default": "잘못된 PIN입니다."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "/auth/refresh": {
+    "get": {
+      "responses": {}
+    }
+  },
+  "/auth/facesign-result-listener": {
+    "post": {
+      "responses": {}
+    }
+  },
+  "/auth/facesign-result": {
+    "post": {
+      "responses": {}
+    }
+  },
+  "/auth/user-pin-match": {
+    "post": {
+      "responses": {}
+    }
+  },
+  "/auth/request-sms-code": {
+    "post": {
+      "responses": {}
+    }
+  },
+  "/auth/validate-sms-code": {
+    "post": {
+      "responses": {}
+    }
+  },
+  "/coupons/all": {
+    "get": {
+      "responses": {}
+    }
+  },
+  "/coupons/": {
+    "get": {
+      "responses": {}
+    }
+  },
+  "/coupons/issued": {
+    "get": {
+      "responses": {}
+    }
+  },
+  "/coupons/purchase": {
+    "post": {
+      "responses": {}
+    }
+  },
+  "/event/ongoing": {
+    "get": {
+      "responses": {}
+    }
+  },
+  "/event/upcomming": {
+    "get": {
+      "responses": {}
+    }
+  },
+  "/event/past/{page}": {
+    "get": {
+      "responses": {}
+    }
+  },
+  "/notice/current": {
+    "get": {
+      "responses": {}
+    }
+  },
+  "/payment/method": {
+    "get": {
+      "responses": {}
+    }
+  },
+  "/payment/method/general": {
+    "post": {
+      "responses": {}
+    }
+  },
+  "/payment/method/prepaid": {
+    "post": {
+      "responses": {}
+    }
+  },
+  "/payment/method/{id}": {
+    "delete": {
+      "responses": {}
+    }
+  },
+  "/payment/token": {
+    "post": {
+      "responses": {}
+    }
+  },
+  "/payment/token/refresh": {
+    "post": {
+      "responses": {}
+    }
+  },
+  "/payment/approval": {
+    "post": {
+      "responses": {}
+    }
+  },
+  "/payment/pin": {
+    "put": {
+      "responses": {}
+    }
+  },
+  "/payment/response": {
+    "get": {
+      "responses": {}
+    }
+  },
+  "/pos-login/": {
+    "post": {
+      "responses": {}
+    }
+  },
+  "/pos-login/refresh": {
+    "post": {
+      "responses": {}
+    }
+  },
+  "/pos-login/health": {
+    "get": {
+      "responses": {}
+    }
+  },
+  "/product/{barcode}": {
+    "get": {
+      "responses": {}
+    }
+  },
+  "/product/store/": {
+    "put": {
+      "responses": {}
+    }
+  },
+  "/product/store/{systemId}": {
+    "get": {
+      "responses": {}
+    }
+  },
+  "/transaction/my": {
+    "get": {
+      "responses": {}
+    }
+  },
+  "/transaction/monthly/year/{year}/month/{month}": {
+    "get": {
+      "responses": {}
+    }
+  },
+  "/user/me": {
+    "get": {
+      "responses": {}
+    }
+  },
+  "/user/search/{search}": {
+    "get": {
+      "responses": {}
+    }
+  },
+  "/user/code/{code}": {
+    "get": {
+      "responses": {}
+    }
+  }
+}

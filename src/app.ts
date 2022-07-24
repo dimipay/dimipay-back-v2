@@ -1,12 +1,15 @@
-import express, { NextFunction, Request, Response } from "express";
+import express from "express";
 import bearerToken from "express-bearer-token";
 import morgan from "morgan";
 import helmet from "helmet";
 import cors from "cors";
+import swaggerUi from "swagger-ui-express";
 
+import { serviceRouter } from "./services";
 import { httpLogStream } from "@src/resources";
-import { serviceDocsRouter, serviceRouter, serviceSwaggerUi } from "./services";
-import { attachIdentity, errorProcessingMiddleware } from "./middlewares";
+import { errorProcessingMiddleware } from "./middlewares";
+
+import swaggerJson from "../docs/files/swagger.json";
 
 class App {
   public app: express.Application;
@@ -19,8 +22,8 @@ class App {
   }
   private initializeRouter() {
     this.app.use("/", serviceRouter);
-    this.app.use("/docs", serviceDocsRouter);
-    this.app.use("/api-docs", serviceSwaggerUi);
+    this.app.use("/", swaggerUi.serve);
+    this.app.get("/api-docs", swaggerUi.setup(swaggerJson));
   }
   private errorProcessingMiddleware() {
     this.app.use(errorProcessingMiddleware);
