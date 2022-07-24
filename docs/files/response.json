@@ -2,13 +2,97 @@
   "/auth/login": {
     "post": {
       "responses": {
-        "200": {}
+        "200": {
+          "description": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "isFirstVisit": {
+                    "type": "boolean",
+                    "description": "Is first visit"
+                  },
+                  "accessToken": {
+                    "type": "string",
+                    "description": "Access token"
+                  },
+                  "refreshToken": {
+                    "type": "string",
+                    "description": "Refresh token"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "400": {
+          "description": "Bad request - wrong domain",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "default": "ERR_NOT_ALLOWED_EMAIL"
+                  },
+                  "message": {
+                    "type": "string",
+                    "default": "우리학교 이메일로만 가입할 수 있습니다."
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     }
   },
   "/auth/onBoarding": {
     "post": {
-      "responses": {}
+      "responses": {
+        "200": {
+          "description": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "accessToken": {
+                    "type": "string",
+                    "description": "Access token"
+                  },
+                  "refreshToken": {
+                    "type": "string",
+                    "description": "Refresh token"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "400": {
+          "description": "Bad request - wrong PIN",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "default": "ERR_WRONG_PAYMENT_PIN"
+                  },
+                  "message": {
+                    "type": "string",
+                    "default": "잘못된 PIN입니다."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "/auth/refresh": {

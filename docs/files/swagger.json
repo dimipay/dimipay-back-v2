@@ -1,5 +1,6 @@
 {
   "openapi": "3.0.0",
+  "deepLinking": true,
   "servers": [
     {
       "url": "https://dimipay.up.railway.app/",
@@ -58,12 +59,46 @@
           }
         },
         "responses": {
-          "post": {
-            "responses": {
-              "200": {
-                "description": "successful operation",
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
                 "schema": {
-                  "$ref": "#/definitions/User"
+                  "type": "object",
+                  "properties": {
+                    "isFirstVisit": {
+                      "type": "boolean",
+                      "description": "Is first visit"
+                    },
+                    "accessToken": {
+                      "type": "string",
+                      "description": "Access token"
+                    },
+                    "refreshToken": {
+                      "type": "string",
+                      "description": "Refresh token"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - wrong domain",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "default": "ERR_NOT_ALLOWED_EMAIL"
+                    },
+                    "message": {
+                      "type": "string",
+                      "default": "우리학교 이메일로만 가입할 수 있습니다."
+                    }
+                  }
                 }
               }
             }
@@ -111,8 +146,45 @@
           }
         ],
         "responses": {
-          "post": {
-            "responses": {}
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "accessToken": {
+                      "type": "string",
+                      "description": "Access token"
+                    },
+                    "refreshToken": {
+                      "type": "string",
+                      "description": "Refresh token"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - wrong PIN",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "default": "ERR_WRONG_PAYMENT_PIN"
+                    },
+                    "message": {
+                      "type": "string",
+                      "default": "잘못된 PIN입니다."
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -123,11 +195,7 @@
           "인증 서비스"
         ],
         "parameters": [],
-        "responses": {
-          "get": {
-            "responses": {}
-          }
-        }
+        "responses": {}
       }
     },
     "/auth/facesign-result-listener": {
@@ -136,11 +204,7 @@
           "인증 서비스"
         ],
         "parameters": [],
-        "responses": {
-          "post": {
-            "responses": {}
-          }
-        }
+        "responses": {}
       }
     },
     "/auth/facesign-result": {
@@ -154,11 +218,7 @@
             "bearerAuth": []
           }
         ],
-        "responses": {
-          "post": {
-            "responses": {}
-          }
-        }
+        "responses": {}
       }
     },
     "/auth/user-pin-match": {
@@ -201,11 +261,7 @@
             "bearerAuth": []
           }
         ],
-        "responses": {
-          "post": {
-            "responses": {}
-          }
-        }
+        "responses": {}
       }
     },
     "/auth/request-sms-code": {
@@ -242,11 +298,7 @@
             "bearerAuth": []
           }
         ],
-        "responses": {
-          "post": {
-            "responses": {}
-          }
-        }
+        "responses": {}
       }
     },
     "/auth/validate-sms-code": {
@@ -283,11 +335,7 @@
             "bearerAuth": []
           }
         ],
-        "responses": {
-          "post": {
-            "responses": {}
-          }
-        }
+        "responses": {}
       }
     },
     "/coupons/all": {
@@ -301,11 +349,7 @@
             "bearerAuth": []
           }
         ],
-        "responses": {
-          "get": {
-            "responses": {}
-          }
-        }
+        "responses": {}
       }
     },
     "/coupons/": {
@@ -319,11 +363,7 @@
             "bearerAuth": []
           }
         ],
-        "responses": {
-          "get": {
-            "responses": {}
-          }
-        }
+        "responses": {}
       }
     },
     "/coupons/issued": {
@@ -337,11 +377,7 @@
             "bearerAuth": []
           }
         ],
-        "responses": {
-          "get": {
-            "responses": {}
-          }
-        }
+        "responses": {}
       }
     },
     "/coupons/purchase": {
@@ -411,11 +447,7 @@
             "bearerAuth": []
           }
         ],
-        "responses": {
-          "post": {
-            "responses": {}
-          }
-        }
+        "responses": {}
       }
     },
     "/event/ongoing": {
@@ -429,11 +461,7 @@
             "bearerAuth": []
           }
         ],
-        "responses": {
-          "get": {
-            "responses": {}
-          }
-        }
+        "responses": {}
       }
     },
     "/event/upcomming": {
@@ -447,11 +475,7 @@
             "bearerAuth": []
           }
         ],
-        "responses": {
-          "get": {
-            "responses": {}
-          }
-        }
+        "responses": {}
       }
     },
     "/event/past/{page}": {
@@ -471,11 +495,7 @@
             "bearerAuth": []
           }
         ],
-        "responses": {
-          "get": {
-            "responses": {}
-          }
-        }
+        "responses": {}
       }
     },
     "/notice/current": {
@@ -484,11 +504,7 @@
           "공지 정보 서비스"
         ],
         "parameters": [],
-        "responses": {
-          "get": {
-            "responses": {}
-          }
-        }
+        "responses": {}
       }
     },
     "/payment/method": {
@@ -502,11 +518,7 @@
             "bearerAuth": []
           }
         ],
-        "responses": {
-          "get": {
-            "responses": {}
-          }
-        }
+        "responses": {}
       }
     },
     "/payment/method/general": {
@@ -549,11 +561,7 @@
             "bearerAuth": []
           }
         ],
-        "responses": {
-          "post": {
-            "responses": {}
-          }
-        }
+        "responses": {}
       }
     },
     "/payment/method/prepaid": {
@@ -589,11 +597,7 @@
             "bearerAuth": []
           }
         ],
-        "responses": {
-          "post": {
-            "responses": {}
-          }
-        }
+        "responses": {}
       }
     },
     "/payment/method/{id}": {
@@ -613,11 +617,7 @@
             "bearerAuth": []
           }
         ],
-        "responses": {
-          "delete": {
-            "responses": {}
-          }
-        }
+        "responses": {}
       }
     },
     "/payment/token": {
@@ -650,11 +650,7 @@
             "bearerAuth": []
           }
         ],
-        "responses": {
-          "post": {
-            "responses": {}
-          }
-        }
+        "responses": {}
       }
     },
     "/payment/token/refresh": {
@@ -691,11 +687,7 @@
             "bearerAuth": []
           }
         ],
-        "responses": {
-          "post": {
-            "responses": {}
-          }
-        }
+        "responses": {}
       }
     },
     "/payment/approval": {
@@ -765,11 +757,7 @@
             "bearerAuth": []
           }
         ],
-        "responses": {
-          "post": {
-            "responses": {}
-          }
-        }
+        "responses": {}
       }
     },
     "/payment/pin": {
@@ -808,11 +796,7 @@
             "bearerAuth": []
           }
         ],
-        "responses": {
-          "put": {
-            "responses": {}
-          }
-        }
+        "responses": {}
       }
     },
     "/payment/response": {
@@ -826,11 +810,7 @@
             "bearerAuth": []
           }
         ],
-        "responses": {
-          "get": {
-            "responses": {}
-          }
-        }
+        "responses": {}
       }
     },
     "/pos-login/": {
@@ -860,11 +840,7 @@
             }
           }
         },
-        "responses": {
-          "post": {
-            "responses": {}
-          }
-        }
+        "responses": {}
       }
     },
     "/pos-login/refresh": {
@@ -873,11 +849,7 @@
           "키오스크 단말기 로그인"
         ],
         "parameters": [],
-        "responses": {
-          "post": {
-            "responses": {}
-          }
-        }
+        "responses": {}
       }
     },
     "/pos-login/health": {
@@ -891,11 +863,7 @@
             "bearerAuth": []
           }
         ],
-        "responses": {
-          "get": {
-            "responses": {}
-          }
-        }
+        "responses": {}
       }
     },
     "/product/{barcode}": {
@@ -915,11 +883,7 @@
             "bearerAuth": []
           }
         ],
-        "responses": {
-          "get": {
-            "responses": {}
-          }
-        }
+        "responses": {}
       }
     },
     "/product/store/": {
@@ -933,11 +897,7 @@
             "bearerAuth": []
           }
         ],
-        "responses": {
-          "put": {
-            "responses": {}
-          }
-        }
+        "responses": {}
       }
     },
     "/product/store/{systemId}": {
@@ -957,11 +917,7 @@
             "bearerAuth": []
           }
         ],
-        "responses": {
-          "get": {
-            "responses": {}
-          }
-        }
+        "responses": {}
       }
     },
     "/transaction/my": {
@@ -996,11 +952,7 @@
             "bearerAuth": []
           }
         ],
-        "responses": {
-          "get": {
-            "responses": {}
-          }
-        }
+        "responses": {}
       }
     },
     "/transaction/monthly/year/{year}/month/{month}": {
@@ -1025,11 +977,7 @@
             "bearerAuth": []
           }
         ],
-        "responses": {
-          "get": {
-            "responses": {}
-          }
-        }
+        "responses": {}
       }
     },
     "/user/me": {
@@ -1043,11 +991,7 @@
             "bearerAuth": []
           }
         ],
-        "responses": {
-          "get": {
-            "responses": {}
-          }
-        }
+        "responses": {}
       }
     },
     "/user/search/{search}": {
@@ -1067,11 +1011,7 @@
             "bearerAuth": []
           }
         ],
-        "responses": {
-          "get": {
-            "responses": {}
-          }
-        }
+        "responses": {}
       }
     },
     "/user/code/{code}": {
@@ -1091,11 +1031,7 @@
             "bearerAuth": []
           }
         ],
-        "responses": {
-          "get": {
-            "responses": {}
-          }
-        }
+        "responses": {}
       }
     }
   },
